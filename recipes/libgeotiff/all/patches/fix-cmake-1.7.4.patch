@@ -1,0 +1,49 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0216ead53..aab389b3e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -107,7 +107,7 @@ endif (MSVC)
+ option(WITH_TIFF "Choose if TIFF support should be built" ON)
+ 
+ FIND_PACKAGE(PROJ NO_MODULE QUIET)
+-if (NOT PROJ_FOUND)
++if (0)
+   FIND_PACKAGE(PROJ REQUIRED)
+ endif ()
+ 
+@@ -240,7 +240,7 @@ IF(WITH_TIFF)
+       FIND_PACKAGE(TIFF REQUIRED)
+     endif ()
+ 
+-    IF(TIFF_FOUND)
++    IF(0)
+         # Confirm required API is available
+         INCLUDE(CheckFunctionExists)
+         SET(CMAKE_REQUIRED_LIBRARIES ${TIFF_LIBRARIES})
+@@ -259,7 +259,7 @@ IF(WITH_TIFF)
+ 
+         TARGET_INCLUDE_DIRECTORIES(${GEOTIFF_LIBRARY_TARGET} PRIVATE ${TIFF_INCLUDE_DIR})
+         TARGET_COMPILE_DEFINITIONS(${GEOTIFF_LIBRARY_TARGET} PRIVATE -DHAVE_TIFF=1)
+-    ENDIF(TIFF_FOUND)
++    ENDIF()
+ ENDIF(WITH_TIFF)
+ 
+ IF(WITH_ZLIB)
+@@ -287,7 +287,7 @@ if(UNIX)
+       VERSION ${LINK_VERSION}
+       SOVERSION ${LINK_SOVERSION}
+       CLEAN_DIRECT_OUTPUT 1 )
+-   if (APPLE)
++   if(0)
+       set_target_properties(
+         ${GEOTIFF_LIBRARY_TARGET}
+         PROPERTIES
+@@ -314,7 +314,7 @@ IF(WIN32)
+ ENDIF()
+ 
+ IF(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+-    target_compile_options(${GEOTIFF_LIBRARY_TARGET} PRIVATE -Wall -Wno-long-long )
++    target_compile_options(${GEOTIFF_LIBRARY_TARGET} PRIVATE -fPIC -Wall -Wno-long-long )
+     IF(GEOTIFF_BUILD_PEDANTIC)
+         target_compile_options(${GEOTIFF_LIBRARY_TARGET} PRIVATE -pedantic)
+     ENDIF()

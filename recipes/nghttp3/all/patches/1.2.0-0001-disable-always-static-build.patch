@@ -1,0 +1,20 @@
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 3928fb3..18bcb04 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -78,6 +78,7 @@ if(ENABLE_SHARED_LIB)
+     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+ endif()
+ 
++if(ENABLE_STATIC_LIB)
+ # Static library (for unittests because of symbol visibility)
+ add_library(nghttp3_static STATIC ${nghttp3_SOURCES})
+ set_target_properties(nghttp3_static PROPERTIES
+@@ -86,7 +87,6 @@ set_target_properties(nghttp3_static PROPERTIES
+   ARCHIVE_OUTPUT_NAME nghttp3${STATIC_LIB_SUFFIX}
+   )
+ target_compile_definitions(nghttp3_static PUBLIC "-DNGHTTP3_STATICLIB")
+-if(ENABLE_STATIC_LIB)
+   install(TARGETS nghttp3_static
+     DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+ endif()

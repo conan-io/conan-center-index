@@ -1,4 +1,7 @@
 sources:
+  "6.1.0":
+    url: "https://github.com/msgpack/msgpack-c/releases/download/c-6.1.0/msgpack-c-6.1.0.tar.gz"
+    sha256: "674119f1a85b5f2ecc4c7d5c2859edf50c0b05e0c10aa0df85eefa2c8c14b796"
   "6.0.0":
     url: "https://github.com/msgpack/msgpack-c/releases/download/c-6.0.0/msgpack-c-6.0.0.tar.gz"
     sha256: "3654f5e2c652dc52e0a993e270bb57d5702b262703f03771c152bba51602aeba"

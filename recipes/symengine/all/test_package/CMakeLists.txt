@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
 
-find_package(symengine REQUIRED CONFIG)
+find_package(SymEngine REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE symengine::symengine)  # FIXME: Replace `symengine::symengine` with `symengine`
+target_link_libraries(${PROJECT_NAME} PRIVATE symengine)

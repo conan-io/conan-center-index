@@ -1,5 +1,13 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -37,7 +37,3 @@ if(NOT CMAKE_BUILD_TYPE)
+ endif()
+ string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
+ 
+-# get rid of the extra default configurations
+-# what? why would you get id of other useful build types? - Ellzey
+-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Limited configurations" FORCE)
+-
 @@ -46,7 +46,7 @@ set(EVENT__LIBRARY_TYPE DEFAULT CACHE STRING
  
  project(libevent C)

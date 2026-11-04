@@ -8,12 +8,17 @@ required_conan_version = ">=1.47"
 
 class XtransConan(ConanFile):
     name = "xtrans"
+    version = "system"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    package_type = "shared-library"
     homepage = "https://www.x.org/wiki/"
     description = "X Network Transport layer shared code"
     settings = "os", "arch", "compiler", "build_type"
     topics = ("x11", "xorg")
+
+    def layout(self):
+        pass
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -41,6 +46,9 @@ class XtransConan(ConanFile):
         pacman.install(["xtrans"], update=True, check=True)
 
         package_manager.Pkg(self).install(["xtrans"], update=True, check=True)
+
+        alpine = package_manager.Apk(self)
+        alpine.install(["xtrans"], update=True, check=True)
 
     def package_info(self):
         pkg_config = PkgConfig(self, "xtrans")

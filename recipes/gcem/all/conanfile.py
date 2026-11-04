@@ -13,11 +13,12 @@ class GcemConan(ConanFile):
     description = "A C++ compile-time math library using generalized " \
                   "constant expressions."
     license = "Apache-2.0"
-    topics = ("gcem", "math", "header-only")
+    topics = ("math", "header-only")
     homepage = "https://github.com/kthohr/gcem"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    settings = "os", "arch", "compiler", "build_type",
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -30,8 +31,7 @@ class GcemConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

@@ -1,12 +1,14 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -393,7 +393,7 @@
+@@ -393,7 +393,9 @@
    ADD_DEFINITIONS(-DHAVE_LIBRT=1)
  endif (HAVE_LIBRT)
  
 -check_library_exists(subunit subunit_test_start "" HAVE_SUBUNIT)
-+option(HAVE_SUBUNIT "Do you have subunit" ON)
  if (HAVE_SUBUNIT)
++  find_package(subunit REQUIRED CONFIG)
++  link_libraries(subunit::subunit)
++  link_directories(${subunit_INCLUDE_DIR}/../lib) # Conan v1 does not set the lib dirs correctly for some reason
    set(SUBUNIT "subunit")
    set(ENABLE_SUBUNIT 1)
 

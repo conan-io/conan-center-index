@@ -8,3 +8,5 @@ patches:
     - patch_file: patches/0002-cmake-fix-install.patch
     - patch_file: patches/0003-cmake-fix-flags.patch
     - patch_file: patches/0004-missing-utils-header.patch
+    - patch_file: patches/0005-cmake4-compatible.patch
+      patch_description: "CMP0025 (Compiler id for Apple Clang is now AppleClang instead of Clang). CMake 4 forces CMP0025 to NEW. Thus a patch is needed to MATCH Clang or AppleClang"

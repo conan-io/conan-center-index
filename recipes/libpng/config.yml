@@ -1,13 +1,4 @@
 versions:
-  "1.6.40":
-    folder: all
-  "1.6.39":
-    folder: all
-  "1.6.38":
-    folder: all
-  "1.6.37":
-    folder: all
-  "1.6.32":
-    folder: all
-  "1.5.30":
+# Keep only the latest version, unless there's strong reasons to keep older ones
+  "1.6.59":
     folder: all

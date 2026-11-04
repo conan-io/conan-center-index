@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(r8brain-free-src LANGUAGES C CXX)
 
 add_library(r8brain)
@@ -30,18 +30,18 @@ install(
 file(GLOB PUBLIC_HEADERS ${R8BRAIN_SRC_DIR}/*.h ${R8BRAIN_SRC_DIR}/*.inc)
 install(FILES ${PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if(R8BRAIN_WITH_PFFFT_DOUBLE)
-  list(APPEND PFFFT_DOUBLE_HEADERS 
+  list(APPEND PFFFT_DOUBLE_HEADERS
     ${R8BRAIN_SRC_DIR}/pffft_double/pffft_double.h
   )
   install(FILES ${PFFFT_DOUBLE_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pffft_double)
 
-  list(APPEND PFFFT_DOUBLE_SIMD_HEADERS 
+  list(APPEND PFFFT_DOUBLE_SIMD_HEADERS
     ${R8BRAIN_SRC_DIR}/pffft_double/simd/pf_avx_double.h
     ${R8BRAIN_SRC_DIR}/pffft_double/simd/pf_double.h
     ${R8BRAIN_SRC_DIR}/pffft_double/simd/pf_neon_double.h
     ${R8BRAIN_SRC_DIR}/pffft_double/simd/pf_neon_double_from_avx.h
     ${R8BRAIN_SRC_DIR}/pffft_double/simd/pf_scalar_double.h
-    ${R8BRAIN_SRC_DIR}/pffft_double/simd/pf_sse2_double.h 
+    ${R8BRAIN_SRC_DIR}/pffft_double/simd/pf_sse2_double.h
   )
   install(FILES ${PFFFT_DOUBLE_SIMD_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pffft_double/simd)
 endif()

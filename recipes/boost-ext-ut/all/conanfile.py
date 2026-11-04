@@ -52,6 +52,11 @@ class UTConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if (Version(self.version) == "2.1.0" and self.settings.os == "Linux" and self.settings.compiler == "clang" and
+                12 <= Version(self.settings.compiler.version) <= 16 and "libstdc++" in self.settings.compiler.libcxx):
+            # https://github.com/boost-ext/ut/issues/637
+            raise ConanInvalidConfiguration(f"{self.ref} does support Clang + libstdc++. Use -s compiler.libcxx=libc++ or Clang >16.")
+
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
         if Version(self.version) <= "1.1.8" and is_msvc(self):
@@ -126,7 +131,7 @@ class UTConan(ConanFile):
         self.cpp_info.components["ut"].names["cmake_find_package"] = "ut"
         self.cpp_info.components["ut"].names["cmake_find_package_multi"] = "ut"
 
-        if newer_than_1_1_8:
+        if newer_than_1_1_8 and Version(self.version) < "2.3.1":
             self.cpp_info.components["ut"].includedirs = [os.path.join("include", "ut-" + self.version, "include")]
 
         if self.options.get_safe("disable_module"):

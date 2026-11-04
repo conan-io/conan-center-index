@@ -1,0 +1,121 @@
+From bfd53d3cc3afbf199fa27f74bf4b35c1ad955c2e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Rados=C5=82aw=20Szkodzi=C5=84ski?= <astralstorm@gmail.com>
+Date: Tue, 3 Jan 2023 14:14:07 +0100
+Subject: [PATCH] Fix Windows build
+
+Fixes all found instances of missing APIs and headers on Windows.
+---
+ src/anchor.c          | 12 ++++++++++++
+ src/compat/mkstemp.c  |  6 +++---
+ src/gldns/parse.c     |  2 +-
+ src/gldns/parseutil.c |  2 ++
+ src/stub.c            |  5 +++++
+ 5 files changed, 23 insertions(+), 4 deletions(-)
+
+diff --git a/src/anchor.c b/src/anchor.c
+index f50c4a3d1..fc357b649 100644
+--- a/src/anchor.c
++++ b/src/anchor.c
+@@ -551,7 +551,11 @@ static void tas_rinse(getdns_context *context, tas_connection *a)
+ 		GETDNS_CLEAR_EVENT(a->loop, &a->event);
+ 	a->event.ev = NULL;
+ 	if (a->fd >= 0)
++#ifdef USE_WINSOCK
++		closesocket(a->fd);
++#else
+ 		close(a->fd);
++#endif
+ 	a->fd = -1;
+ 	if (a->xml.data)
+ 		GETDNS_FREE(context->mf, a->xml.data);
+@@ -662,7 +666,11 @@ static void tas_reconnect_cb(void *userarg)
+ 	           , "Waiting for second document timeout. Reconnecting...\n");
+ 
+ 	GETDNS_CLEAR_EVENT(a->loop, &a->event);
++#ifdef USE_WINSOCK
++	closesocket(a->fd);
++#else
+ 	close(a->fd);
++#endif
+ 	a->fd = -1;
+ 	if (a->state == TAS_READ_PS7_HDR) {
+ 		a->state = TAS_RETRY;
+@@ -778,7 +786,11 @@ static void tas_read_cb(void *userarg)
+ 	if (n == 0) {
+ 		DEBUG_ANCHOR("Connection closed\n");
+ 		GETDNS_CLEAR_EVENT(a->loop, &a->event);
++#ifdef USE_WINSOCK
++		closesocket(a->fd);
++#else
+ 		close(a->fd);
++#endif
+ 		a->fd = -1;
+ 		if (a->state == TAS_READ_PS7_HDR) {
+ 			a->state = TAS_RETRY;
+diff --git a/src/compat/mkstemp.c b/src/compat/mkstemp.c
+index 49d3e919a..86d1dfd67 100644
+--- a/src/compat/mkstemp.c
++++ b/src/compat/mkstemp.c
+@@ -30,14 +30,14 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-#include <fcntl.h>
+-#include <stdio.h>
+ #include <string.h>
++#include <fcntl.h>
+ #include <sys/stat.h>
++#include <io.h>
+ 
+ int mkstemp(char *template)
+ {
+ 		if (_mktemp_s(template, strlen(template) + 1) != 0)
+ 				return -1;
+-		return open(template, _O_CREAT | _O_EXCL | _O_RDWR, _S_IWRITE | _S_IREAD);
++		return _open(template, _O_CREAT | _O_EXCL | _O_RDWR, _S_IWRITE | _S_IREAD);
+ }
+diff --git a/src/gldns/parse.c b/src/gldns/parse.c
+index 367fa80f3..c107c0df9 100644
+--- a/src/gldns/parse.c
++++ b/src/gldns/parse.c
+@@ -13,7 +13,7 @@
+ #include "gldns/gbuffer.h"
+ 
+ #include <limits.h>
+-#include <strings.h>
++#include <string.h>
+ 
+ gldns_lookup_table gldns_directive_types[] = {
+         { GLDNS_DIR_TTL, "$TTL" },
+diff --git a/src/gldns/parseutil.c b/src/gldns/parseutil.c
+index 293496a90..1e4367898 100644
+--- a/src/gldns/parseutil.c
++++ b/src/gldns/parseutil.c
+@@ -14,7 +14,9 @@
+ 
+ #include "config.h"
+ #include "gldns/parseutil.h"
++#ifdef HAVE_SYS_TIME_H
+ #include <sys/time.h>
++#endif
+ #include <time.h>
+ #include <ctype.h>
+ 
+diff --git a/src/stub.c b/src/stub.c
+index ee3193126..ab393885d 100644
+--- a/src/stub.c
++++ b/src/stub.c
+@@ -903,8 +903,13 @@ stub_tcp_write(int fd, getdns_tcp_state *tcp, getdns_network_req *netreq)
+ 			   just fall back to a 'normal' write. */
+ 			if (written == -1
+ 			&&  _getdns_socketerror() == _getdns_EISCONN) 
++#ifdef USE_WINSOCK
++				written = send(fd, (const char *)(netreq->query - 2)
++				                 , pkt_len + 2, 0);
++#else
+ 				written = write(fd, netreq->query - 2
+ 				                  , pkt_len + 2);
++#endif
+ 		} else
+ 			written = send(fd, (const char *)(netreq->query - 2)
+ 			                 , pkt_len + 2, 0);

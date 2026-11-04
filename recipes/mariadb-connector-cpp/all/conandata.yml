@@ -1,0 +1,10 @@
+sources:
+  "1.1.4":
+    url:
+      - "https://github.com/mariadb-corporation/mariadb-connector-cpp/archive/refs/tags/1.1.4.zip"
+    sha256: "4b6846abff09b9fece8c3766785248b60aa7e11815e5b4590bbf7dff7f2e7b3d"
+patches:
+  "1.1.4":
+    - patch_file: "patches/0001-1.1.4-cmake-install-logic.patch"
+      patch_type: "conan"
+      patch_description: "Compile both static and shared libraries but only install one of them"

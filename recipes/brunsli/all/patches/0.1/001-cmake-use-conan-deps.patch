@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -26,7 +26,7 @@
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ set(CMAKE_CXX_STANDARD_REQUIRED YES)
+ 
+-add_subdirectory(third_party)
++find_package(Brotli REQUIRED CONFIG)
+ 
+ # The Brunsli library definition.
+ include(brunsli.cmake)

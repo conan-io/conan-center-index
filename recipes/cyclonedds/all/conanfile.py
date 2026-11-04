@@ -53,7 +53,17 @@ class CycloneDDSConan(ConanFile):
             "apple-clang": "10",
         }
 
+    @property
+    def _pre_v11(self):
+        return Version(self.version) < "11"
+
+    def _has_idlc(self, info=False):
+        # don't build idlc when it makes little sense or not supported
+        host_os = self.info.settings.os if info else self.settings.os
+        return host_os not in ["Android", "iOS", "watchOS", "tvOS", "Neutrino"]
+
     def export_sources(self):
+        copy(self, os.path.join("cmake", "CycloneDDS_idlc.cmake"), self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -71,12 +81,12 @@ class CycloneDDSConan(ConanFile):
 
     def requirements(self):
         if self.options.with_shm:
-            self.requires("iceoryx/2.0.2")
+            self.requires("iceoryx/2.0.5")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.options.enable_security and not self.options.shared:
+        if self._pre_v11 and self.options.enable_security and not self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} currently do not support"\
                                             "static build and security on")
         if self.settings.compiler.get_safe("cppstd"):
@@ -86,6 +96,9 @@ class CycloneDDSConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if Version(self.version) == "11.0.1" and not self.options.shared and self.settings.compiler == "msvc":
+            # FIXME: ddsc.lib(cdtors.c.obj) : error LNK2005: tls_callback_func already defined in string.c.obj
+            raise ConanInvalidConfiguration("Windows static build is not support due linker error. See https://github.com/eclipse-cyclonedds/cyclonedds/issues/2422")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
@@ -96,16 +109,20 @@ class CycloneDDSConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         # TODO : determine how to do in conan :
-        # - idlc is a code generator that is used as tool (and so not cross compiled)
         # - other tools like ddsperf is cross compiled for target
-        # - maybe separate package like cyclonedds_idlc
-        tc.variables["BUILD_IDLC"] = False
+        tc.variables["BUILD_IDLC"] = self._has_idlc()
         tc.variables["BUILD_IDLC_TESTING"] = False
         tc.variables["BUILD_DDSPERF"] = False
         tc.variables["BUILD_IDLC_TESTING"] = False
+        tc.cache_variables["ENABLE_LTO"] = False
         # variables which effects build
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
-        tc.variables["ENABLE_SHM"] = self.options.with_shm
+        if self._pre_v11:
+            # INFO: deprecated in 11.0.0:
+            # https://github.com/eclipse-cyclonedds/cyclonedds/commit/9f354f462d9e8b374da408efc89050f3161322f4
+            tc.cache_variables["ENABLE_SHM"] = self.options.with_shm
+        else:
+            tc.cache_variables["ENABLE_ICEORYX"] = self.options.with_shm
         tc.variables["ENABLE_SECURITY"] = self.options.enable_security
         tc.variables["ENABLE_TYPE_DISCOVERY"] = self.options.enable_discovery
         tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.options.enable_discovery
@@ -126,12 +143,13 @@ class CycloneDDSConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        if self.settings.os == "Windows" and self.options.shared:
+        rm(self, "*.cmake", os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS"))
+        copy(self, "CycloneDDS_idlc.cmake",
+                   src=os.path.join(self.source_folder, os.pardir, "cmake"),
+                   dst=os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS"))
+        if self.settings.os == "Windows":
             for p in ("*.pdb", "concrt*.dll", "msvcp*.dll", "vcruntime*.dll"):
                 rm(self, p, os.path.join(self.package_folder, "bin"))
-        else:
-            rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CycloneDDS")
@@ -141,7 +159,10 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.components["CycloneDDS"].libs = ["ddsc"]
         requires = []
         if self.options.with_shm:
-            requires.append("iceoryx::iceoryx_binding_c")
+            if self._pre_v11:
+                requires.append("iceoryx::iceoryx_binding_c")
+            else:
+                requires.extend(["iceoryx::iceoryx_hoofs", "iceoryx::iceoryx_posh"])
         if self.options.with_ssl:
             requires.append("openssl::openssl")
         self.cpp_info.components["CycloneDDS"].requires = requires
@@ -155,6 +176,18 @@ class CycloneDDSConan(ConanFile):
                 "iphlpapi"
             ]
 
+        # TODO: CMakeConfigDeps + cpp_info.exe can replace CycloneDDS_idlc.cmake
+        build_modules = [
+            os.path.join("lib", "cmake", "CycloneDDS", "CycloneDDS_idlc.cmake"),
+            os.path.join("lib", "cmake", "CycloneDDS", "idlc", "Generate.cmake"),
+        ]
+        self.cpp_info.set_property("cmake_build_modules", build_modules)
+        build_dirs = [
+            os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS"),
+            os.path.join(self.package_folder, "lib", "cmake", "CycloneDDS", "idlc"),
+        ]
+        self.cpp_info.builddirs = build_dirs
+
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "CycloneDDS"
         self.cpp_info.names["cmake_find_package_multi"] = "CycloneDDS"
@@ -162,3 +195,20 @@ class CycloneDDSConan(ConanFile):
         self.cpp_info.components["CycloneDDS"].names["cmake_find_package_multi"] = "ddsc"
         self.cpp_info.components["CycloneDDS"].set_property("cmake_target_name", "CycloneDDS::ddsc")
         self.cpp_info.components["CycloneDDS"].set_property("pkg_config_name", "CycloneDDS")
+        if self._has_idlc():
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
+            self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
+            self.cpp_info.components["idl"].libs = ["cycloneddsidl"]
+            self.cpp_info.components["idl"].names["cmake_find_package"] = "idl"
+            self.cpp_info.components["idl"].names["cmake_find_package_multi"] = "idl"
+            self.cpp_info.components["idl"].set_property("cmake_target_name", "CycloneDDS::idl")
+            self.cpp_info.components["idl"].build_modules["cmake_find_package"] = build_modules
+            self.cpp_info.components["idl"].build_modules["cmake_find_package_multi"] = build_modules
+            self.cpp_info.components["idl"].requires = ["CycloneDDS"]
+
+            if Version(self.version) >= "11.0.0":
+                # https://github.com/eclipse-cyclonedds/cyclonedds/pull/1752
+                self.cpp_info.components["libidlc"].set_property("cmake_target_name", "CycloneDDS::libidlc")
+                self.cpp_info.components["libidlc"].libs = ["cycloneddsidlc"]
+                self.cpp_info.components["libidlc"].requires = ["idl", "CycloneDDS"]

@@ -1,0 +1,308 @@
+From 048865a3b61e9bc2b61219168d434b61e784d355 Mon Sep 17 00:00:00 2001
+From: Benjamin Gilbert <bgilbert@cs.cmu.edu>
+Date: Mon, 12 Feb 2024 20:44:45 +0900
+Subject: [PATCH] Replace _OPENSLIDE_POISON() with pre-commit check
+
+Preprocessor macros are somewhat clunky as a way to prevent use of
+forbidden functions.  Now that we have pre-commit checks, use those
+instead.  Allow forbidden function calls in wrapper implementations by
+ignoring call sites with "ci-allow" in a comment on the same line.
+
+Signed-off-by: Benjamin Gilbert <bgilbert@cs.cmu.edu>
+---
+ .pre-commit-config.yaml          | 29 +++++++++++++++++++++++++++++
+ src/openslide-decode-sqlite.c    | 10 +++-------
+ src/openslide-decode-tiff.c      |  8 ++------
+ src/openslide-file.c             | 20 +++++++-------------
+ src/openslide-jdatasrc.c         |  2 +-
+ src/openslide-private.h          | 27 ---------------------------
+ src/openslide-util.c             |  4 +---
+ src/openslide-vendor-synthetic.c |  7 +++----
+ 8 files changed, 46 insertions(+), 61 deletions(-)
+
+diff --git a/src/openslide-decode-sqlite.c b/src/openslide-decode-sqlite.c
+index f75083df5..119b71b5a 100644
+--- a/src/openslide-decode-sqlite.c
++++ b/src/openslide-decode-sqlite.c
+@@ -44,7 +44,6 @@ static int profile_callback(unsigned trace_type G_GNUC_UNUSED,
+   return 0;
+ }
+ 
+-#undef sqlite3_open_v2
+ static sqlite3 *do_open(const char *filename, int flags, GError **err) {
+   sqlite3 *db;
+ 
+@@ -55,7 +54,7 @@ static sqlite3 *do_open(const char *filename, int flags, GError **err) {
+     return NULL;
+   }
+ 
+-  ret = sqlite3_open_v2(filename, &db, flags, NULL);
++  ret = sqlite3_open_v2(filename, &db, flags, NULL);  // ci-allow
+ 
+   if (ret) {
+     if (db) {
+@@ -76,7 +75,6 @@ static sqlite3 *do_open(const char *filename, int flags, GError **err) {
+ 
+   return db;
+ }
+-#define sqlite3_open_v2 _OPENSLIDE_POISON(_openslide_sqlite_open)
+ 
+ sqlite3 *_openslide_sqlite_open(const char *filename, GError **err) {
+   // ":" filename prefix is reserved.
+@@ -131,12 +129,10 @@ void _openslide_sqlite_propagate_stmt_error(sqlite3_stmt *stmt, GError **err) {
+   _openslide_sqlite_propagate_error(sqlite3_db_handle(stmt), err);
+ }
+ 
+-#undef sqlite3_close
+ void _openslide_sqlite_close(sqlite3 *db) {
+-  // sqlite3_close() failures indicate a leaked resource, probably a
++  // sqlite3_close failures indicate a leaked resource, probably a
+   // prepared statement.
+-  if (sqlite3_close(db)) {
++  if (sqlite3_close(db)) {  // ci-allow
+     g_warning("SQLite error: %s", sqlite3_errmsg(db));
+   }
+ }
+-#define sqlite3_close _OPENSLIDE_POISON(_openslide_sqlite_close)
+diff --git a/src/openslide-decode-tiff.c b/src/openslide-decode-tiff.c
+index 0af196479..ed294f18f 100644
+--- a/src/openslide-decode-tiff.c
++++ b/src/openslide-decode-tiff.c
+@@ -74,7 +74,6 @@ struct associated_image {
+     result = tmp;							\
+   } while (0)
+ 
+-#undef TIFFSetDirectory
+ bool _openslide_tiff_set_dir(TIFF *tiff,
+                              tdir_t dir,
+                              GError **err) {
+@@ -82,14 +81,13 @@ bool _openslide_tiff_set_dir(TIFF *tiff,
+     // avoid libtiff unnecessarily rereading directory contents
+     return true;
+   }
+-  if (!TIFFSetDirectory(tiff, dir)) {
++  if (!TIFFSetDirectory(tiff, dir)) {  // ci-allow
+     g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
+                 "Cannot set TIFF directory %d", dir);
+     return false;
+   }
+   return true;
+ }
+-#define TIFFSetDirectory _OPENSLIDE_POISON(_openslide_tiff_set_dir)
+ 
+ bool _openslide_tiff_level_init(TIFF *tiff,
+                                 tdir_t dir,
+@@ -587,7 +585,6 @@ static toff_t tiff_do_size(thandle_t th) {
+   return hdl->size;
+ }
+ 
+-#undef TIFFClientOpen
+ static TIFF *tiff_open(struct _openslide_tiffcache *tc, GError **err) {
+   // open
+   g_autoptr(_openslide_file) f = _openslide_fopen(tc->filename, err);
+@@ -646,7 +643,7 @@ static TIFF *tiff_open(struct _openslide_tiffcache *tc, GError **err) {
+ 
+   // TIFFOpen
+   // mode: m disables mmap to avoid sigbus and other mmap fragility
+-  TIFF *tiff = TIFFClientOpen(tc->filename, "rm", hdl,
++  TIFF *tiff = TIFFClientOpen(tc->filename, "rm", hdl,  // ci-allow
+                               tiff_do_read, tiff_do_write, tiff_do_seek,
+                               tiff_do_close, tiff_do_size, NULL, NULL);
+   if (tiff == NULL) {
+@@ -656,7 +653,6 @@ static TIFF *tiff_open(struct _openslide_tiffcache *tc, GError **err) {
+   }
+   return tiff;
+ }
+-#define TIFFClientOpen _OPENSLIDE_POISON(_openslide_tiffcache_get)
+ 
+ struct _openslide_tiffcache *_openslide_tiffcache_create(const char *filename) {
+   struct _openslide_tiffcache *tc = g_new0(struct _openslide_tiffcache, 1);
+diff --git a/src/openslide-file.c b/src/openslide-file.c
+index 2763f3807..9eb9b1039 100644
+--- a/src/openslide-file.c
++++ b/src/openslide-file.c
+@@ -22,7 +22,6 @@
+ 
+ #include <config.h>
+ 
+-#define NO_POISON_FSEEKO
+ #include "openslide-private.h"
+ 
+ #include <stdio.h>
+@@ -44,13 +43,8 @@ struct _openslide_dir {
+   GDir *dir;
+ };
+ 
+-#undef fopen
+-#undef fread
+-#undef fclose
+-#undef g_file_test
+-
+ static void wrap_fclose(FILE *fp) {
+-  fclose(fp);
++  fclose(fp);  // ci-allow
+ }
+ G_DEFINE_AUTOPTR_CLEANUP_FUNC(FILE, wrap_fclose)
+ 
+@@ -87,7 +81,7 @@ static FILE *do_fopen(const char *path, const char *mode, GError **err) {
+     io_error(err, "Couldn't open %s", path);
+   }
+ #else
+-  f = fopen(path, mode);
++  f = fopen(path, mode);  // ci-allow
+   if (f == NULL) {
+     io_error(err, "Couldn't open %s", path);
+   }
+@@ -132,7 +126,7 @@ size_t _openslide_fread(struct _openslide_file *file, void *buf, size_t size) {
+   char *bufp = buf;
+   size_t total = 0;
+   while (total < size) {
+-    size_t count = fread(bufp + total, 1, size - total, file->fp);
++    size_t count = fread(bufp + total, 1, size - total, file->fp);  // ci-allow
+     if (count == 0) {
+       return total;
+     }
+@@ -143,7 +137,7 @@ size_t _openslide_fread(struct _openslide_file *file, void *buf, size_t size) {
+ 
+ bool _openslide_fseek(struct _openslide_file *file, off_t offset, int whence,
+                       GError **err) {
+-  if (fseeko(file->fp, offset, whence)) {
++  if (fseeko(file->fp, offset, whence)) {  // ci-allow
+     g_set_error(err, G_FILE_ERROR, g_file_error_from_errno(errno),
+                 "%s", g_strerror(errno));
+     return false;
+@@ -152,7 +146,7 @@ bool _openslide_fseek(struct _openslide_file *file, off_t offset, int whence,
+ }
+ 
+ off_t _openslide_ftell(struct _openslide_file *file, GError **err) {
+-  off_t ret = ftello(file->fp);
++  off_t ret = ftello(file->fp);  // ci-allow
+   if (ret == -1) {
+     g_set_error(err, G_FILE_ERROR, g_file_error_from_errno(errno),
+                 "%s", g_strerror(errno));
+@@ -179,12 +173,12 @@ off_t _openslide_fsize(struct _openslide_file *file, GError **err) {
+ }
+ 
+ void _openslide_fclose(struct _openslide_file *file) {
+-  fclose(file->fp);
++  fclose(file->fp);  // ci-allow
+   g_free(file);
+ }
+ 
+ bool _openslide_fexists(const char *path, GError **err G_GNUC_UNUSED) {
+-  return g_file_test(path, G_FILE_TEST_EXISTS);
++  return g_file_test(path, G_FILE_TEST_EXISTS);  // ci-allow
+ }
+ 
+ struct _openslide_dir *_openslide_dir_open(const char *dirname, GError **err) {
+diff --git a/src/openslide-jdatasrc.c b/src/openslide-jdatasrc.c
+index 2ad068818..4de54eddf 100644
+--- a/src/openslide-jdatasrc.c
++++ b/src/openslide-jdatasrc.c
+@@ -158,7 +158,7 @@ static void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
+ {
+   struct jpeg_source_mgr * src = cinfo->src;
+ 
+-  /* Just a dumb implementation for now.  Could use fseek() except
++  /* Just a dumb implementation for now.  Could use fseek except
+    * it doesn't work on pipes.  Not clear that being smart is worth
+    * any trouble anyway --- large skips are infrequent.
+    */
+diff --git a/src/openslide-private.h b/src/openslide-private.h
+index 5ae36939b..ed08f5ed7 100644
+--- a/src/openslide-private.h
++++ b/src/openslide-private.h
+@@ -383,33 +383,6 @@ extern const int32_t _openslide_G_Cb[256];
+ extern const int32_t _openslide_G_Cr[256];
+ extern const int16_t _openslide_B_Cb[256];
+ 
+-/* Prevent use of dangerous functions and functions with mandatory wrappers.
+-   Every @p replacement must be unique to avoid conflicting-type errors. */
+-#define _OPENSLIDE_POISON(replacement) error__use_ ## replacement ## _instead
+-#define fopen _OPENSLIDE_POISON(_openslide_fopen)
+-#define fread _OPENSLIDE_POISON(_openslide_fread)
+-#define fseek _OPENSLIDE_POISON(_openslide_fseek)
+-#define ftell _OPENSLIDE_POISON(_openslide_ftell)
+-#define fclose _OPENSLIDE_POISON(_openslide_fclose)
+-#define g_file_test _OPENSLIDE_POISON(_openslide_fexists)
+-#define strtod _OPENSLIDE_POISON(_openslide_parse_double)
+-#define g_ascii_strtod _OPENSLIDE_POISON(_openslide_parse_double_)
+-#define sqlite3_open _OPENSLIDE_POISON(_openslide_sqlite_open)
+-#define sqlite3_open_v2 _OPENSLIDE_POISON(_openslide_sqlite_open_)
+-#define sqlite3_close _OPENSLIDE_POISON(_openslide_sqlite_close)
+-#define TIFFClientOpen _OPENSLIDE_POISON(_openslide_tiffcache_get)
+-#define TIFFFdOpen _OPENSLIDE_POISON(_openslide_tiffcache_get_)
+-#define TIFFOpen _OPENSLIDE_POISON(_openslide_tiffcache_get__)
+-#define TIFFSetDirectory _OPENSLIDE_POISON(_openslide_tiff_set_dir)
+-
+-#ifndef NO_POISON_FSEEKO
+-// openslide-file.c needs the original macros
+-#undef fseeko
+-#undef ftello
+-#define fseeko _OPENSLIDE_POISON(_openslide_fseek_)
+-#define ftello _OPENSLIDE_POISON(_openslide_ftell_)
+-#endif
+-
+ #ifdef _WIN32
+ // Prevent windows.h from defining the IN/OUT macro
+ #define _NO_W32_PSEUDO_MODIFIERS
+diff --git a/src/openslide-util.c b/src/openslide-util.c
+index 719953274..b85f9afa3 100644
+--- a/src/openslide-util.c
++++ b/src/openslide-util.c
+@@ -170,7 +170,6 @@ void *_openslide_inflate_buffer(const void *src, int64_t src_len,
+   return g_steal_pointer(&dst);
+ }
+ 
+-#undef g_ascii_strtod
+ double _openslide_parse_double(const char *value) {
+   // Canonicalize comma to decimal point, since the locale of the
+   // originating system sometimes leaks into slide files.
+@@ -180,14 +179,13 @@ double _openslide_parse_double(const char *value) {
+ 
+   char *endptr;
+   errno = 0;
+-  double result = g_ascii_strtod(canonical, &endptr);
++  double result = g_ascii_strtod(canonical, &endptr);  // ci-allow
+   // fail on overflow/underflow
+   if (canonical[0] == 0 || endptr[0] != 0 || errno == ERANGE) {
+     return NAN;
+   }
+   return result;
+ }
+-#define g_ascii_strtod _OPENSLIDE_POISON(_openslide_parse_double)
+ 
+ char *_openslide_format_double(double d) {
+   char buf[G_ASCII_DTOSTR_BUF_SIZE];
+diff --git a/src/openslide-vendor-synthetic.c b/src/openslide-vendor-synthetic.c
+index e3a440569..79938a597 100644
+--- a/src/openslide-vendor-synthetic.c
++++ b/src/openslide-vendor-synthetic.c
+@@ -204,7 +204,6 @@ static toff_t mem_tiff_size(thandle_t th) {
+   return mem->size;
+ }
+ 
+-#undef TIFFClientOpen
+ static bool decode_tiff(const void *data, uint32_t len,
+                         uint32_t *dest, GError **err) {
+   // there's no reason for OpenSlide as a whole to support reading entire
+@@ -216,8 +215,9 @@ static bool decode_tiff(const void *data, uint32_t len,
+   };
+   // mode: m disables mmap to avoid sigbus and other mmap fragility
+   g_autoptr(TIFF) tiff =
+-    TIFFClientOpen("tiff", "rm", &mem, mem_tiff_read, mem_tiff_write,
+-                   mem_tiff_seek, mem_tiff_close, mem_tiff_size, NULL, NULL);
++    TIFFClientOpen("tiff", "rm", &mem, mem_tiff_read,  // ci-allow
++                   mem_tiff_write, mem_tiff_seek, mem_tiff_close,
++                   mem_tiff_size, NULL, NULL);
+   if (tiff == NULL) {
+     g_set_error(err, OPENSLIDE_ERROR, OPENSLIDE_ERROR_FAILED,
+                 "Couldn't open TIFF");
+@@ -238,7 +238,6 @@ static bool decode_tiff(const void *data, uint32_t len,
+ 
+   return _openslide_tiff_read_tile(&tiffl, tiff, dest, 0, 0, err);
+ }
+-#define TIFFClientOpen _OPENSLIDE_POISON(_openslide_tiffcache_get)
+ 
+ static bool decode_xml(const void *data, uint32_t len,
+                        uint32_t *dest, GError **err) {

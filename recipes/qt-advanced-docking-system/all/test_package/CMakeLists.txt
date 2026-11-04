@@ -1,12 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
-project(PackageTest CXX)
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
-find_package(qt-advanced-docking-system CONFIG REQUIRED)
-
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets)
+find_package(qt${QT_VERSION_MAJOR}advanceddocking REQUIRED CONFIG)
 add_executable(example example.cpp)
-target_link_libraries(example qt-advanced-docking-system::qt-advanced-docking-system)
+target_link_libraries(example ads::qt${QT_VERSION_MAJOR}advanceddocking Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets)

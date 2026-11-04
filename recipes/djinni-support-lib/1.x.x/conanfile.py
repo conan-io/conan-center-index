@@ -1,76 +1,49 @@
 import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import collect_libs, copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
 
 
-class DjinniSuppotLib(ConanFile):
+class DjinniSupportLib(ConanFile):
     name = "djinni-support-lib"
-    homepage = "https://djinni.xlcpp.dev"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Djinni is a tool for generating cross-language type declarations and interface bindings"
-    topics = ("java", "Objective-C", "Android", "iOS")
     license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://djinni.xlcpp.dev"
+    topics = ("java", "Objective-C", "Android", "iOS")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "target": ["jni", "objc", "python", "cppcli", "auto", "deprecated"],
-               "with_jni": [True, False, "auto"],
-               "with_objc": [True, False, "auto"],
-               "with_python": [True, False, "auto"],
-               "with_cppcli": [True, False, "auto"],
-               "system_java": [True, False]
-               }
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "target": "deprecated",
-                       "with_jni": "auto",
-                       "with_objc": "auto",
-                       "with_python": "auto",
-                       "with_cppcli": "auto",
-                       "system_java": False,
-                       }
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_jni": [True, False, "auto"],
+        "with_objc": [True, False, "auto"],
+        "with_python": [True, False, "auto"],
+        "with_cppcli": [True, False, "auto"],
+        "system_java": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_jni": "auto",
+        "with_objc": "auto",
+        "with_python": "auto",
+        "with_cppcli": "auto",
+        "system_java": False,
+    }
 
-    _cmake = None
-
-    @property
-    def _objc_support(self):
-        if self.options.with_objc == "auto" or self.options.target == "auto":
-            return tools.is_apple_os(self.settings.os)
-        else:
-            return self.options.with_objc == True or self.options.target == "objc"
-
-    @property
-    def _jni_support(self):
-        if self.options.with_jni == "auto" or self.options.target == "auto":
-            return self.settings.os == "Android"
-        else:
-            return self.options.with_jni == True or self.options.target == "jni"
-
-    @property
-    def _python_support(self):
-        return self.options.with_python == True or self.options.target == "python"
-
-    @property
-    def _cppcli_support(self):
-        if self.options.with_cppcli == "auto" or self.options.target == "auto":
-            return self.settings.os == "Windows"
-        else:
-            return self.options.with_cppcli == True or self.options.target == "cppcli"
-
-    def configure(self):
-        if self.settings.compiler == "Visual Studio" or self.options.shared:
-            del self.options.fPIC
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def build_requirements(self):
-        if not self.options.system_java and self._jni_support:
-            self.build_requires("zulu-openjdk/11.0.12@")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -79,67 +52,124 @@ class DjinniSuppotLib(ConanFile):
             self.options.system_java = True
 
     @property
+    def _objc_support(self):
+        if self.options.with_objc == "auto":
+            return is_apple_os(self)
+        else:
+            return self.options.with_objc
+
+    @property
+    def _jni_support(self):
+        if self.options.with_jni == "auto":
+            return self.settings.os == "Android"
+        else:
+            return self.options.with_jni
+
+    @property
+    def _python_support(self):
+        return self.options.with_python
+
+    @property
+    def _cppcli_support(self):
+        if self.options.with_cppcli == "auto":
+            return self.settings.os == "Windows"
+        else:
+            return self.options.with_cppcli
+
+    @property
     def _supported_compilers(self):
         return {
             "gcc": "8",
             "clang": "7",
-            "Visual Studio": "15",
             "apple-clang": "10",
+            "msvc": "191",
+            "Visual Studio": "15",
         }
 
+    def configure(self):
+        if is_msvc(self) or self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def validate(self):
-        if self.options.target != "deprecated":
-            self.output.warn("The 'target' option is deprecated and will be removed soon. Use 'with_jni', 'with_objc', 'with_python' or 'with_cppcli' options instead.")
         if not (self._objc_support or self._jni_support or self._python_support or self._cppcli_support):
-            raise ConanInvalidConfiguration("Target language could not be determined automatically. Set at least one of 'with_jni', 'with_objc', 'with_python' or 'with_cppcli' options to `True`.")
+            raise ConanInvalidConfiguration(
+                "Target language could not be determined automatically. Set at least one of 'with_jni',"
+                " 'with_objc', 'with_python' or 'with_cppcli' options to `True`."
+            )
         if self._cppcli_support:
             if self.settings.os != "Windows":
-                raise ConanInvalidConfiguration("C++/CLI has been enabled on a non-Windows operating system. This is not supported.")
-            if self.options.shared:
-                raise ConanInvalidConfiguration("C++/CLI does not support building as shared library")
-            if self.settings.compiler.runtime == "MT" or self.settings.compiler.runtime == "MTd":
-                raise ConanInvalidConfiguration("'/clr' and '/MT' command-line options are incompatible")
+                raise ConanInvalidConfiguration(
+                    "C++/CLI has been enabled on a non-Windows operating system. This is not supported."
+                )
             if self._objc_support or self._jni_support or self._python_support:
                 raise ConanInvalidConfiguration(
-                    "C++/CLI is not yet supported with other languages enabled as well. Disable 'with_jni', 'with_objc' and 'with_python' options for a valid configuration.")
+                    "C++/CLI is not yet supported with other languages enabled as well. "
+                    "Disable 'with_jni', 'with_objc' and 'with_python' options for a valid configuration."
+                )
+            if self.options.shared:
+                raise ConanInvalidConfiguration("C++/CLI does not support building as shared library")
+            if is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration("'/clr' and '/MT' command-line options are incompatible")
         if self._python_support:
             if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("Python on Windows is not fully yet supported, please see https://github.com/cross-language-cpp/djinni-support-lib/issues.")
+                raise ConanInvalidConfiguration(
+                    "Python on Windows is not fully yet supported, please see"
+                    " https://github.com/cross-language-cpp/djinni-support-lib/issues."
+                )
         if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, "17")
+            check_min_cppstd(self, "17")
         try:
             minimum_required_compiler_version = self._supported_compilers[str(self.settings.compiler)]
-            if tools.Version(self.settings.compiler.version) < minimum_required_compiler_version:
-                raise ConanInvalidConfiguration("This package requires c++17 support. The current compiler does not support it.")
+            if Version(self.settings.compiler.version) < minimum_required_compiler_version:
+                raise ConanInvalidConfiguration(
+                    "This package requires c++17 support. The current compiler does not support it."
+                )
         except KeyError:
-            self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
+            self.output.warning(
+                "This recipe has no support for the current compiler. Please consider adding it."
+            )
+
+    def build_requirements(self):
+        if not self.options.system_java and self._jni_support:
+            self.build_requires("zulu-openjdk/11.0.19")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["DJINNI_WITH_OBJC"] = self._objc_support
-        self._cmake.definitions["DJINNI_WITH_JNI"] = self._jni_support
-        self._cmake.definitions["DJINNI_WITH_PYTHON"] = self._python_support
-        self._cmake.definitions["DJINNI_WITH_CPPCLI"] = self._cppcli_support
-        self._cmake.definitions["BUILD_TESTING"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        tc.variables["DJINNI_WITH_OBJC"] = self._objc_support
+        tc.variables["DJINNI_WITH_JNI"] = self._jni_support
+        tc.variables["DJINNI_WITH_PYTHON"] = self._python_support
+        tc.variables["DJINNI_WITH_CPPCLI"] = self._cppcli_support
+        tc.variables["BUILD_TESTING"] = False
         if self._jni_support:
-            self._cmake.definitions["JAVA_AWT_LIBRARY"] = "NotNeeded"
-            self._cmake.definitions["JAVA_AWT_INCLUDE_PATH"] = "NotNeeded"
-        self._cmake.configure()
-        return self._cmake
+            tc.variables["JAVA_AWT_LIBRARY"] = "NotNeeded"
+            tc.variables["JAVA_AWT_INCLUDE_PATH"] = "NotNeeded"
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+        tc = VirtualBuildEnv(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")

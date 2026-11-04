@@ -1,4 +1,10 @@
 sources:
   "3.0.0":
-    url: "http://mpir.org/mpir-3.0.0.zip"
-    sha256: "6277d3cc36ff39c98e4d4cc17b46b5a6ff42a22d30a4130b2d49255f98dd8c1f"
+    url: "https://github.com/wbhart/mpir/archive/refs/tags/mpir-3.0.0.tar.gz"
+    sha256: "86a5039badc3e6738219a262873a1db5513405e15ece9527b718fcd0fac09bb2"
+patches:
+  "3.0.0":
+    - patch_file: "patches/fix_xcode_12_configure.patch"
+      patch_type: "backport"
+      patch_source: https://github.com/wbhart/mpir/commit/bbc43ca6ae0bec4f64e69c9cd4c967005d6470eb
+      patch_description: "Fix warnings (turned to errors) that causes XCode 12+ configure to fail"

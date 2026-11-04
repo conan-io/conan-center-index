@@ -1,10 +1,13 @@
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd, stdcpp_library
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd, stdcpp_library, cross_building, check_max_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class KtxConan(ConanFile):
@@ -53,41 +56,47 @@ class KtxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("lodepng/cci.20200615")
-        self.requires("zstd/1.5.5")
+        self.requires("zstd/[^1.5]")
+        if self.options.tools:
+            self.requires("fmt/[>=11 <12]")
+
+    def validate_build(self):
+        if self.options.tools:
+            if cross_building(self) and is_apple_os(self):
+                raise ConanInvalidConfiguration(f"Cross-building KTX tools {self.version} for Apple OS is not supported in this version")
+            # Does not compile with newer cppstd versions.
+            check_max_cppstd(self, 17)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17)
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 6:
+            # astcenc_vecmathlib_sse_4.h:809:41: error: the last argument must be a 4-bit immediate
+            raise ConanInvalidConfiguration("GCC v6+ is required")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.22]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Disable tests (and avoid copying them, it's a large folder)
+        rmdir(self, os.path.join(self.source_folder, "tests"))
+        save(self, os.path.join(self.source_folder, "tests", "CMakeLists.txt"), "")
+        replace_in_file(self, os.path.join(self.source_folder, "external", "astc-encoder", "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD", "#")
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["KTX_FEATURE_TOOLS"] = self.options.tools
-        tc.variables["KTX_FEATURE_DOC"] = False
-        tc.variables["KTX_FEATURE_LOADTEST_APPS"] = False
-        tc.variables["KTX_FEATURE_STATIC_LIBRARY"] = not self.options.shared
-        tc.variables["KTX_FEATURE_TESTS"] = False
-        tc.variables["BASISU_SUPPORT_SSE"] = self.options.get_safe("sse", False)
+        tc.cache_variables["KTX_FEATURE_TOOLS"] = self.options.tools
+        tc.cache_variables["KTX_FEATURE_DOC"] = False
+        tc.cache_variables["KTX_FEATURE_LOADTEST_APPS"] = False
+        tc.cache_variables["KTX_FEATURE_TESTS"] = False
+        tc.cache_variables["BASISU_SUPPORT_SSE"] = self.options.get_safe("sse", False)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Unvendor several libs (we rely on patch files to link those libs)
-        # It's worth noting that vendored jpeg-compressor can't be replaced by CCI equivalent
-        basisu_dir = os.path.join(self.source_folder, "lib", "basisu")
-        ## lodepng (the patch file 0002-lodepng-no-export-symbols is important, in order to not try to export lodepng symbols)
-        os.remove(os.path.join(basisu_dir, "encoder", "lodepng.cpp"))
-        os.remove(os.path.join(basisu_dir, "encoder", "lodepng.h"))
-        ## zstd
-        rmdir(self, os.path.join(basisu_dir, "zstd"))
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -102,7 +111,6 @@ class KtxConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ktx")
         self.cpp_info.set_property("cmake_target_name", "KTX::ktx")
-        # TODO: back to root level in conan v2
         self.cpp_info.components["libktx"].libs = ["ktx"]
         self.cpp_info.components["libktx"].defines = [
             "KTX_FEATURE_KTX1", "KTX_FEATURE_KTX2", "KTX_FEATURE_WRITE"
@@ -117,14 +125,7 @@ class KtxConan(ConanFile):
         elif self.settings.os == "Linux":
             self.cpp_info.components["libktx"].system_libs.extend(["m", "dl", "pthread"])
 
-        # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "Ktx"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Ktx"
-        self.cpp_info.names["cmake_find_package"] = "KTX"
-        self.cpp_info.names["cmake_find_package_multi"] = "KTX"
-        self.cpp_info.components["libktx"].names["cmake_find_package"] = "ktx"
-        self.cpp_info.components["libktx"].names["cmake_find_package_multi"] = "ktx"
         self.cpp_info.components["libktx"].set_property("cmake_target_name", "KTX::ktx")
-        self.cpp_info.components["libktx"].requires = ["lodepng::lodepng", "zstd::zstd"]
+        self.cpp_info.components["libktx"].requires = ["zstd::zstd"]
         if self.options.tools:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.cpp_info.components["libktx"].requires.append("fmt::fmt")

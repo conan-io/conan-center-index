@@ -2,38 +2,36 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2"
 
 
 class GeosConan(ConanFile):
     name = "geos"
-    description = "C++11 library for performing operations on two-dimensional vector geometries"
+    description = "GEOS is a C++ library for performing operations on two-dimensional vector geometries."
     license = "LGPL-2.1"
-    topics = ("osgeo", "geometry", "topology", "geospatial")
-    homepage = "https://trac.osgeo.org/geos"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://libgeos.org/"
+    topics = ("osgeo", "geometry", "topology", "geospatial")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "inline": [True, False],
         "utils": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "inline": True,
         "utils": True,
     }
 
     @property
     def _min_cppstd(self):
-        return "14" if Version(self.version) >= "3.12.0" else "11"
+        return "17" if Version(self.version) >= "3.14.0" else "14"
 
     @property
     def _compilers_minimum_version(self):
@@ -47,18 +45,9 @@ class GeosConan(ConanFile):
             },
         }.get(self._min_cppstd, {})
 
-    @property
-    def _has_inline_option(self):
-        return Version(self.version) < "3.11.0"
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_inline_option:
-            del self.options.inline
 
     def configure(self):
         if self.options.shared:
@@ -81,23 +70,23 @@ class GeosConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "3.11.0":
-            # these 2 options are declared before project() in geos < 3.11.0
-            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-            tc.cache_variables["BUILD_BENCHMARKS"] = False
-        else:
-            tc.variables["BUILD_BENCHMARKS"] = False
-            tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
-        if self._has_inline_option:
-            tc.variables["DISABLE_GEOS_INLINE"] = not self.options.inline
+        tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
+
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["BUILD_ASTYLE"] = False
         tc.variables["BUILD_GEOSOP"] = self.options.utils
         tc.generate()
 
+    def _patch_sources(self):
+        # Avoid setting CMAKE_BUILD_TYPE default when multi-config generators are used.
+        # https://github.com/libgeos/geos/pull/945
+        if Version(self.version) <= "3.12.1":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "set(CMAKE_BUILD_TYPE ${DEFAULT_BUILD_TYPE})", "")
+
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

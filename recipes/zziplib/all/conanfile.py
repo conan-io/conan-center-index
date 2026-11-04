@@ -1,11 +1,12 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class ZziplibConan(ConanFile):
@@ -17,6 +18,7 @@ class ZziplibConan(ConanFile):
     license = "GPL-2.0-or-later"
 
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -51,13 +53,25 @@ class ZziplibConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
 
+    def validate(self):
+        # Old versions do not support llvm >= 15
+        if (Version(self.version) < "0.13.78"
+                and self.settings.compiler in ("clang", "apple-clang")
+                and Version(self.settings.compiler.version) >= "15.0"):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.compiler} >= 15 due to incompatible pointer to integer conversion errors")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        # Older versions had BUILD_STATIC_LIBS option, new ones only have BUILD_SHARED_LIBS
+        if Version(self.version) < "0.13.78":
+            tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        else:
+            # Disable sanitizer for newer versions
+            tc.variables["FORTIFY"] = False
         tc.variables["ZZIPCOMPAT"] = self.settings.os != "Windows"
         tc.variables["ZZIPMMAPPED"] = self.options.zzipmapped
         tc.variables["ZZIPFSEEKO"] = self.options.zzipfseeko
@@ -85,6 +99,7 @@ class ZziplibConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "zziplib-all-do-not-use")
@@ -112,7 +127,7 @@ class ZziplibConan(ConanFile):
             if Version(self.version) >= "0.13.72" and self.options.shared and is_apple_os(self):
                 self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko"]
             else:
-                self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]            
+                self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]
             self.cpp_info.components["zzipfseeko"].requires = ["zlib::zlib"]
         # libzzipwrap
         if self.options.zzipwrap:

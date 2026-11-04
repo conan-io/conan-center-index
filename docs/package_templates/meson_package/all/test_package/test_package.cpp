@@ -1,16 +1,19 @@
 #include <cstdlib>
-#include <iostream>
 #include "package/foobar.hpp"
 
 
 int main(void) {
     /*
-     * Create a minimal usage for the target project here.
-     * Avoid big examples, bigger than 100 lines.
-     * Avoid networking connections.
-     * Avoid background apps or servers.
-     * The propose is testing the generated artifacts only.
-     */
+     * TODO: Remove this comment before pushing the testing code;
+     *
+     * Create a minimal usage for the target project here;
+     * Avoid upstream full examples, or code bigger than 15 lines;
+     * Avoid networking connections;
+     * Avoid background apps or servers;
+     * Avoid GUI apps;
+     * Avoid extra files like images, sounds and other binaries;
+     * The propose is testing the generated artifacts ONLY;
+    */
 
     foobar.print_version();
 

@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 44c7299..7421f49 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -202,6 +202,10 @@ if (BUILD_BASE64URL)
+     target_link_libraries(base64url PRIVATE ${orcania_lib})
+     install(TARGETS base64url RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+     install(FILES ${BASE64URL_DIR}/base64url.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1 COMPONENT runtime)
++    if(MSVC)
++        find_package(getopt-for-visual-studio REQUIRED)
++        target_link_libraries(base64url PRIVATE getopt-for-visual-studio::getopt-for-visual-studio)
++    endif()
+ endif ()
+ 
+ # tests

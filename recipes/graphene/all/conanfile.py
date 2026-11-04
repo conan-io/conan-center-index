@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -51,7 +51,7 @@ class GrapheneConan(ConanFile):
 
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.77.0")
+            self.requires("glib/[^2.78]")
 
     def validate(self):
         if self.settings.compiler == "gcc":
@@ -70,9 +70,9 @@ class GrapheneConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/[>=1.3.1 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False):
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/[>=2.1 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -91,13 +91,18 @@ class GrapheneConan(ConanFile):
             "gtk_doc": "false",
         })
         meson.project_options["gobject_types"] = "true" if self.options.with_glib else "false"
-        if Version(self.version) < "1.10.4":
-            meson.project_options["introspection"] = "false"
-        else:
-            meson.project_options["introspection"] = "disabled"
+        meson.project_options["introspection"] = "disabled"
         meson.generate()
 
+    def _patch_sources(self):
+        # The finite-math-only optimization has no effect and can cause linking errors
+        # when linked against glibc >= 2.31
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                        "'-ffast-math'",
+                        "'-ffast-math', '-fno-finite-math-only'")
+
     def build(self):
+        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -111,10 +116,23 @@ class GrapheneConan(ConanFile):
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
 
+    @property
+    def _pkgconfig_custom_content(self) -> dict:
+        # INFO: these definitions are extracted from meson.build:
+        # https://github.com/ebassi/graphene/blob/1.10.8/meson.build?#L409
+        # https://github.com/ebassi/graphene/blob/1.10.8/meson.build?#L359
+        # https://github.com/ebassi/graphene/blob/1.10.8/meson.build?#L294
+        return {"graphene_has_gcc": 1 if self.settings.compiler == "gcc" else 0,
+                "graphene_has_sse2": 1 if str(self.settings.arch) in ["x86", "x86_64"] else 0,
+                "graphene_has_neon": 1 if str(self.settings.arch).startswith("arm") else 0,
+                "graphene_has_scalar": 1}
+
     def package_info(self):
         self.cpp_info.components["graphene-1.0"].set_property("pkg_config_name", "graphene-1.0")
         self.cpp_info.components["graphene-1.0"].libs = ["graphene-1.0"]
         self.cpp_info.components["graphene-1.0"].includedirs = [os.path.join("include", "graphene-1.0"), os.path.join("lib", "graphene-1.0", "include")]
+        self.cpp_info.components["graphene-1.0"].set_property("pkg_config_custom_content", self._pkgconfig_custom_content)
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["graphene-1.0"].system_libs = ["m", "pthread"]
         if self.options.with_glib:
@@ -124,6 +142,8 @@ class GrapheneConan(ConanFile):
             self.cpp_info.components["graphene-gobject-1.0"].set_property("pkg_config_name","graphene-gobject-1.0")
             self.cpp_info.components["graphene-gobject-1.0"].includedirs = [os.path.join("include", "graphene-1.0")]
             self.cpp_info.components["graphene-gobject-1.0"].requires = ["graphene-1.0", "glib::gobject-2.0"]
+            self.cpp_info.components["graphene-gobject-1.0"].set_property("pkg_config_custom_content", self._pkgconfig_custom_content)
+
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""

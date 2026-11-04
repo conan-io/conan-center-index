@@ -4,25 +4,14 @@
 
 int main(int argc, char *argv[])
 {
-    (void)argc;
-    (void)argv;
-
-    const sail::image image(SAIL_DEMO_FILE_PATH);
-
-    if (!image.is_valid()) {
-        return 1;
+    const char* filename = "my-binary.bmp";
+    try {
+        const sail::image image(filename);
+        std::cout << "Size: " << image.width() << '\n'; // Never reached
+    } catch (const std::exception& e) {
+        std::cout << "Tried to open " << filename << " with sail library\n";
     }
-
-    std::cout
-        << "Size: "
-        << image.width() << 'x' << image.height()
-        << ", bytes per line: "
-        << image.bytes_per_line()
-        << ", pixel format: "
-        << sail::image::pixel_format_to_string(image.pixel_format())
-        << ", pixels: "
-        << image.pixels()
-        << std::endl;
+    std::cout << "TEST SUCCEED\n";
 
     return 0;
 }

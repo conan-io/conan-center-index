@@ -3,7 +3,7 @@
 #include <iostream>
 
 int main() {
-  
+
   osi3::SensorData d;
   // Version
   d.mutable_version()->set_version_major(3);

@@ -1,4 +1,8 @@
 sources:
+  "1.2.0":
+    url:
+      - "https://github.com/gegles/spdlog_setup/archive/v1.2.0.tar.gz"
+    sha256: "f202bba9e9b9a10dc7b60ac09fc8781f1f41216b1f4eb8c8e84f61360973a4c1"
   "1.1.0":
     url:
       - "https://github.com/gegles/spdlog_setup/archive/v1.1.0.tar.gz"

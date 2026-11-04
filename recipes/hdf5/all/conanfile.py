@@ -1,14 +1,15 @@
+import glob
 import os
 import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run, check_min_cppstd, valid_min_cppstd
+from conan.tools.build import cross_building, check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class Hdf5Conan(ConanFile):
@@ -16,7 +17,7 @@ class Hdf5Conan(ConanFile):
     description = "HDF5 is a data model, library, and file format for storing and managing data."
     license = "BSD-3-Clause"
     topics = "hdf", "data"
-    homepage = "https://portal.hdfgroup.org/display/HDF5/HDF5"
+    homepage = "https://www.hdfgroup.org/solutions/hdf5/"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -27,6 +28,7 @@ class Hdf5Conan(ConanFile):
         "hl": [True, False],
         "threadsafe": [True, False],
         "with_zlib": [True, False],
+        "with_zlibng": [True, False],
         "szip_support": [None, "with_libaec", "with_szip"],
         "szip_encoding": [True, False],
         "parallel": [True, False],
@@ -39,17 +41,12 @@ class Hdf5Conan(ConanFile):
         "hl": True,
         "threadsafe": False,
         "with_zlib": True,
+        "with_zlibng": False,
         "szip_support": None,
         "szip_encoding": False,
         "parallel": False,
         "enable_unsupported": False
     }
-
-    @property
-    def _min_cppstd(self):
-        if Version(self.version) < "1.14.0":
-            return "98"
-        return "11"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -76,17 +73,16 @@ class Hdf5Conan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_zlibng:
+            self.requires("zlib-ng/2.2.2")
         if self.options.szip_support == "with_libaec":
             self.requires("libaec/1.0.6")
         elif self.options.szip_support == "with_szip":
             self.requires("szip/2.1.1")
         if self.options.parallel:
-            self.requires("openmpi/4.1.0")
+            self.requires("openmpi/[>=4.1.0 <5]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if not can_run(self):
-            # While building it runs some executables like H5detect
-            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
         if self.options.parallel and not self.options.enable_unsupported:
             if self.options.enable_cxx:
                 raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive, forcefully allow with enable_unsupported=True")
@@ -96,57 +92,53 @@ class Hdf5Conan(ConanFile):
                 self.options.szip_encoding and \
                 not self.dependencies["szip"].options.enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        if self.options.with_zlib and self.options.get_safe("with_zlibng"):
+            raise ConanInvalidConfiguration("with_zlib and with_zlibng cannot be enabled at the same time")
+        if self.options.get_safe("with_zlibng") and Version(self.version) < "1.14.5":
+            raise ConanInvalidConfiguration("with_zlibng=True is incompatible with versions prior to v1.14.5")
+        if self.options.enable_cxx:
+            check_min_cppstd(self, "11")
+
+    def validate_build(self):
+        if cross_building(self) and Version(self.version) < "1.14.4.3":
+            # While building it runs some executables like H5detect
+            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
 
     def build_requirements(self):
-        if Version(self.version) >= "1.14.0":
-            self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.26]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def _inject_stdlib_flag(self, tc):
-        if self.settings.os == "Linux" and self.settings.compiler == "clang":
-            cpp_stdlib = f" -stdlib={self.settings.compiler.libcxx}".rstrip("1")  # strip 11 from stdlibc++11
-            tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + cpp_stdlib
-        return tc
 
     def generate(self):
         cmakedeps = CMakeDeps(self)
         cmakedeps.generate()
 
         tc = CMakeToolchain(self)
-        if not valid_min_cppstd(self, self._min_cppstd):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
-        if self.settings.get_safe("compiler.libcxx"):
-            tc = self._inject_stdlib_flag(tc)
         if self.options.szip_support == "with_libaec":
             tc.variables["USE_LIBAEC"] = True
         tc.variables["HDF5_EXTERNALLY_CONFIGURED"] = True
         tc.variables["HDF5_EXTERNAL_LIB_PREFIX"] = ""
         tc.variables["HDF5_USE_FOLDERS"] = False
         tc.variables["HDF5_NO_PACKAGES"] = True
-        tc.variables["ALLOW_UNSUPPORTED"] = False
-        if Version(self.version) >= "1.10.6":
-            tc.variables["ONLY_SHARED_LIBS"] = self.options.shared
+        tc.variables["ALLOW_UNSUPPORTED" if Version(self.version) < "2.0.0" else "HDF5_ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
+        tc.variables["ONLY_SHARED_LIBS" if Version(self.version) < "2.0.0" else "HDF5_ONLY_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["BUILD_STATIC_EXECS"] = False
         tc.variables["HDF5_ENABLE_COVERAGE"] = False
         tc.variables["HDF5_ENABLE_USING_MEMCHECKER"] = False
-        if Version(self.version) >= "1.10.0":
-            tc.variables["HDF5_MEMORY_ALLOC_SANITY_CHECK"] = False
-        if Version(self.version) >= "1.10.5":
-            tc.variables["HDF5_ENABLE_PREADWRITE"] = True
+        tc.variables["HDF5_MEMORY_ALLOC_SANITY_CHECK"] = False
+        tc.variables["HDF5_ENABLE_PREADWRITE"] = True
         tc.variables["HDF5_ENABLE_DEPRECATED_SYMBOLS"] = True
         tc.variables["HDF5_BUILD_GENERATORS"] = False
         tc.variables["HDF5_ENABLE_TRACE"] = False
         if self.settings.build_type == "Debug":
             tc.variables["HDF5_ENABLE_INSTRUMENT"] = False  # Option?
         tc.variables["HDF5_ENABLE_PARALLEL"] = self.options.parallel
-        tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
+        tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT" if Version(self.version) < "2.0.0" else "HDF5_ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
         tc.variables["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
         tc.variables["HDF5_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding", False)
+        tc.variables["HDF5_USE_ZLIB_NG"] = self.options.get_safe("with_zlibng", False)
         tc.variables["HDF5_PACKAGE_EXTLIBS"] = False
         tc.variables["HDF5_ENABLE_THREADSAFE"] = self.options.get_safe("threadsafe", False)
         tc.variables["HDF5_ENABLE_DEBUG_APIS"] = False # Option?
@@ -159,9 +151,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_HL_LIB"] = self.options.hl
         tc.variables["HDF5_BUILD_FORTRAN"] = False
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
-        if Version(self.version) >= "1.10.0":
-            tc.variables["HDF5_BUILD_JAVA"] = False
-        tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
+        tc.variables["HDF5_BUILD_JAVA"] = False
         tc.generate()
 
     def build(self):
@@ -225,7 +215,7 @@ class Hdf5Conan(ConanFile):
                             f"conan-official-{self.name}-variables.cmake")
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING" if Version(self.version) < "2.0.0" else "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         cmake = CMake(self)
         cmake.install()
@@ -235,7 +225,9 @@ class Hdf5Conan(ConanFile):
 
         # remove extra libs... building 1.8.21 as shared also outputs static libs on Linux.
         if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
+                if not lib.endswith(".dll.a"):
+                    os.remove(lib)
 
         # Mimic the official CMake FindHDF5 targets. HDF5::HDF5 refers to the global target as per conan,
         # but component targets have a lower case namespace prefix. hdf5::hdf5 refers to the C library only
@@ -254,7 +246,7 @@ class Hdf5Conan(ConanFile):
             def _config_libname(lib):
                 if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
                     lib = "lib" + lib
-                if self.settings.build_type == "Debug":
+                if self.settings.build_type == "Debug" and Version(self.version) < "2.0.0":
                     debug_postfix = "_D" if self.settings.os == "Windows" else "_debug"
                     return lib + debug_postfix
                 # See config/cmake_ext_mod/HDFMacros.cmake
@@ -281,10 +273,12 @@ class Hdf5Conan(ConanFile):
         components = self._components()
         add_component("hdf5_c", **components["hdf5_c"])
         self.cpp_info.components["hdf5_c"].includedirs.append(os.path.join("include", "hdf5"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["hdf5_c"].system_libs.extend(["dl", "m"])
             if self.options.get_safe("threadsafe"):
                 self.cpp_info.components["hdf5_c"].system_libs.append("pthread")
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["hdf5_c"].system_libs.append("Shlwapi")
 
         if self.options.shared:
             self.cpp_info.components["hdf5_c"].defines.append("H5_BUILT_AS_DYNAMIC_LIB")

@@ -1,21 +1,19 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibxlsxwriterConan(ConanFile):
     name = "libxlsxwriter"
+    description = "A C library for creating Excel XLSX files"
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jmcnamara/libxlsxwriter"
     topics = ("excel", "xlsx")
-    description = "A C library for creating Excel XLSX files"
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -60,13 +58,11 @@ class LibxlsxwriterConan(ConanFile):
         if self.options.md5 == "openssl":
             self.requires("openssl/[>=1.1 <4]")
 
-    def validate(self):
-        if Version(self.version) < "1.0.6" and self.info.options.md5 == "openssl":
-            raise ConanInvalidConfiguration(f"{self.name}:md5=openssl is not suppported in {self.ref}")
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -75,14 +71,14 @@ class LibxlsxwriterConan(ConanFile):
         tc.variables["USE_SYSTEM_MINIZIP"] = True
         tc.variables["USE_STANDARD_TMPFILE"] = self.options.tmpfile
         tc.variables["USE_NO_MD5"] = not bool(self.options.md5)
-        if Version(self.version) >= "1.0.6":
-            tc.variables["USE_OPENSSL_MD5"] = self.options.md5 == "openssl"
+        tc.variables["USE_OPENSSL_MD5"] = self.options.md5 == "openssl"
         tc.variables["USE_FMEMOPEN"] = self.options.get_safe("fmemopen", False)
         tc.variables["USE_DTOA_LIBRARY"] = self.options.dtoa
         if is_msvc(self):
             tc.variables["USE_STATIC_MSVC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("minizip", "cmake_additional_variables_prefixes", ["MINIZIP"])
         deps.generate()
 
     def build(self):

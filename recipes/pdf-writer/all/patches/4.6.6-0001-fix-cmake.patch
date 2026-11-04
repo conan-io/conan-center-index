@@ -1,0 +1,32 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 956c730..a7d809b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -165,13 +165,13 @@ if(PROJECT_IS_TOP_LEVEL AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PDFWriterTesting)
+     ADD_SUBDIRECTORY(PDFWriterTesting)
+ endif()
+ 
+-include(InstallRequiredSystemLibraries)
+-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+-set(CPACK_PACKAGE_VERSION_MAJOR "${PDFHummus_VERSION_MAJOR}")
+-set(CPACK_PACKAGE_VERSION_MINOR "${PDFHummus_VERSION_MINOR}")
+-set(CPACK_SOURCE_GENERATOR "ZIP")
+-set(CPACK_GENERATOR "ZIP")
+-include(CPack)
++# include(InstallRequiredSystemLibraries)
++# set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
++# set(CPACK_PACKAGE_VERSION_MAJOR "${PDFHummus_VERSION_MAJOR}")
++# set(CPACK_PACKAGE_VERSION_MINOR "${PDFHummus_VERSION_MINOR}")
++# set(CPACK_SOURCE_GENERATOR "ZIP")
++# set(CPACK_GENERATOR "ZIP")
++# include(CPack)
+ 
+ install(EXPORT PDFHummusTargets
+   FILE PDFHummusTargets.cmake
+@@ -200,4 +200,4 @@ install(FILES
+ export(EXPORT PDFHummusTargets
+   FILE "${CMAKE_CURRENT_BINARY_DIR}/PDFHummusTargets.cmake"
+   NAMESPACE PDFHummus::
+-)
+\ No newline at end of file
++)

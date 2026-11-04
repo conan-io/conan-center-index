@@ -1,0 +1,9 @@
+sources:
+  "1.7":
+    url: "https://github.com/ebu/bmx/releases/download/v1.7/bmx-1.7.tar.gz"
+    sha256: "448242a31c77517a472eab8aa05bbe98d6c50814d7990d17696444c0564bfb34"
+patches:
+  "1.7":
+   - patch_file: "patches/1.7-cmake-fixes.patch"
+     patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+     patch_type: "conan"

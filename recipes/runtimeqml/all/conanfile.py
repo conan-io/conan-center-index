@@ -41,8 +41,7 @@ class RuntimeQml(ConanFile):
         }
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder,
-             self.export_sources_folder)
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,19 +49,16 @@ class RuntimeQml(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if Version(self.version) <= "cci.20211220":
-            self.requires("qt/5.15.5")
+            self.requires("qt/5.15.13")
         else:
-            self.requires("qt/6.3.1")
+            self.requires("qt/6.6.2")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -81,8 +77,7 @@ class RuntimeQml(ConanFile):
                 f"{self.ref} requires option qt:qtdeclarative=True")
 
     def source(self):
-        get(self, **self.conan_data["sources"][str(self.version)],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

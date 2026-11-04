@@ -1,0 +1,22 @@
+From ac0e9f4f633ad8bfc1378db8954af4f1f88c1f4f Mon Sep 17 00:00:00 2001
+From: Denis Pershin <dyp@perchine.com>
+Date: Tue, 9 Nov 2021 19:36:50 +0700
+Subject: [PATCH] Fix compilation on gcc 11.2 (#67)
+
+Add include memory for standard smart pointer
+---
+ djinni/cwrapper/wrapper_marshal.hpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/djinni/cwrapper/wrapper_marshal.hpp b/djinni/cwrapper/wrapper_marshal.hpp
+index 75a75d1..6d6a7cc 100644
+--- a/djinni/cwrapper/wrapper_marshal.hpp
++++ b/djinni/cwrapper/wrapper_marshal.hpp
+@@ -9,6 +9,7 @@
+ #include <thread>
+ #include <assert.h>
+ #include <optional>
++#include <memory>
+ 
+ #ifdef __cplusplus
+ extern "C" {

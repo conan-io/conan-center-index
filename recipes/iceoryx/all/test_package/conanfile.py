@@ -1,9 +1,19 @@
 import os
-from conans import ConanFile, CMake
 
-class IceoryxTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = ["cmake", "cmake_find_package_multi"]
+from conan import ConanFile
+from conan.tools.cmake import cmake_layout, CMake
+
+
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
@@ -17,5 +27,5 @@ class IceoryxTestConan(ConanFile):
         # a bad idea (checked on 3 different linux devices
         # always ok - but in container get
         # "fatal SIGBUS signal appeared caused by memset")
-        path, dirs, files = next(os.walk("bin"))
-        print("All %d example files are present" % (len(files)))
+        path, dirs, files = next(os.walk(self.cpp.build.bindir))
+        print(f"All {len(files)} example files are present")

@@ -1,0 +1,71 @@
+Keep backward compatibility with OpenEXR 2.x
+Adapt to include replaced header in OpenEXR 3.x
+Read OpenEXRConfig.h which contains OpenEXR version
+
+Imath project deprecated Imath::Int64 in favor of uint64_t:
+https://github.com/AcademySoftwareFoundation/Imath/blob/v3.2.2/src/Imath/ImathInt64.h#L30
+
+diff --git a/Source/FreeImage/PluginEXR.cpp b/Source/FreeImage/PluginEXR.cpp
+index 9bf3ada..022c86b 100644
+--- a/Source/FreeImage/PluginEXR.cpp
++++ b/Source/FreeImage/PluginEXR.cpp
+@@ -37,7 +37,12 @@
+ #include <OpenEXR/ImfRgba.h>
+ #include <OpenEXR/ImfArray.h>
+ #include <OpenEXR/ImfPreviewImage.h>
+-#include <OpenEXR/half.h>
++#include <OpenEXR/OpenEXRConfig.h>
++#if OPENEXR_VERSION_MAJOR >= 3
++#	include <Imath/half.h>
++#else
++#	include <OpenEXR/half.h>
++#endif
+
+
+ // ==========================================================
+@@ -66,11 +71,11 @@ public:
+ 		return ((unsigned)n != _io->read_proc(c, 1, n, _handle));
+ 	}
+
+-	virtual Imath::Int64 tellg() {
++	virtual uint64_t tellg() {
+ 		return _io->tell_proc(_handle);
+ 	}
+
+-	virtual void seekg(Imath::Int64 pos) {
++	virtual void seekg(uint64_t pos) {
+ 		_io->seek_proc(_handle, (unsigned)pos, SEEK_SET);
+ 	}
+
+@@ -100,11 +105,11 @@ public:
+ 		}
+ 	}
+
+-	virtual Imath::Int64 tellp() {
++	virtual uint64_t tellp() {
+ 		return _io->tell_proc(_handle);
+ 	}
+
+-	virtual void seekp(Imath::Int64 pos) {
++	virtual void seekp(uint64_t pos) {
+ 		_io->seek_proc(_handle, (unsigned)pos, SEEK_SET);
+ 	}
+ };
+diff --git a/Source/FreeImage/PluginTIFF.cpp b/Source/FreeImage/PluginTIFF.cpp
+index ef257a4..a34e9bf 100644
+--- a/Source/FreeImage/PluginTIFF.cpp
++++ b/Source/FreeImage/PluginTIFF.cpp
+@@ -39,7 +39,12 @@
+ #include "Utilities.h"
+ #include <tiffio.h>
+ #include "../Metadata/FreeImageTag.h"
+-#include <OpenEXR/half.h>
++#include <OpenEXR/OpenEXRConfig.h>
++#if OPENEXR_VERSION_MAJOR >= 3
++#	include <Imath/half.h>
++#else
++#	include <OpenEXR/half.h>
++#endif
+
+ #include "FreeImageIO.h"
+ #include "PSDParser.h"

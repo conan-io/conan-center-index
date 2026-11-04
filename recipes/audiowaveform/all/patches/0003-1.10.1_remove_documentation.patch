@@ -1,0 +1,34 @@
+Remove documentation target
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -314,6 +314,7 @@ endif()
+ #
+ #-------------------------------------------------------------------------------
+ 
++if(0)
+ file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/doc)
+ 
+ add_custom_command(
+@@ -334,6 +335,7 @@ add_custom_target(doc
+ )
+ 
+ add_dependencies(audiowaveform doc)
++endif()
+ 
+ #-------------------------------------------------------------------------------
+ #
+@@ -347,6 +349,7 @@ message(STATUS "CMAKE_INSTALL_PREFIX='${CMAKE_INSTALL_PREFIX}'")
+ install(TARGETS audiowaveform DESTINATION bin)
+ 
+ # Install man pages
++if(0)
+ install(
+     FILES ${PROJECT_BINARY_DIR}/doc/audiowaveform.1.gz
+     DESTINATION share/man/man1
+@@ -356,5 +359,6 @@ install(
+     FILES ${PROJECT_BINARY_DIR}/doc/audiowaveform.5.gz
+     DESTINATION share/man/man5
+ )
++endif()
+ 
+ #-------------------------------------------------------------------------------

@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 893328e..7d907ad 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -137,7 +137,7 @@ set(shp_VERSION ${PROJECT_VERSION})
+ set_target_properties(${PACKAGE} PROPERTIES
+   SOVERSION ${shp_SOVERSION}
+   VERSION ${shp_VERSION}
+-  INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
++#  INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
+ )
+ 
+ if(USE_RPATH)

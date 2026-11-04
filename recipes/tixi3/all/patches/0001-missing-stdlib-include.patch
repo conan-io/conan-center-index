@@ -1,0 +1,88 @@
+From 53b324c41133ac72b36f2bcda0b75c2bf2f3bff0 Mon Sep 17 00:00:00 2001
+From: mayeut <mayeut@users.noreply.github.com>
+Date: Sat, 20 Apr 2024 13:10:18 +0200
+Subject: [PATCH] fix issues with latest version of libxml2
+
+---
+ src/tixiImpl.c       | 1 +
+ src/tixiInternal.c   | 2 +-
+ src/tixiUtils.c      | 1 +
+ src/uidHelper.c      | 1 +
+ src/webMethods.c     | 2 ++
+ src/xpathFunctions.c | 1 +
+ 6 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/tixiImpl.c b/src/tixiImpl.c
+index f9e08b9..aa306d1 100644
+--- a/src/tixiImpl.c
++++ b/src/tixiImpl.c
+@@ -27,6 +27,7 @@
+ #include <stdio.h>
+ #include <time.h>
+ #include <math.h>
++#include <stdlib.h>
+ 
+ #include "libxml/parser.h"
+ #include "libxml/xpath.h"
+diff --git a/src/tixiInternal.c b/src/tixiInternal.c
+index 5bf0712..b399b4d 100644
+--- a/src/tixiInternal.c
++++ b/src/tixiInternal.c
+@@ -46,7 +46,7 @@
+ 
+ extern void printMsg(MessageType type, const char* message, ...);
+ 
+-void xmlStructuredErrorHandler(void * userData, xmlErrorPtr error) {
++void xmlStructuredErrorHandler(void * userData, xmlError const* error) {
+   printMsg(MESSAGETYPE_ERROR, "%s:%i: %s", error->file, error->line, error->message);
+ }
+ 
+diff --git a/src/tixiUtils.c b/src/tixiUtils.c
+index 834be5d..bd42fc8 100644
+--- a/src/tixiUtils.c
++++ b/src/tixiUtils.c
+@@ -32,6 +32,7 @@
+   #include <sys/stat.h>
+   #include <unistd.h>
+ #endif
++#include <stdlib.h>
+ 
+ extern void printMsg(MessageType type, const char* message, ...);
+ 
+diff --git a/src/uidHelper.c b/src/uidHelper.c
+index 9c7a7bd..841774d 100644
+--- a/src/uidHelper.c
++++ b/src/uidHelper.c
+@@ -17,6 +17,7 @@
+ */
+ #include "uidHelper.h"
+ #include "tixiInternal.h"
++#include <stdlib.h>
+ 
+ extern void printMsg(MessageType type, const char* message, ...);
+ 
+diff --git a/src/webMethods.c b/src/webMethods.c
+index f8372e9..16e6411 100644
+--- a/src/webMethods.c
++++ b/src/webMethods.c
+@@ -25,6 +25,8 @@
+ #include <curl/curl.h>
+ #include <curl/easy.h>
+ 
++#include <stdlib.h>
++
+ extern void printMsg(MessageType type, const char* message, ...);
+ 
+ void* myrealloc(void* ptr, size_t size)
+diff --git a/src/xpathFunctions.c b/src/xpathFunctions.c
+index 25442f6..69ce60e 100644
+--- a/src/xpathFunctions.c
++++ b/src/xpathFunctions.c
+@@ -21,6 +21,7 @@
+ #include "libxml/xpathInternals.h"
+ 
+ #include <assert.h>
++#include <stdlib.h>
+ 
+ extern void printMsg(MessageType type, const char* message, ...);
+ 

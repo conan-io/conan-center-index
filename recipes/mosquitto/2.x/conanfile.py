@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -12,11 +12,12 @@ required_conan_version = ">=1.53.0"
 
 class Mosquitto(ConanFile):
     name = "mosquitto"
+    description = """Eclipse Mosquitto MQTT library, broker and more"""
     license = "EPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://mosquitto.org"
-    description = """Eclipse Mosquitto MQTT library, broker and more"""
     topics = ("MQTT", "IoT", "eclipse")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,7 +43,6 @@ class Mosquitto(ConanFile):
         "websockets": False,
         "threading": True,
     }
-    generators = "CMakeDeps"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -66,14 +66,25 @@ class Mosquitto(ConanFile):
         if self.options.ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("cjson"):
-            self.requires("cjson/1.7.14")
+            self.requires("cjson/1.7.16")
         if self.options.get_safe("websockets"):
-            self.requires("libwebsockets/4.2.0")
+            self.requires("libwebsockets/4.3.2")
+        if self.options.get_safe("threading") and self.settings.os == "Windows" and Version(self.version) >= "2.0.21":
+            self.requires("pthreads4w/3.0.0")
+
+    def build_requirements(self):
+        # cmake_minimum_version is 3.18 in CMakeLists.txt for mosquitto >= 2.0.21
+        self.tool_requires("cmake/[>=3.18 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        deps = CMakeDeps(self)
+        if self.options.get_safe("threading") and self.settings.os == "Windows" and Version(self.version) >= "2.0.21":
+            deps.set_property("pthreads4w", "cmake_target_aliases", ["PThreads4W::PThreads4W"])
+        deps.generate()
+
         tc = CMakeToolchain(self)
         tc.variables["WITH_STATIC_LIBRARIES"] = not self.options.shared
         tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", True)
@@ -87,7 +98,11 @@ class Mosquitto(ConanFile):
         tc.variables["WITH_APPS"] = self.options.apps
         tc.variables["WITH_PLUGINS"] = False
         tc.variables["WITH_LIB_CPP"] = self.options.build_cpp
-        tc.variables["WITH_THREADING"] = not is_msvc(self) and self.options.threading
+        if self.settings.os == "Windows" and Version(self.version) < "2.0.21":
+            # Threading not supported by recipe before 2.0.21
+            tc.variables["WITH_THREADING"] = False
+        else:
+            tc.variables["WITH_THREADING"] = self.options.threading
         tc.variables["WITH_WEBSOCKETS"] = self.options.get_safe("websockets", False)
         tc.variables["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.dependencies["libwebsockets"].options.shared
         tc.variables["DOCUMENTATION"] = False
@@ -135,6 +150,8 @@ class Mosquitto(ConanFile):
             self.cpp_info.components["libmosquitto"].system_libs = ["pthread", "m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["libmosquitto"].system_libs = ["ws2_32"]
+            if self.options.get_safe("threading") and Version(self.version) >= "2.0.21":        
+                self.cpp_info.components["libmosquitto"].requires.append("pthreads4w::pthreads4w")
 
         if self.options.build_cpp:
             self.cpp_info.components["libmosquittopp"].set_property("pkg_config_name", "libmosquittopp")
@@ -163,9 +180,3 @@ class Mosquitto(ConanFile):
                 self.cpp_info.components[option_comp_name].requires = ["openssl::openssl", "libmosquitto"]
                 if self.options.cjson:
                     self.cpp_info.components[option_comp_name].requires.append("cjson::cjson")
-
-        # TODO: to remove in conan v2
-        if self.options.broker or self.options.get_safe("apps") or self.options.get_safe("clients"):
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH env var with : {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)

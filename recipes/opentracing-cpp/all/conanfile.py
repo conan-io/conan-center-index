@@ -29,6 +29,7 @@ class OpenTracingConan(ConanFile):
         "enable_mocktracer": False,
         "enable_dynamic_load": False,
     }
+    deprecated = "upstream deprecated. See https://github.com/opentracing/specification/issues/163"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -59,6 +60,7 @@ class OpenTracingConan(ConanFile):
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["BUILD_TESTING"] = False
         tc.variables["ENABLE_LINTING"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
     def build(self):

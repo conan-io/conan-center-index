@@ -141,20 +141,17 @@ dependencies:
   - date_time
   - exception
   - system
-  timer:
-  - chrono
-  - system
+  timer: []
   type_erasure:
   - thread
   unit_test_framework:
-  - prg_exec_monitor
   - test
-  - test_exec_monitor
   url:
   - system
   wave:
   - filesystem
   - serialization
+  - thread
   wserialization:
   - serialization
 libs:

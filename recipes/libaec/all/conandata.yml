@@ -1,22 +1,11 @@
 sources:
+  "1.1.4":
+    url: "https://github.com/Deutsches-Klimarechenzentrum/libaec/releases/download/v1.1.4/libaec-1.1.4.tar.gz"
+    sha256: "1b9f3b913d9111469a83820ab62bb6a9f3ec7a5f9b6d681761776aecbc7fefbe"
+  "1.1.2":
+    url: "https://github.com/Deutsches-Klimarechenzentrum/libaec/releases/download/v1.1.2/libaec-1.1.2.tar.gz"
+    sha256: "a5d03a242468014b92b1b196de397f1e9a7927782db1a0423ea01db78421e373"
+  # Using the tag URL as it points to a later commit that fixes the lib names
   "1.0.6":
-    url: "https://gitlab.dkrz.de/k202009/libaec/uploads/45b10e42123edd26ab7b3ad92bcf7be2/libaec-1.0.6.tar.gz"
-    sha256: "032961877231113bb094ef224085e6d66fd670f85a3e17f53d0f131abf24f2fd"
-  "1.0.4":
-    url: "https://gitlab.dkrz.de/k202009/libaec/uploads/ea0b7d197a950b0c110da8dfdecbb71f/libaec-1.0.4.tar.gz"
-    sha256: "f2b1b232083bd8beaf8a54a024225de3dd72a673a9bcdf8c3ba96c39483f4309"
-patches:
-  "1.0.4":
-    - patch_file: "patches/1.0.4-0001-Fix-static-library-builds.patch"
-      patch_type: "conan"
-      patch_description: "Fix static library builds"
-    - patch_file: "patches/1.0.4-0002-fix-install-ios.patch"
-      patch_type: "conan"
-      patch_description: "Fix install iOS"
-  "1.0.6":
-    - patch_file: "patches/1.0.6-0001-fix-library-builds.patch"
-      patch_type: "conan"
-      patch_description: "Fix library builds"
-    - patch_file: "patches/1.0.6-0002-fix-cmake-build-with-ninja.patch"
-      patch_type: "conan"
-      patch_description: "Ninja needs 'aec' binary to be put in a separate folder to an imaginary 'aec' object output"
+    url: "https://github.com/Deutsches-Klimarechenzentrum/libaec/archive/refs/tags/v1.0.6.tar.gz"
+    sha256: "80b713112798f5c961f13145fb5a5fcb917f50b6bafc7dba489fa939ee0aecd3"

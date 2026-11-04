@@ -1,4 +1,7 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/jfalcou/spy/archive/1.1.0.tar.gz"
+    sha256: "35e15dfe7bebcb03fb28c249d2c2c4ed302dadafbfd5f81e71c31b95d1e3b2dd"
   "1.0.0":
     url: "https://github.com/jfalcou/spy/archive/1.0.0.tar.gz"
     sha256: "ae2f508460b3b21436a652e281e1cf44370da5871a9d13086daa04a9e2bd7d1b"

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(noise LANGUAGES CXX)
 
 set(NOISE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/noise/src)

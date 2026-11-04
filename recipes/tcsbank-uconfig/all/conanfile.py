@@ -1,20 +1,24 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.52.0"
 
 
 class TCSBankUconfigConan(ConanFile):
     name = "tcsbank-uconfig"
     description = "Lightweight, header-only, C++17 configuration library"
-    topics = ("conan", "configuration", "env", "json")
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/TinkoffCreditSystems/uconfig"
     license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Tinkoff/uconfig"
+    topics = ("configuration", "env", "json", "header-only")
 
-    generators = "cmake", "cmake_find_package_multi"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_rapidjson": [True, False],
@@ -22,59 +26,67 @@ class TCSBankUconfigConan(ConanFile):
     default_options = {
         "with_rapidjson": True,
     }
+    no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 17
 
     @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "7.3",
+            "clang": "6.0",
+            "apple-clang": "10.0"
+        }
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_rapidjson:
-            self.requires("rapidjson/1.1.0")
+            self.requires("rapidjson/cci.20220822")
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
-        compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
-
-        min_req_cppstd = "17"
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, min_req_cppstd)
-        else:
-            self.output.warn("%s recipe lacks information about the %s compiler"
-                             " standard version support." % (self.name, compiler))
+            check_min_cppstd(self, self._min_cppstd)
 
-        minimal_version = {
-            "Visual Studio": "16",
-            "gcc": "7.3",
-            "clang": "6.0",
-            "apple-clang": "10.0",
-        }
-        # Exclude not supported compilers
-        if compiler not in minimal_version:
-            self.output.info("%s requires a compiler that supports at least C++%s" % (self.name, min_req_cppstd))
-            return
-        if compiler_version < minimal_version[compiler]:
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler))
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                "%s requires a compiler that supports at least C++%s. %s %s is not supported." %
-                (self.name, min_req_cppstd, compiler, compiler_version))
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.ipp", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        copy(self, "*.h",
+             dst=os.path.join(self.package_folder, "include"),
+             src=os.path.join(self.source_folder, "include"))
+        copy(self, "*.ipp",
+             dst=os.path.join(self.package_folder, "include"),
+             src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "uconfig"
-        self.cpp_info.names["cmake_find_package"] = "uconfig"
-        self.cpp_info.names["cmake_find_package_multi"] = "uconfig"
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        self.cpp_info.set_property("cmake_file_name", "uconfig")
+        self.cpp_info.set_property("cmake_target_name", "uconfig::uconfig")
+        self.cpp_info.set_property("pkg_config_name", "uconfig")
+
         if self.options.with_rapidjson:
             self.cpp_info.defines = ["RAPIDJSON_HAS_STDSTRING=1"]
 
-    def package_id(self):
-        self.info.header_only()
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.names["cmake_find_package"] = "uconfig"
+        self.cpp_info.names["cmake_find_package_multi"] = "uconfig"

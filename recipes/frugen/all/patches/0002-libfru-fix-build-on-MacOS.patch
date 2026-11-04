@@ -1,0 +1,87 @@
+From b31cf1c79730d5f288cd10361a05eb6b01d0698e Mon Sep 17 00:00:00 2001
+From: "Andrei K." <alatarum@gmail.com>
+Date: Sun, 17 Nov 2024 17:29:35 +0400
+Subject: [PATCH] libfru: fix build on MacOS
+
+* remove explicit include of <endian.h>: it should be included in <sys/types.h>
+* redefine endiangs manipulation functions
+* rename uuid_t structure since there is same named type defined on
+  MacOS
+* add type casting for print off_t variable - there is no portable way
+  to pass off_t to printf
+
+Signed-off-by: Andrei K. <alatarum@gmail.com>
+---
+ fru.c    | 21 +++++++++++++++++----
+ frugen.c |  2 +-
+ 2 files changed, 18 insertions(+), 5 deletions(-)
+
+diff --git a/fru.c b/fru.c
+index 01aaef9..c0f79d9 100644
+--- a/fru.c
++++ b/fru.c
+@@ -26,7 +26,20 @@
+ #include "fru-errno.h"
+ 
+ #define _BSD_SOURCE
+-#include <endian.h>
++
++#if defined(__APPLE__)
++#include <libkern/OSByteOrder.h>
++
++#define htobe16(x) OSSwapHostToBigInt16(x)
++#define htole16(x) OSSwapHostToLittleInt16(x)
++#define be16toh(x) OSSwapBigToHostInt16(x)
++#define le16toh(x) OSSwapLittleToHostInt16(x)
++
++#define htobe32(x) OSSwapHostToBigInt32(x)
++#define htole32(x) OSSwapHostToLittleInt32(x)
++#define be32toh(x) OSSwapBigToHostInt32(x)
++#define le32toh(x) OSSwapLittleToHostInt32(x)
++#endif
+ 
+ #ifdef __STANDALONE__
+ #include <stdio.h>
+@@ -1354,7 +1367,7 @@ typedef union __attribute__((packed)) {
+ 		uint8_t clock_seq_low;
+ 		uint8_t node[6];
+ 	};
+-} uuid_t;
++} fru_uuid_t;
+ #pragma pack(pop)
+ 
+ static bool is_mr_rec_valid(fru_mr_rec_t *rec, size_t limit, fru_flags_t flags)
+@@ -1476,7 +1489,7 @@ int fru_mr_mgmt_str2rec(fru_mr_rec_t **rec,
+ int fru_mr_uuid2rec(fru_mr_rec_t **rec, const char *str)
+ {
+ 	size_t len;
+-	uuid_t uuid;
++	fru_uuid_t uuid;
+ 
+ 	if (!str) return -EFAULT;
+ 
+@@ -1531,7 +1544,7 @@ int fru_mr_uuid2rec(fru_mr_rec_t **rec, const char *str)
+ int fru_mr_rec2uuid(char **str, fru_mr_mgmt_rec_t *mgmt, fru_flags_t flags)
+ {
+ 	size_t i;
+-	uuid_t uuid;
++	fru_uuid_t uuid;
+ 
+ 	if (!mgmt || !str) {
+ 		return -EFAULT;
+diff --git a/frugen.c b/frugen.c
+index b0aa76f..36a0c78 100644
+--- a/frugen.c
++++ b/frugen.c
+@@ -314,7 +314,7 @@ void load_from_binary_file(const char *fname,
+ 		fatal("Cannot allocate buffer");
+ 	}
+ 
+-	debug(2, "Reading the template file of size %lu...", statbuf.st_size);
++	debug(2, "Reading the template file of size %ld...", (long) statbuf.st_size);
+ 	if (read(fd, buffer, statbuf.st_size) != statbuf.st_size) {
+ 		fatal("Cannot read file");
+ 	}
+-- 
+2.45.2
+

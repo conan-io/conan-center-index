@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
@@ -13,7 +13,7 @@ import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class CapnprotoConan(ConanFile):
@@ -38,32 +38,12 @@ class CapnprotoConan(ConanFile):
         "with_zlib": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return "14"
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "5" if Version(self.version) < "1.0.0" else "7",
-            "clang": "5",
-            "apple-clang": "5.1",
-        }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.8.0":
-            del self.options.with_zlib
 
     def configure(self):
         if self.options.shared:
@@ -82,26 +62,15 @@ class CapnprotoConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
-            )
+        check_min_cppstd(self, 14)
+
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared libraries for Visual Studio")
-        if self.settings.os == "Windows" and Version(self.version) < "0.8.0" and self.options.with_openssl:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support OpenSSL on Windows pre 0.8.0")
-        # MSVC Release build is not supported in 1.0.0
-        # https://github.com/capnproto/capnproto/issues/1740
-        if Version(self.version) == "1.0.0" and is_msvc(self) and self.settings.build_type == "Release":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC Release build")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
             self.tool_requires("libtool/2.4.7")
-            if self._settings_build.os == "Windows":
+            if self.settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
@@ -116,6 +85,8 @@ class CapnprotoConan(ConanFile):
             tc.variables["EXTERNAL_CAPNP"] = False
             tc.variables["CAPNP_LITE"] = False
             tc.variables["WITH_OPENSSL"] = self.options.with_openssl
+            if Version(self.version) < "2": # pylint: disable=conan-condition-evals-to-constant
+                tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support (v2 branch does not need this)
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -130,9 +101,8 @@ class CapnprotoConan(ConanFile):
             tc.configure_args.extend([
                 f"--with-openssl={yes_no(self.options.with_openssl)}",
                 "--enable-reflection",
+                f"--with-zlib={yes_no(self.options.with_zlib)}"
             ])
-            if Version(self.version) >= "0.8.0":
-                tc.configure_args.append(f"--with-zlib={yes_no(self.options.with_zlib)}")
             # Fix rpath on macOS
             if self.settings.os == "Macos":
                 tc.extra_ldflags.append("-Wl,-rpath,@loader_path/../lib")
@@ -152,6 +122,12 @@ class CapnprotoConan(ConanFile):
                 # TODO: replace by a call to autootols.autoreconf() in c++ folder once https://github.com/conan-io/conan/issues/12103 implemented
                 self.run("autoreconf --force --install")
                 autotools.configure(build_script_folder=os.path.join(self.source_folder, "c++"))
+                if (is_apple_os(self) and cross_building(self) and self.settings.arch in ("x86_64", "armv8") and
+                    self.settings.compiler == "apple-clang"):
+                    # when crossbuilding, the -arch flag is not correctly forwarded to the linker invocation
+                    libtool_sh = os.path.join(self.source_folder, "c++", "libtool")
+                    arch = "x86_64" if self.settings.arch == "x86_64" else "arm64"
+                    replace_in_file(self, libtool_sh, r'archive_cmds="\$CC -r ', r'archive_cmds="\$CC -r -arch {} '.format(arch))
                 autotools.make()
 
     @property
@@ -193,53 +169,47 @@ class CapnprotoConan(ConanFile):
                               "function(CAPNP_GENERATE_CPP SOURCES HEADERS)",
                               find_execs)
 
+    @property
+    def _capnp_components(self):
+        def libm():
+            return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
+
+        def pthread():
+            return ["pthread"] if self.settings.os in ["Linux", "FreeBSD"] else []
+
+        def ws2_32():
+            return ["ws2_32"] if self.settings.os == "Windows" else []
+
+        components = {
+            "capnp": {"requires": ["kj"]},
+            "capnp-json": {"requires": ["capnp", "kj"]},
+            "capnp-rpc": {"requires": ["capnp", "kj", "kj-async"]},
+            "capnpc": {"requires": ["capnp", "kj"], "system_libs": libm() + pthread()},
+            "kj": {"system_libs": libm() + pthread()},
+            "kj-async": {"requires": ["kj"], "system_libs": libm() + pthread() + ws2_32()},
+            "kj-http": {"requires": ["kj", "kj-async"]},
+            "kj-test": {"requires": ["kj"]},
+        }
+
+        if self.options.get_safe("with_zlib"):
+            components.update({"kj-gzip": {"requires": ["kj", "kj-async", "zlib::zlib"]}})
+            components["kj-http"].setdefault("requires", []).append("zlib::zlib")
+        if self.options.with_openssl:
+            components.update({"kj-tls": {"requires": ["kj", "kj-async", "openssl::openssl"]}})
+        
+        components.update({"capnp-websocket": {"requires": ["capnp", "capnp-rpc", "kj-http", "kj-async", "kj"]}})
+
+        return components
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CapnProto")
         capnprotomacros = os.path.join(self._cmake_folder, "CapnProtoMacros.cmake")
         self.cpp_info.set_property("cmake_build_modules", [capnprotomacros])
 
-        components = [
-            {"name": "capnp", "requires": ["kj"]},
-            {"name": "capnp-json", "requires": ["capnp", "kj"]},
-            {"name": "capnp-rpc", "requires": ["capnp", "kj", "kj-async"]},
-            {"name": "capnpc", "requires": ["capnp", "kj"]},
-            {"name": "kj", "requires": []},
-            {"name": "kj-async", "requires": ["kj"]},
-            {"name": "kj-http", "requires": ["kj", "kj-async"]},
-            {"name": "kj-test", "requires": ["kj"]},
-        ]
-        if self.options.get_safe("with_zlib"):
-            components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
-        if self.options.with_openssl:
-            components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})
-        if Version(self.version) >= "0.9.0":
-            components.append({
-                "name": "capnp-websocket",
-                "requires": ["capnp", "capnp-rpc", "kj-http", "kj-async", "kj"],
-            })
-
-        for component in components:
-            self._register_component(component)
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["capnpc"].system_libs = ["pthread", "m"]
-            self.cpp_info.components["kj"].system_libs = ["pthread", "m"]
-            self.cpp_info.components["kj-async"].system_libs = ["pthread", "m"]
-        elif self.settings.os == "Windows":
-            self.cpp_info.components["kj-async"].system_libs = ["ws2_32"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CapnProto"
-        self.cpp_info.names["cmake_find_package_multi"] = "CapnProto"
-        self.cpp_info.components["kj"].build_modules = [capnprotomacros]
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH env var with: {bin_path}")
-        self.env_info.PATH.append(bin_path)
-
-    def _register_component(self, component):
-        name = component["name"]
-        self.cpp_info.components[name].set_property("cmake_target_name", f"CapnProto::{name}")
-        self.cpp_info.components[name].builddirs.append(self._cmake_folder)
-        self.cpp_info.components[name].set_property("pkg_config_name", name)
-        self.cpp_info.components[name].libs = [name]
-        self.cpp_info.components[name].requires = component["requires"]
+        for name, comp_info in self._capnp_components.items():
+            self.cpp_info.components[name].set_property("cmake_target_name", f"CapnProto::{name}")
+            self.cpp_info.components[name].builddirs.append(self._cmake_folder)
+            self.cpp_info.components[name].set_property("pkg_config_name", name)
+            self.cpp_info.components[name].libs = [name]
+            self.cpp_info.components[name].requires = comp_info.get("requires", [])
+            self.cpp_info.components[name].system_libs = comp_info.get("system_libs", [])

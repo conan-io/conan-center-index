@@ -7,3 +7,11 @@ versions:
     folder: all
   "22.11":
     folder: all
+  "23.09":
+    folder: cmake
+  "24.09":
+    folder: cmake
+  "25.05":
+    folder: cmake
+  "26.07":
+    folder: cmake

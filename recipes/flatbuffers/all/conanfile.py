@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, collect_libs, copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class FlatbuffersConan(ConanFile):
@@ -18,6 +18,7 @@ class FlatbuffersConan(ConanFile):
     description = "Memory Efficient Serialization Library"
 
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -56,17 +57,17 @@ class FlatbuffersConan(ConanFile):
             self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def build_requirements(self):
         # since 23.3.3 version, flatbuffers cmake scripts were refactored to use cmake 3.8 version
         # see https://github.com/google/flatbuffers/pull/7801
-        if Version(self.version) >= "2.0.7" and Version(self.version) < "23.3.3":
+        if Version(self.version) >= "2.0.8" and Version(self.version) < "23.3.3":
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -89,12 +90,11 @@ class FlatbuffersConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # Relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) < "2.0.8":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         # Fix iOS/tvOS/watchOS
         if is_apple_os(self):
             tc.variables["CMAKE_MACOSX_BUNDLE"] = False
-        # Inject at least C++11 standard (would be more elegant to rely on cxx_std_11 compile feature upstream)
-        if not valid_min_cppstd(self, 11):
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.generate()
 
     def _patch_sources(self):
@@ -112,7 +112,6 @@ class FlatbuffersConan(ConanFile):
                               "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -156,17 +155,3 @@ class FlatbuffersConan(ConanFile):
             os.path.join(self._module_path, "BuildFlatBuffers.cmake"),
         ]
         self.cpp_info.set_property("cmake_build_modules", build_modules)
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "flatbuffers"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "flatbuffers"
-        self.cpp_info.names["cmake_find_package"] = "flatbuffers"
-        self.cpp_info.names["cmake_find_package_multi"] = "flatbuffers"
-        self.cpp_info.components["libflatbuffers"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["libflatbuffers"].names["cmake_find_package_multi"] = cmake_target
-        self.cpp_info.components["libflatbuffers"].build_modules["cmake_find_package"] = build_modules
-        self.cpp_info.components["libflatbuffers"].build_modules["cmake_find_package_multi"] = build_modules
-        self.cpp_info.components["libflatbuffers"].set_property("cmake_file_name", f"flatbuffers::{cmake_target}")
-        self.cpp_info.components["libflatbuffers"].set_property("pkg_config_name", "flatbuffers")
-        if self._has_flatc():
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

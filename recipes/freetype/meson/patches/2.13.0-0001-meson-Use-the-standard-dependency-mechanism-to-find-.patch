@@ -1,0 +1,31 @@
+From 2598fa002859d2af1c846363ff64e72d2ebde16a Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 4 Mar 2024 12:14:51 -0600
+Subject: [PATCH] meson: Use the standard dependency mechanism to find bzip2
+
+This follows standard conventions in Meson by using the pkg-config file.
+This change allows Conan to switch to the Meson build system.
+---
+ meson.build | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index f81de3e2f..c5cb8ea52 100644
+--- a/meson.build
++++ b/meson.build
+@@ -316,8 +316,10 @@ else
+ endif
+ 
+ # BZip2 support
+-bzip2_dep = cc.find_library('bz2',
+-  required: get_option('bzip2'))
++bzip2_dep = dependency('bzip2', required: false)
++if not bzip2_dep.found()
++  bzip2_dep = cc.find_library('bz2', has_headers: ['bzlib.h'], required: get_option('bzip2'))
++endif
+ 
+ if bzip2_dep.found()
+   ftoption_command += ['--enable=FT_CONFIG_OPTION_USE_BZIP2']
+-- 
+2.44.0
+

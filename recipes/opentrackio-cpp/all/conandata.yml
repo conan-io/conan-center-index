@@ -1,0 +1,5 @@
+sources:
+  "1.0.1":
+    url:
+    - "https://github.com/mosys/opentrackio-cpp/archive/refs/tags/1.0.1.tar.gz"
+    sha256: "079b3998e9e1e12e5b7a3c72f2f177bbc48f7da5220cd0f6dfd556056ba5663f"

@@ -50,13 +50,13 @@ class PDFWriterConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.13.0")
+        self.requires("freetype/2.13.2")
         self.requires("libaesgm/2013.1.1")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_png:
             self.requires("libjpeg/9e")
         if self.options.with_jpeg:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
 

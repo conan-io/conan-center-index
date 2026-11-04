@@ -1,15 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class WaylandConan(ConanFile):
@@ -33,7 +32,7 @@ class WaylandConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_libraries": True,
+        # "enable_libraries": True, # See `config_options()`
         "enable_dtd_validation": True,
     }
 
@@ -43,39 +42,51 @@ class WaylandConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+    def config_options(self):
+        # enable libraries by defualt only on Linux, Android
+        self.options.enable_libraries = self.settings.os in ("Linux", "Android")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.enable_libraries:
-            self.requires("libffi/3.4.4")
+            self.requires("libffi/[>=3.4.4 <4]")
         if self.options.enable_dtd_validation:
-            self.requires("libxml2/2.11.4")
-        self.requires("expat/2.5.0")
+            self.requires("libxml2/[>=2.12.5 <3]")
+        self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
+        if self.settings.compiler == "msvc":
+            # use of getopt.h, unistd.h, `-include` flag
+            # it's clear wayland-scanner does not support msvc
+            raise ConanInvalidConfiguration("msvc is not supported")
+        if self.settings.os not in ("Linux", "Android") and self.options.enable_libraries:
+            raise ConanInvalidConfiguration(f"wayland libraries only supported Linux or Android, set 'enable_libraries=False' to build wayland-scanner")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
-        if cross_building(self):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
+        if not can_run(self):
             self.tool_requires(str(self.ref))
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
+        if can_run(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
         pkg_config_deps = PkgConfigDeps(self)
-        if cross_building(self):
+        if not can_run(self):
             pkg_config_deps.build_context_activated = ["wayland"]
         elif self.dependencies["expat"].is_build_context:  # wayland is being built as build_require
             # If wayland is the build_require, all its dependencies are treated as build_requires
@@ -87,10 +98,9 @@ class WaylandConan(ConanFile):
         tc.project_options["libraries"] = self.options.enable_libraries
         tc.project_options["dtd_validation"] = self.options.enable_dtd_validation
         tc.project_options["documentation"] = False
-        if cross_building(self):
+        if not can_run(self):
             tc.project_options["build.pkg_config_path"] = self.generators_folder
-        if Version(self.version) >= "1.18.91":
-            tc.project_options["scanner"] = True
+        tc.project_options["scanner"] = True
         tc.generate()
 
     def _patch_sources(self):
@@ -133,9 +143,11 @@ class WaylandConan(ConanFile):
             self.cpp_info.components["wayland-server"].libs = ["wayland-server"]
             self.cpp_info.components["wayland-server"].set_property("pkg_config_name", "wayland-server")
             self.cpp_info.components["wayland-server"].requires = ["libffi::libffi"]
-            self.cpp_info.components["wayland-server"].system_libs = ["pthread", "m"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["wayland-server"].system_libs = ["pthread", "m"]
+
             self.cpp_info.components["wayland-server"].resdirs = ["res"]
-            if self.version >= Version("1.21.0") and self.settings.os == "Linux":
+            if self.settings.os == "Linux":
                 self.cpp_info.components["wayland-server"].system_libs += ["rt"]
             self.cpp_info.components["wayland-server"].set_property("component_version", self.version)
             pkgconfig_variables = {
@@ -149,9 +161,10 @@ class WaylandConan(ConanFile):
             self.cpp_info.components["wayland-client"].libs = ["wayland-client"]
             self.cpp_info.components["wayland-client"].set_property("pkg_config_name", "wayland-client")
             self.cpp_info.components["wayland-client"].requires = ["libffi::libffi"]
-            self.cpp_info.components["wayland-client"].system_libs = ["pthread", "m"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["wayland-client"].system_libs = ["pthread", "m"]
             self.cpp_info.components["wayland-client"].resdirs = ["res"]
-            if self.version >= Version("1.21.0") and self.settings.os == "Linux":
+            if self.settings.os == "Linux":
                 self.cpp_info.components["wayland-client"].system_libs += ["rt"]
             self.cpp_info.components["wayland-client"].set_property("component_version", self.version)
             pkgconfig_variables = {
@@ -174,6 +187,3 @@ class WaylandConan(ConanFile):
 
             self.cpp_info.components["wayland-egl-backend"].set_property("pkg_config_name", "wayland-egl-backend")
             self.cpp_info.components["wayland-egl-backend"].set_property("component_version", "3")
-
-            # TODO: to remove in conan v2
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

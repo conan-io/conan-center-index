@@ -1,5 +1,14 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -16,7 +16,7 @@ if(NOT CMAKE_BUILD_TYPE)
+ endif(NOT CMAKE_BUILD_TYPE)
+ 
+ if(POLICY CMP0054)
+-    cmake_policy(SET CMP0054 OLD)
++    # cmake_policy(SET CMP0054 OLD)
+ endif()
+ 
+ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 @@ -60,9 +60,11 @@ if(BUILD_PACKAGES)
  
  endif(BUILD_PACKAGES)

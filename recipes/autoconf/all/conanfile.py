@@ -38,7 +38,10 @@ class AutoconfConan(ConanFile):
         self.requires("m4/1.4.19") # Needed at runtime by downstream clients as well
 
     def package_id(self):
-        self.info.clear()
+        del self.info.settings.arch
+        del self.info.settings.compiler
+        del self.info.settings.build_type
+        self.info.requires.clear()
 
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
@@ -104,12 +107,6 @@ class AutoconfConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.resdirs = ["res"]
-
-        # TODO: These variables can be removed since the scripts now locate the resources
-        #       relative to themselves.
-        dataroot_path = os.path.join(self.package_folder, "res", "autoconf")
-        self.buildenv_info.define_path("AC_MACRODIR", dataroot_path)
-        self.buildenv_info.define_path("autom4te_perllibdir", dataroot_path)
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.buildenv_info.define_path("AUTOCONF", os.path.join(bin_path, "autoconf"))

@@ -2,21 +2,21 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import copy, get, rmdir, save
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class Catch2Conan(ConanFile):
     name = "catch2"
     description = "A modern, C++-native, header-only, framework for unit-tests, TDD and BDD"
-    topics = ("catch2", "unit-test", "tdd", "bdd")
     license = "BSL-1.0"
-    homepage = "https://github.com/catchorg/Catch2"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/catchorg/Catch2"
+    topics = ("catch2", "unit-test", "tdd", "bdd")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,6 +26,7 @@ class Catch2Conan(ConanFile):
         "default_reporter": [None, "ANY"],
         "console_width": [None, "ANY"],
         "no_posix_signals": [True, False],
+        "thread_safe_assertions": [True, False],
     }
     default_options = {
         "shared": False,
@@ -34,11 +35,11 @@ class Catch2Conan(ConanFile):
         "default_reporter": None,
         "console_width": "80",
         "no_posix_signals": False,
+        "thread_safe_assertions": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return "14"
+    # disallow cppstd compatibility, as it affects the ABI in this library
+    # see https://github.com/conan-io/conan-center-index/issues/19008
+    extension_properties = {"compatibility_cppstd": False}
 
     @property
     def _min_console_width(self):
@@ -46,21 +47,8 @@ class Catch2Conan(ConanFile):
         return 46
 
     @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "Visual Studio": "15",
-            "msvc": "191",
-            "clang": "5",
-            "apple-clang": "10",
-        }
-
-    @property
     def _default_reporter_str(self):
         return str(self.options.default_reporter).strip('"')
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,14 +61,11 @@ class Catch2Conan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16]")
+
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler doesn't support",
-            )
+        check_min_cppstd(self, 14)
 
         try:
             if int(self.options.console_width) < self._min_console_width:
@@ -105,10 +90,10 @@ class Catch2Conan(ConanFile):
         if self.options.default_reporter:
             tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
         tc.variables["CATCH_CONFIG_NO_POSIX_SIGNALS"] = self.options.no_posix_signals
+        tc.variables["CATCH_CONFIG_THREAD_SAFE_ASSERTIONS"] = self.options.thread_safe_assertions
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -175,13 +160,3 @@ class Catch2Conan(ConanFile):
         if self.options.default_reporter:
             defines.append(f"CATCH_CONFIG_DEFAULT_REPORTER={self._default_reporter_str}")
         self.cpp_info.components["catch2_with_main"].defines = defines
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Catch2"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Catch2"
-        self.cpp_info.names["cmake_find_package"] = "catch2"
-        self.cpp_info.names["cmake_find_package_multi"] = "catch2"
-        self.cpp_info.components["_catch2"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["_catch2"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["catch2_with_main"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["catch2_with_main"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

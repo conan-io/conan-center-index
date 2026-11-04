@@ -1,0 +1,23 @@
+sources:
+  # Newer versions at the top
+  "1.8.0":
+    url:
+    - "https://github.com/DentonW/DevIL/archive/refs/tags/v1.8.0.tar.gz"
+    sha256: "52129f247b26fcb5554643c9e6bbee75c4b9717735fdbf3c6ebff08cee38ad37"
+patches:
+  "1.8.0":
+    - patch_file: "patches/1.8.0-jp2_fix.patch"
+      patch_description: "Make devil build with supported versions of jasper"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.0-jpeg_fix.patch"
+      patch_description: "Make devil build with newer versions of libjpeg"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.0-remove_register_keyword.patch"
+      patch_description: "Remove invalid register keyword"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.0-avoid-methoddef-dllimport-error.patch"
+      patch_description: "remove uses of METHODDEF from libjpeg as they are unneeded and cause errors in MSVC"
+      patch_type: "conan"
+    - patch_file: "patches/1.8.0-install-ilut-config-h.patch"
+      patch_description: "ensure ilut_config.h is installed"
+      patch_type: "conan"

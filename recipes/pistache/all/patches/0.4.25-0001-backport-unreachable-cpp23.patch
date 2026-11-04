@@ -1,0 +1,88 @@
+https://github.com/pistacheio/pistache/pull/1285
+Subject: [PATCH] fix: don't break C++23's std::unreachable
+
+---
+ include/pistache/winornix.h | 13 ++++++++-----
+ src/client/client.cc        |  2 +-
+ src/common/http_defs.cc     |  4 ++--
+ src/common/net.cc           |  2 +-
+ version.txt                 |  2 +-
+ 5 files changed, 13 insertions(+), 10 deletions(-)
+
+diff --git a/include/pistache/winornix.h b/include/pistache/winornix.h
+index e849bb0a0..0e9f265fe 100644
+--- a/include/pistache/winornix.h
++++ b/include/pistache/winornix.h
+@@ -592,16 +592,19 @@ typedef uint32_t pst_thread_id; // DWORD := uint32_t
+ #define PST_FD_CLOEXEC      FD_CLOEXEC
+ #endif
+ 
+-#ifdef __GNUC__
+-// GCC 4.8+, Clang, Intel and other compilers compatible with GCC
+-#define unreachable() __builtin_unreachable()
+-// [[noreturn]] inline __attribute__((always_inline)) void unreachable() {__builtin_unreachable();}
++#include <utility>
++namespace Pistache::details
++{
++#ifdef __cpp_lib_unreachable
++using std::unreachable;
++#elif defined(__GNUC__) // GCC 4.8+, Clang, Intel and other compilers compatible with GCC
++[[noreturn]] inline __attribute__((always_inline)) void unreachable() {__builtin_unreachable();}
+ #elif defined(_MSC_VER) // MSVC
+ [[noreturn]] __forceinline void unreachable() {__assume(false);}
+ #else // ???
+ inline void unreachable() {}
+ #endif
+-/// Note: Could also use std::unreachable for C++23
++}
+ 
+ /* ------------------------------------------------------------------------- */
+ #endif // of ifndef _WINORNIX_H_
+diff --git a/src/client/client.cc b/src/client/client.cc
+index 4526854bf..2b7687ab2 100644
+--- a/src/client/client.cc
++++ b/src/client/client.cc
+@@ -821,7 +821,7 @@ namespace Pistache::Http::Experimental
+         }
+         else
+         {
+-            unreachable();
++            Pistache::details::unreachable();
+         }
+         oss << ")";
+         return oss.str();
+diff --git a/src/common/http_defs.cc b/src/common/http_defs.cc
+index d23b78bdb..21887dd46 100644
+--- a/src/common/http_defs.cc
++++ b/src/common/http_defs.cc
+@@ -164,7 +164,7 @@ namespace Pistache::Http
+             return "HTTP/1.1";
+         }
+ 
+-        unreachable();
++        Pistache::details::unreachable();
+     }
+ 
+     const char* methodString(Method method)
+@@ -178,7 +178,7 @@ namespace Pistache::Http
+ #undef METHOD
+         }
+ 
+-        unreachable();
++        Pistache::details::unreachable();
+     }
+ 
+     const char* codeString(Code code)
+diff --git a/src/common/net.cc b/src/common/net.cc
+index 6892bf2fc..3d6b53fd5 100644
+--- a/src/common/net.cc
++++ b/src/common/net.cc
+@@ -198,7 +198,7 @@ namespace Pistache
+         }
+         else
+         {
+-            unreachable();
++            Pistache::details::unreachable();
+         }
+     }
+ 

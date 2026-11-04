@@ -5,4 +5,3 @@ sources:
 patches:
   "1.1.2":
     - patch_file: "patches/0001-set-CMAKE_C_STANDARD.patch"
-      base_path: "source_subfolder"

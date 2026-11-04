@@ -151,11 +151,11 @@ class FaacConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.autoreconf()
+            autotools.configure()
             if self._is_mingw and self.options.shared:
                 replace_in_file(self, os.path.join(self.build_folder, "libfaac", "Makefile"),
                                 "\nlibfaac_la_LIBADD = ",
                                 "\nlibfaac_la_LIBADD = -no-undefined ")
-            autotools.configure()
             autotools.make()
 
     def package(self):

@@ -75,7 +75,7 @@ class IgnitionUitlsConan(ConanFile):
                 )
     
     def requirements(self):
-        self.requires("doxygen/1.9.2")
+        self.requires("doxygen/[>=1.8 <2]")
         if self.options.ign_utils_vendor_cli11:
             self.requires("cli11/2.1.2")
 

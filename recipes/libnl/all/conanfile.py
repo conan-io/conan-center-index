@@ -3,6 +3,8 @@ from conan.tools.files import get, rmdir, copy, rm
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -15,6 +17,7 @@ class LibNlConan(ConanFile):
     homepage = "https://github.com/thom311/libnl"
     topics = ("netlink")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
@@ -45,6 +48,8 @@ class LibNlConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = AutotoolsToolchain(self)
         tc.generate()
 
@@ -66,14 +71,30 @@ class LibNlConan(ConanFile):
         self.cpp_info.components["nl"].libs = ["nl-3"]
         self.cpp_info.components["nl"].includedirs = [os.path.join('include', 'libnl3')]
         self.cpp_info.components["nl"].system_libs = ["pthread", "m"]
+        self.cpp_info.components["nl"].set_property("pkg_config_name", "libnl-3.0")
+
         self.cpp_info.components["nl-route"].libs = ["nl-route-3"]
         self.cpp_info.components["nl-route"].requires = ["nl"]
+        self.cpp_info.components["nl-route"].set_property("pkg_config_name", "libnl-route-3.0")
+
         self.cpp_info.components["nl-genl"].libs = ["nl-genl-3"]
         self.cpp_info.components["nl-genl"].requires = ["nl"]
+        self.cpp_info.components["nl-genl"].set_property("pkg_config_name", "libnl-genl-3.0")
+
         self.cpp_info.components["nl-nf"].libs = ["nl-nf-3"]
         self.cpp_info.components["nl-nf"].requires = ["nl-route"]
+        self.cpp_info.components["nl-nf"].set_property("pkg_config_name", "libnl-nf-3.0")
+
         self.cpp_info.components["nl-cli"].libs = ["nl-cli-3"]
         self.cpp_info.components["nl-cli"].requires = ["nl-nf", "nl-genl"]
         self.cpp_info.components["nl-cli"].system_libs = ["dl"]
+        self.cpp_info.components["nl-cli"].set_property("pkg_config_name", "libnl-cli-3.0")
+
         self.cpp_info.components["nl-idiag"].libs = ["nl-idiag-3"]
         self.cpp_info.components["nl-idiag"].requires = ["nl"]
+        self.cpp_info.components["nl-idiag"].set_property("pkg_config_name", "libnl-idiag-3.0")
+
+        if Version(self.version) >= "3.3.0":
+            self.cpp_info.components["nl-xfrm"].libs = ["nl-xfrm-3"]
+            self.cpp_info.components["nl-xfrm"].requires = ["nl"]
+            self.cpp_info.components["nl-xfrm"].set_property("pkg_config_name", "libnl-xfrm-3.0")

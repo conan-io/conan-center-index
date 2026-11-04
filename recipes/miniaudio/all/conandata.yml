@@ -1,4 +1,16 @@
 sources:
+  "0.11.25":
+    url: "https://github.com/mackron/miniaudio/archive/0.11.25.tar.gz"
+    sha256: "b900edcffe979816e2560a0580b9b1216d674b4f17fbadeca8f777a7f8ab0274"
+  "0.11.22":
+    url: "https://github.com/mackron/miniaudio/archive/0.11.22.tar.gz"
+    sha256: "bcb07bfb27e6fa94d34da73ba2d5642d4940b208ec2a660dbf4e52e6b7cd492f"
+  "0.11.21":
+    url: "https://github.com/mackron/miniaudio/archive/0.11.21.tar.gz"
+    sha256: "6afb5c231613d2fab4f1c668b7243ff9a7d6d78a7f5a2692c133f026fe508506"
+  "0.11.18":
+    url: "https://github.com/mackron/miniaudio/archive/0.11.18.tar.gz"
+    sha256: "85ca916266d809b39902e180a6d16f82caea9c2ea1cea6d374413641b7ba48c3"
   "0.11.17":
     url: "https://github.com/mackron/miniaudio/archive/0.11.17.tar.gz"
     sha256: "4b139065f7068588b73d507d24e865060e942eb731f988ee5a8f1828155b9480"

@@ -5,7 +5,7 @@ from conan.tools.files import export_conandata_patches, apply_conandata_patches,
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class CivetwebConan(ConanFile):
@@ -22,6 +22,7 @@ class CivetwebConan(ConanFile):
         "fPIC": [True, False],
         "shared": [True, False],
         "ssl_dynamic_loading": [True, False],
+        "thread_stack_size": [None, "ANY"],
         "with_caching": [True, False],
         "with_cgi": [True, False],
         "with_cxx": [True, False],
@@ -39,6 +40,7 @@ class CivetwebConan(ConanFile):
         "fPIC": True,
         "shared": False,
         "ssl_dynamic_loading": False,
+        "thread_stack_size": None,
         "with_caching": True,
         "with_cgi": True,
         "with_cxx": True,
@@ -92,9 +94,12 @@ class CivetwebConan(ConanFile):
     def validate(self):
         if self.options.get_safe("ssl_dynamic_loading") and not self.dependencies["openssl"].options.shared:
             raise ConanInvalidConfiguration("ssl_dynamic_loading requires shared openssl")
+        if self.options.thread_stack_size and not str(self.options.thread_stack_size).isdigit():
+            raise ConanInvalidConfiguration("-o='civetweb/*:thread_stack_size' should be a positive integer")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -122,9 +127,14 @@ class CivetwebConan(ConanFile):
         tc.variables["CIVETWEB_ENABLE_THIRD_PARTY_OUTPUT"] = self.options.with_third_party_output
         tc.variables["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
         tc.variables["CIVETWEB_SERVE_NO_FILES"] = not self.options.with_static_files
+        if self.options.thread_stack_size:
+            tc.variables["CIVETWEB_THREAD_STACK_SIZE"] = self.options.thread_stack_size
 
         if self._has_zlib_option:
             tc.variables["CIVETWEB_ENABLE_ZLIB"] = self.options.with_zlib
+
+        if Version(self.version) <= "1.16":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4
 
         tc.generate()
 
@@ -132,7 +142,6 @@ class CivetwebConan(ConanFile):
         cd.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -181,11 +190,3 @@ class CivetwebConan(ConanFile):
             elif self.settings.os == "Windows":
                 if self.options.shared:
                     self.cpp_info.components["civetweb-cpp"].defines.append("CIVETWEB_CXX_DLL_IMPORTS")
-
-        # TODO: to remove once conan v1 support dropped
-        self.cpp_info.components["_civetweb"].names["cmake_find_package"] = "civetweb"
-        self.cpp_info.components["_civetweb"].names["cmake_find_package_multi"] = "civetweb"
-        if self.options.with_cxx:
-            self.cpp_info.components["civetweb-cpp"].names["cmake_find_package"] = "civetweb-cpp"
-            self.cpp_info.components["civetweb-cpp"].names["cmake_find_package_multi"] = "civetweb-cpp"
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

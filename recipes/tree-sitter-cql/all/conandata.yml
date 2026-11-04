@@ -1,0 +1,4 @@
+sources:
+  "0.2.0":
+    url: "https://github.com/shotover/tree-sitter-cql/archive/refs/tags/v0.2.0.tar.gz"
+    sha256: "fc5aa2c660b6e6daa48e14b4bb7aca0a5a69294229bfae4fdcd9761d288edf07"

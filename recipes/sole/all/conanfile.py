@@ -14,6 +14,7 @@ class SoleConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/r-lyeh-archived/sole"
     topics = ("uuid", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def export_sources(self):
@@ -30,19 +31,14 @@ class SoleConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(
-            self,
-            pattern="*.hpp",
-            dst=os.path.join(self.package_folder, "include"),
-            src=self.source_folder,
-        )
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.hpp", self.source_folder, os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.bindirs = []

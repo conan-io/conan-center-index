@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, rmdir
+from conan.tools.files import get, rmdir, copy
 from conan.tools.scm import Version
 import os
 
@@ -11,13 +11,13 @@ required_conan_version = ">=1.53.0"
 
 class TaoCPPTaopqConan(ConanFile):
     name = "taocpp-taopq"
+    description = "C++ client library for PostgreSQL"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/taocpp/taopq"
-    description = "C++ client library for PostgreSQL"
     topics = ("cpp17", "postgresql", "libpq", "data-base", "sql")
     package_type = "library"
-    settings = "os", "arch", "build_type", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -28,14 +28,10 @@ class TaoCPPTaopqConan(ConanFile):
     }
 
     @property
-    def _min_cppstd(self):
-        return "17"
-
-    @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
-            "clang": "6",
+            "gcc": "8",
+            "clang": "7",
             "apple-clang": "10",
             "Visual Studio": "15",
             "msvc": "191",
@@ -54,12 +50,10 @@ class TaoCPPTaopqConan(ConanFile):
 
     def requirements(self):
         # libpq-fe.h is included by many public headers of taocpp-taopq, and also uses some symbols of the lib (see https://github.com/conan-io/conan-center-index/pull/19825#issuecomment-1720996359)
-        self.requires("libpq/15.4", transitive_headers=True, transitive_libs=True)
+        self.requires("libpq/[>=15.4 <18]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
+        check_min_cppstd(self, 17)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
@@ -71,9 +65,10 @@ class TaoCPPTaopqConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TAOPQ_BUILD_TESTS"] = False
-        tc.variables["TAOPQ_INSTALL_DOC_DIR"] = "licenses"
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        # Option names changed in https://github.com/taocpp/taopq/commit/d77896ab80369f13512a7f0ba8af818a03de1cdf
+        tc.cache_variables["taopq_BUILD_TESTS"] = False
+        tc.cache_variables["taopq_INSTALL_DOC_DIR"] = "licenses"
+        tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -84,9 +79,11 @@ class TaoCPPTaopqConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "taopq")
@@ -98,12 +95,5 @@ class TaoCPPTaopqConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["_taocpp-taopq"].system_libs.append("ws2_32")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "taopq"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "taopq"
-        self.cpp_info.names["cmake_find_package"] = "taocpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "taocpp"
-        self.cpp_info.components["_taocpp-taopq"].names["cmake_find_package"] = "taopq"
-        self.cpp_info.components["_taocpp-taopq"].names["cmake_find_package_multi"] = "taopq"
         self.cpp_info.components["_taocpp-taopq"].set_property("cmake_target_name", "taocpp::taopq")
         self.cpp_info.components["_taocpp-taopq"].requires = ["libpq::libpq"]

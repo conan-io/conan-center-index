@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -171,7 +171,7 @@ if (NOT ASMTK_EMBED)
+     $<$<CONFIG:Debug>:${ASMTK_PRIVATE_CFLAGS_DBG}>
+     $<$<NOT:$<CONFIG:Debug>>:${ASMTK_PRIVATE_CFLAGS_REL}>)
+
+-  if(ASMJIT_EXTERNAL)
++  if(NOT ASMJIT_EXTERNAL)
+     target_link_libraries(asmtk PUBLIC ${ASMJIT_LIBRARY})
+     find_path(ASMJIT_INCLUDE_DIR NAMES asmjit/asmjit.h)
+     target_include_directories(asmtk PRIVATE ${ASMJIT_INCLUDE_DIR})

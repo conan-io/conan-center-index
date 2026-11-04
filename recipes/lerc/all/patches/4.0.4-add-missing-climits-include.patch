@@ -1,0 +1,21 @@
+From 1fc73694263f53cf029c8cac2e632170880f56d4 Mon Sep 17 00:00:00 2001
+From: Thomas Maurer <tmaurer@esri.com>
+Date: Wed, 8 Nov 2023 12:54:35 -0800
+Subject: [PATCH] add missing include
+
+---
+ src/LercLib/fpl_Compression.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/LercLib/fpl_Compression.cpp b/src/LercLib/fpl_Compression.cpp
+index bea9483..22773dd 100644
+--- a/src/LercLib/fpl_Compression.cpp
++++ b/src/LercLib/fpl_Compression.cpp
+@@ -27,6 +27,7 @@ Original coding 2021 Yuriy Yakimenko
+ #include <assert.h>
+ #include <cmath>
+ #include <cstring>
++#include <climits>
+ 
+ USING_NAMESPACE_LERC
+ 

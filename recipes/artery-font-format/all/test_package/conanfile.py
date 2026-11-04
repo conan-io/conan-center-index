@@ -4,7 +4,6 @@ from conan.tools.cmake import cmake_layout, CMake
 import os
 
 
-# It will become the standard on Conan 2.x
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
@@ -24,5 +23,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
-            arfont = os.path.join(self.source_folder, "example.arfont")
-            self.run(f"{bin_path} {arfont}", env="conanrun")
+            self.run(bin_path, env="conanrun")

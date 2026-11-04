@@ -1,0 +1,12 @@
+diff --git a/include/llvm/Support/Signals.h b/include/llvm/Support/Signals.h
+index 44f5a750ff5..937e0572d4a 100644
+--- a/include/llvm/Support/Signals.h
++++ b/include/llvm/Support/Signals.h
+@@ -14,6 +14,7 @@
+ #ifndef LLVM_SUPPORT_SIGNALS_H
+ #define LLVM_SUPPORT_SIGNALS_H
+ 
++#include <cstdint>
+ #include <string>
+ 
+ namespace llvm {

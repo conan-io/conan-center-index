@@ -43,6 +43,8 @@ class LitehtmlConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.version != "cci.20211028":
+            del self.options.with_icu
 
     def configure(self):
         if self.options.shared:
@@ -53,8 +55,8 @@ class LitehtmlConan(ConanFile):
 
     def requirements(self):
         # FIXME: add gumbo requirement (it is vendored right now)
-        if self.options.with_icu:
-            self.requires("icu/72.1")
+        if self.options.get_safe("with_icu"):
+            self.requires("icu/73.2")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -74,7 +76,7 @@ class LitehtmlConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["LITEHTML_UTF8"] = self.options.utf8
-        tc.variables["USE_ICU"] = self.options.with_icu
+        tc.variables["USE_ICU"] = self.options.get_safe("with_icu", False)
         tc.variables["EXTERNAL_GUMBO"] = False # FIXME: add cci recipe, and use it unconditionally (option value should be True)
         tc.variables["EXTERNAL_XXD"] = self._with_xxd  # FIXME: should be True unconditionally
         tc.generate()
@@ -124,7 +126,7 @@ class LitehtmlConan(ConanFile):
         self.cpp_info.components["litehtml_litehtml"].set_property("cmake_target_name", "litehtml")
         self.cpp_info.components["litehtml_litehtml"].libs = ["litehtml"]
         self.cpp_info.components["litehtml_litehtml"].requires = ["gumbo"]
-        if self.options.with_icu:
+        if self.options.get_safe("with_icu"):
             self.cpp_info.components["litehtml_litehtml"].requires.append("icu::icu")
 
         if True: # FIXME: remove once we use a vendored gumbo library

@@ -14,9 +14,9 @@ required_conan_version = ">=1.54.0"
 class LibbacktraceConan(ConanFile):
     name = "libbacktrace"
     description = "A C library that may be linked into a C/C++ program to produce symbolic backtraces."
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ianlancetaylor/libbacktrace"
-    license = "BSD-3-Clause"
     topics = ("backtrace", "stack-trace")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -52,7 +52,7 @@ class LibbacktraceConan(ConanFile):
     def validate(self):
         check_min_vs(self, "180")
         if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration("libbacktrace shared is not supported with Visual Studio")
+            raise ConanInvalidConfiguration(f"{self.ref} shared is not supported with Visual Studio")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":

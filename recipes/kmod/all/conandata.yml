@@ -1,4 +1,7 @@
 sources:
+  "31":
+    url: "https://kernel.org/pub/linux/utils/kernel/kmod/kmod-31.tar.xz"
+    sha256: "f5a6949043cc72c001b728d8c218609c5a15f3c33d75614b78c79418fcf00d80"
   "30":
     url: "https://kernel.org/pub/linux/utils/kernel/kmod/kmod-30.tar.xz"
     sha256: "f897dd72698dc6ac1ef03255cd0a5734ad932318e4adbaebc7338ef2f5202f9f"

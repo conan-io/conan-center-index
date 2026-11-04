@@ -1,24 +1,18 @@
 sources:
-  "5.4.4":
-    url: "https://tukaani.org/xz/xz-5.4.4.tar.gz"
-    sha256: "aae39544e254cfd27e942d35a048d592959bd7a79f9a624afb0498bb5613bdf8"
-  "5.4.2":
-    url: "https://tukaani.org/xz/xz-5.4.2.tar.gz"
-    sha256: "87947679abcf77cc509d8d1b474218fd16b72281e2797360e909deaee1ac9d05"
-  "5.4.0":
-    url: "https://tukaani.org/xz/xz-5.4.0.tar.gz"
-    sha256: "7471ef5991f690268a8f2be019acec2e0564b7b233ca40035f339fe9a07f830b"
-  "5.2.10":
-    url: "https://tukaani.org/xz/xz-5.2.10.tar.gz"
-    sha256: "eb7a3b2623c9d0135da70ca12808a214be9c019132baaa61c9e1d198d1d9ded3"
-  "5.2.5":
-    url: "https://tukaani.org/xz/xz-5.2.5.tar.gz"
-    sha256: "f6f4910fd033078738bd82bfba4f49219d03b17eb0794eb91efbae419f4aba10"
-  "5.2.4":
-    url: "https://tukaani.org/xz/xz-5.2.4.tar.gz"
-    sha256: "b512f3b726d3b37b6dc4c8570e137b9311e7552e8ccbab4d39d47ce5f4177145"
-patches:
-  "5.2.4":
-    - patch_file: "patches/0001-relax_windows-sdk-restriction.patch"
-      patch_description: "Relax Windows SDK restriction"
-      patch_type: "conan"
+  "5.8.4":
+    url:
+      - "https://github.com/tukaani-project/xz/releases/download/v5.8.4/xz-5.8.4.tar.xz"
+      - "https://codeberg.org/tukaani/xz/releases/download/v5.8.4/xz-5.8.4.tar.xz"
+      - "https://sourceforge.net/projects/lzmautils/files/xz-5.8.4.tar.xz"
+    sha256: "4ce24038fd4221e0d13bc1a2de7a4db56e90b92b3bf75321f6c14be73f65de4b"
+  "5.8.3":
+    url:
+      - "https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.xz"
+      - "https://codeberg.org/tukaani/xz/releases/download/v5.8.3/xz-5.8.3.tar.xz"
+      - "https://sourceforge.net/projects/lzmautils/files/xz-5.8.3.tar.xz"
+    sha256: "fff1ffcf2b0da84d308a14de513a1aa23d4e9aa3464d17e64b9714bfdd0bbfb6"
+  "5.4.5":
+    url:
+      - "https://github.com/tukaani-project/xz/releases/download/v5.4.5/xz-5.4.5.tar.xz"
+      - "https://sourceforge.net/projects/lzmautils/files/xz-5.4.5.tar.xz"
+    sha256: "da9dec6c12cf2ecf269c31ab65b5de18e8e52b96f35d5bcd08c12b43e6878803"

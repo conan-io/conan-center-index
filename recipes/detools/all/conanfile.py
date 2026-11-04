@@ -1,17 +1,20 @@
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, copy
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+import os
 
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-
+required_conan_version = ">=1.53.0"
 
 class DetoolsConan(ConanFile):
     name = "detools"
     description = "Binary delta encoding"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eerimoq/detools"
-    license = "MIT"
     topics = ("delta-compression", "delta-update", "delta-encoding",
               "ota", "bsdiff", "hdiffpatch")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,43 +25,42 @@ class DetoolsConan(ConanFile):
         "fPIC": True,
     }
     exports_sources = "CMakeLists.txt"
-    generators = "cmake"
-    requires = ['heatshrink/0.4.1', 'lz4/1.9.3', 'xz_utils/5.2.5']
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("This library is only compatible with Linux and FreeBSD")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires('heatshrink/0.4.1', transitive_headers=True)
+        self.requires('xz_utils/5.4.4', transitive_headers=True)
+
+    def validate(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux and FreeBSD")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["DETOOLS_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):

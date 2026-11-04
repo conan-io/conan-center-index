@@ -8,6 +8,7 @@ required_conan_version = ">=1.50.0"
 
 class XkeyboardConfigConan(ConanFile):
     name = "xkeyboard-config"
+    package_type = "application"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     homepage = "https://www.freedesktop.org/wiki/Software/XKeyboardConfig/"
@@ -16,7 +17,7 @@ class XkeyboardConfigConan(ConanFile):
     topics = ("x11", "xorg", "keyboard")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD", "Android"]:
             raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def package_id(self):
@@ -37,6 +38,9 @@ class XkeyboardConfigConan(ConanFile):
 
         pacman = package_manager.PacMan(self)
         pacman.install(["xkeyboard-config"], update=True, check=True)
+
+        apk = package_manager.Apk(self)
+        apk.install(["xkeyboard-config-dev"], update=True, check=True)
 
         package_manager.Pkg(self).install(["xkeyboard-config"], update=True, check=True)
 

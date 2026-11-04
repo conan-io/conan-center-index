@@ -1,14 +1,13 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 import os
 import glob
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class CBlosc2Conan(ConanFile):
@@ -17,13 +16,13 @@ class CBlosc2Conan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Blosc/c-blosc2"
-    topics = ("c-blosc", "blosc", "compression")
+    topics = ("c-blosc", "blosc", "compression", "cache", "store")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "simd_intrinsics": [None, "sse2", "avx2"],
+        "simd_intrinsics": [None, "sse2", "avx2", "avx512"],
         "with_lz4": [True, False],
         "with_zlib": [None, "zlib", "zlib-ng", "zlib-ng-compat"],
         "with_zstd": [True, False],
@@ -38,9 +37,6 @@ class CBlosc2Conan(ConanFile):
         "with_zstd": True,
         "with_plugins": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,26 +61,27 @@ class CBlosc2Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_lz4:
-            self.requires("lz4/1.9.4")
+            self.requires("lz4/[>=1.9.4 <2]")
         if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
-            self.requires("zlib-ng/2.1.3")
+            self.requires("zlib-ng/[>=2.2 <3]")
         elif self.options.with_zlib == "zlib":
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5 <1.6]")
 
     def build_requirements(self):
-        if Version(self.version) >= "2.4.1":
-            self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "3.0.0":
+            tc.cache_variables["BLOSC_DEPENDENCY_MODE"] = "EXTERNAL"
+            # Not available in Conan Center
+            tc.cache_variables["BLOSC_ENABLE_ZFP"] = False
         tc.cache_variables["BLOSC_IS_SUBPROJECT"] = False
         tc.cache_variables["BLOSC_INSTALL"] = True
         tc.cache_variables["BUILD_STATIC"] = not bool(self.options.shared)
@@ -94,7 +91,8 @@ class CBlosc2Conan(ConanFile):
         tc.cache_variables["BUILD_BENCHMARKS"] = False
         tc.cache_variables["BUILD_EXAMPLES"] = False
         simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
-        tc.cache_variables["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
+        tc.cache_variables["DEACTIVATE_AVX2"] = simd_intrinsics not in ["avx2", "avx512"]
+        tc.cache_variables["DEACTIVATE_AVX512"] = simd_intrinsics != "avx512"
         tc.cache_variables["DEACTIVATE_LZ4"] = not bool(self.options.with_lz4)
         tc.cache_variables["PREFER_EXTERNAL_LZ4"] = True
         tc.cache_variables["DEACTIVATE_ZLIB"] = self.options.with_zlib is None
@@ -104,14 +102,21 @@ class CBlosc2Conan(ConanFile):
         tc.cache_variables["BUILD_PLUGINS"] = bool(self.options.with_plugins)
         if self.options.with_zlib == "zlib-ng-compat":
             tc.preprocessor_definitions["ZLIB_COMPAT"] = "1"
+        tc.cache_variables["WITH_ZLIB_OPTIM"] = self.settings.arch != "wasm"
         tc.generate()
 
         deps = CMakeDeps(self)
+        if self.options.with_lz4:
+            # Sources do not make distinction of shared-static target name difference
+            deps.set_property("lz4", "cmake_target_name", "LZ4::lz4")
+        if self.options.with_zlib =="zlib-ng":
+            deps.set_property("zlib-ng", "cmake_target_name", "zlib-ng::zlib")
+        if self.options.with_zstd:
+            # Sources do not make distinction of shared-static target name difference
+            deps.set_property("zstd", "cmake_target_name", "zstd::libzstd")
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         for filename in glob.glob(os.path.join(self.source_folder, "cmake", "Find*.cmake")):
             if os.path.basename(filename) not in [
                 "FindSIMD.cmake",
@@ -119,7 +124,6 @@ class CBlosc2Conan(ConanFile):
                 rm(self, os.path.basename(filename), os.path.join(self.source_folder, "cmake"))
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

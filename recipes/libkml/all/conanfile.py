@@ -1,12 +1,12 @@
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan import ConanFile, conan_version
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
-import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class LibkmlConan(ConanFile):
@@ -43,7 +43,7 @@ class LibkmlConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.81.0", transitive_headers=True)
-        self.requires("expat/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
         self.requires("minizip/1.2.13")
         self.requires("uriparser/0.9.7")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -52,14 +52,37 @@ class LibkmlConan(ConanFile):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} shared with Visual Studio and MT runtime is not supported")
 
+    def package_id(self):
+        cppstd = self.info.settings.get_safe("compiler.cppstd")
+        if cppstd and cppstd not in ['98', 'gnu98', '11', 'gnu11', '14', 'gnu14']:
+            prefix = "gnu" if str(cppstd).startswith("gnu") else ""
+            self.info.settings.compiler.cppstd = f"{prefix}14"
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+
+        # Fallback to C++14 - the implementation uses
+        # functionality that is not compliant with C++17
+        # See https://github.com/conan-io/conan/issues/16148
+        cppstd = self.settings.get_safe("compiler.cppstd")
+        if cppstd and conan_version.major >= 2:
+            from conan.tools.build import valid_max_cppstd
+            if not valid_max_cppstd(self, "14"):
+                self.output.warning(f"Recipe not compatible with C++ {cppstd}, falling back to C++14")
+                use_gnu_extensions = str(cppstd).startswith("gnu")
+                tc.blocks.remove("cppstd")
+                tc.cache_variables["CMAKE_CXX_STANDARD"] = "14"
+                tc.cache_variables["CMAKE_CXX_EXTENSIONS"] = use_gnu_extensions
+
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.3.0": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -77,39 +100,10 @@ class LibkmlConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {
-                "kmlbase": "LibKML::kmlbase",
-                "kmlxsd": "LibKML::kmlxsd",
-                "kmldom": "LibKML::kmldom",
-                "kmlengine": "LibKML::kmlengine",
-                "kmlconvenience": "LibKML::kmlconvenience",
-                "kmlregionator": "LibKML::kmlregionator",
-            }
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LibKML")
         self.cpp_info.set_property("pkg_config_name", "libkml")
-
-        self.cpp_info.names["cmake_find_package"] = "LibKML"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibKML"
 
         self._register_components({
             "kmlbase": {
@@ -142,10 +136,6 @@ class LibkmlConan(ConanFile):
             system_libs = values.get("system_libs", [])
             requires = values.get("requires", [])
             self.cpp_info.components[comp_cmake_lib_name].set_property("cmake_target_name", comp_cmake_lib_name)
-            self.cpp_info.components[comp_cmake_lib_name].names["cmake_find_package"] = comp_cmake_lib_name
-            self.cpp_info.components[comp_cmake_lib_name].names["cmake_find_package_multi"] = comp_cmake_lib_name
-            self.cpp_info.components[comp_cmake_lib_name].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components[comp_cmake_lib_name].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
             self.cpp_info.components[comp_cmake_lib_name].libs = [comp_cmake_lib_name]
             self.cpp_info.components[comp_cmake_lib_name].defines = defines
             self.cpp_info.components[comp_cmake_lib_name].system_libs = system_libs

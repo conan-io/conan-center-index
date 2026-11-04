@@ -11,8 +11,8 @@ required_conan_version = ">=1.53.0"
 class Bzip2Conan(ConanFile):
     name = "bzip2"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://www.bzip.org"
-    license = "bzip2-1.0.8"
+    homepage = "https://sourceware.org/bzip2"
+    license = "bzip2-1.0.6" # SPDX license identifier for version 1.0.6 or newer
     description = "bzip2 is a free and open-source file compression program that uses the Burrows Wheeler algorithm."
     topics = ("data-compressor", "file-compression")
     package_type = "library"
@@ -35,7 +35,6 @@ class Bzip2Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        self.license = f"bzip2-{self.version}"
 
     def configure(self):
         if self.options.shared:

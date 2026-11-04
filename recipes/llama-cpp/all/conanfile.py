@@ -1,0 +1,226 @@
+import os
+import textwrap
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import save, copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+
+required_conan_version = ">=2.0.9"
+
+
+class LlamaCppConan(ConanFile):
+    name = "llama-cpp"
+    description = "Inference of LLaMA model in pure C/C++"
+    topics = ("llama", "llm", "ai")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/ggml-org/llama.cpp"
+    license = "MIT"
+    settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
+
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_examples": [True, False],
+        "with_cuda": [True, False],
+        "with_vulkan": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_examples": False,
+        "with_cuda": False,
+        "with_vulkan": False,
+    }
+
+    implements = ["auto_shared_fpic"]
+
+    @property
+    def _with_subprocess(self):
+        return self.settings.os not in ("iOS", "tvOS", "watchOS", "Android", "Emscripten")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if is_apple_os(self):
+            del self.options.with_vulkan
+
+    @property
+    def _cuda_build_module(self):
+        # Adding this to the package info is necessary if we want consumers of llama to link correctly when
+        # they activate the CUDA option. In the future, when we have a CUDA recipe this could be removed.
+        cuda_target = "ggml::ggml-cuda"
+        return textwrap.dedent(f"""\
+            find_dependency(CUDAToolkit REQUIRED)
+            if (WIN32)
+                # As of CUDA 12.3.1, Windows does not offer a static cublas library
+                target_link_libraries({cuda_target} INTERFACE CUDA::cudart_static CUDA::cublas CUDA::cublasLt CUDA::cuda_driver)
+            else ()
+                target_link_libraries({cuda_target} INTERFACE CUDA::cudart_static CUDA::cublas_static CUDA::cublasLt_static CUDA::cuda_driver)
+            endif()
+        """)
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def validate(self):
+        check_min_cppstd(self, 17)
+
+    def validate_build(self):
+        if self.settings.compiler == "msvc" and "arm" in self.settings.arch:
+            raise ConanInvalidConfiguration("llama-cpp does not support ARM architecture on msvc, it recommends to use clang instead")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("cpp-httplib/[~0.59]", options={"with_openssl": True})
+
+        if self.options.get_safe("with_vulkan"):
+            self.requires("vulkan-loader/[>=1.3 <1.5]")
+            self.requires("spirv-headers/1.4.357.0")
+
+    def build_requirements(self):
+        if self.options.get_safe("with_vulkan"):
+            self.tool_requires("shaderc/[>=2025.3]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.set_property("cpp-httplib", "cmake_target_name", "cpp-httplib")
+        deps.generate()
+
+        tc = CMakeToolchain(self)
+        tc.variables["LLAMA_BUILD_TESTS"] = False
+        tc.cache_variables["LLAMA_BUILD_TOOLS"] = False
+        tc.cache_variables["LLAMA_BUILD_APP"] = False
+        tc.cache_variables["LLAMA_SUBPROCESS"] = self._with_subprocess
+        tc.variables["LLAMA_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
+
+        # Avoid -march=native so binaries do not depend on the build machine CPU
+        tc.cache_variables["GGML_NATIVE"] = False
+        tc.variables["GGML_BUILD_TESTS"] = False
+        tc.variables["GGML_BUILD_EXAMPLES"] = False
+        tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
+        tc.cache_variables["GGML_CUDA_NCCL"] = False
+
+        if self.options.get_safe("with_vulkan"):
+            tc.variables["GGML_VULKAN"] = True
+            shaderc_bin_path = os.path.join(self.dependencies.build["shaderc"].cpp_info.bindir, "glslc").replace("\\", "/")
+            tc.variables["Vulkan_GLSLC_EXECUTABLE"] = shaderc_bin_path
+        tc.cache_variables["LLAMA_BUILD_IS_DEV"] = False
+
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*", src=os.path.join(self.source_folder, "licenses"), dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        copy(self, "*", os.path.join(self.source_folder, "models"), os.path.join(self.package_folder, "res", "models"))
+        copy(self, "*.h*", os.path.join(self.source_folder, "common"), os.path.join(self.package_folder, "include", "common"), excludes=["subproc.h", "http.h"])
+        # llama-common-base is always static and upstream does not install it
+        copy(self, "*llama-common-base.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*llama-common-base.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        if self.options.with_cuda and not self.options.shared:
+            save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"), self._cuda_build_module)
+
+    def _get_backends(self):
+        results = ["cpu"]
+        if is_apple_os(self):
+            results.append("blas")
+            results.append("metal")
+        if self.options.with_cuda:
+            results.append("cuda")
+        if self.options.get_safe("with_vulkan"):
+            results.append("vulkan")
+        return results
+
+    def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "llama")
+        self.cpp_info.set_property("cmake_file_name", "llama")
+
+        self.cpp_info.components["ggml"].libs = ["ggml"]
+        self.cpp_info.components["ggml"].resdirs = ["res"]
+        self.cpp_info.components["ggml"].set_property("cmake_target_name", "ggml::ggml")
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["ggml"].system_libs.append("dl")
+        self.cpp_info.components["ggml"].requires = ["ggml-base"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["ggml-base"].system_libs.extend(["dl", "m", "pthread", "gomp"])
+
+        self.cpp_info.components["ggml-base"].libs = ["ggml-base"]
+        self.cpp_info.components["ggml-base"].resdirs = ["res"]
+        self.cpp_info.components["ggml-base"].set_property("cmake_target_name", "ggml::ggml-base")
+
+        # ggml::all only aggregates the backends, ggml::ggml already links them
+        self.cpp_info.components["ggml-all"].set_property("cmake_target_name", "ggml::all")
+
+        self.cpp_info.components["llama"].set_property("cmake_target_name", "llama")
+        self.cpp_info.components["llama"].set_property("pkg_config_name", "llama")
+        self.cpp_info.components["llama"].libs = ["llama"]
+        self.cpp_info.components["llama"].resdirs = ["res"]
+        self.cpp_info.components["llama"].requires = ["ggml", "ggml-base"]
+
+        # upstream does not export common, these are its build tree target names
+        self.cpp_info.components["common-base"].set_property("cmake_target_name", "llama-common-base")
+        self.cpp_info.components["common-base"].libs = ["llama-common-base"]
+
+        self.cpp_info.components["common"].set_property("cmake_target_name", "llama-common")
+        self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
+        self.cpp_info.components["common"].libs = ["llama-common"]
+        self.cpp_info.components["common"].requires = ["llama", "common-base", "cpp-httplib::cpp-httplib"]
+
+        if self._with_subprocess:
+            self.cpp_info.components["common"].defines.append("LLAMA_SUBPROCESS")
+
+        if is_apple_os(self):
+            self.cpp_info.components["common"].frameworks.extend(["Foundation", "Accelerate", "Metal"])
+        elif self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["common"].system_libs.extend(["dl", "m", "pthread"])
+
+        if self.options.with_cuda and not self.options.shared:
+            self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+            module_path = os.path.join("lib", "cmake", "llama-cpp-cuda-static.cmake")
+            self.cpp_info.set_property("cmake_build_modules", [module_path])
+
+        if self.options.shared:
+            self.cpp_info.components["llama"].defines.append("LLAMA_SHARED")
+            self.cpp_info.components["ggml-base"].defines.append("GGML_SHARED")
+            self.cpp_info.components["ggml"].defines.append("GGML_SHARED")
+
+        backends = self._get_backends()
+        for backend in backends:
+            self.cpp_info.components[f"ggml-{backend}"].libs = [f"ggml-{backend}"]
+            self.cpp_info.components[f"ggml-{backend}"].resdirs = ["res"]
+            self.cpp_info.components[f"ggml-{backend}"].set_property("cmake_target_name", f"ggml::ggml-{backend}")
+            if self.options.shared:
+                self.cpp_info.components[f"ggml-{backend}"].defines.append("GGML_BACKEND_SHARED")
+            self.cpp_info.components["ggml"].defines.append(f"GGML_USE_{backend.upper()}")
+            self.cpp_info.components["ggml"].requires.append(f"ggml-{backend}")
+            self.cpp_info.components["ggml-all"].requires.append(f"ggml-{backend}")
+
+            if backend == "vulkan":
+                self.cpp_info.components["ggml-vulkan"].requires = ["vulkan-loader::vulkan-loader", "spirv-headers::spirv-headers"]
+
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["ggml-cpu"].system_libs.append("gomp")
+
+        if is_apple_os(self):
+            if "blas" in backends:
+                self.cpp_info.components["ggml-blas"].frameworks.append("Accelerate")
+            if "metal" in backends:
+                self.cpp_info.components["ggml-metal"].frameworks.extend(["Metal", "MetalKit", "Foundation", "CoreFoundation"])

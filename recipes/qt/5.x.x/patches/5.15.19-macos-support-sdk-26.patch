@@ -1,0 +1,29 @@
+Upstream PR: https://codereview.qt-project.org/c/qt/qtbase/+/652022
+macOS: Remove linkage to AGL framework
+
+It's no longer available on macOS 26, and we don't use it anymore
+anyways.
+
+diff --git a/mkspecs/common/mac.conf b/mkspecs/common/mac.conf
+index 61bea95..9ba38d9 100644
+--- a/mkspecs/common/mac.conf
++++ b/mkspecs/common/mac.conf
+@@ -18,8 +18,7 @@ QMAKE_LIBDIR            =
+ 
+ # sdk.prf will prefix the proper SDK sysroot
+ QMAKE_INCDIR_OPENGL     = \
+-    /System/Library/Frameworks/OpenGL.framework/Headers \
+-    /System/Library/Frameworks/AGL.framework/Headers/
++    /System/Library/Frameworks/OpenGL.framework/Headers
+ 
+ QMAKE_FIX_RPATH         = install_name_tool -id
+ 
+@@ -30,7 +29,7 @@ QMAKE_LFLAGS_REL_RPATH  =
+ QMAKE_REL_RPATH_BASE    = @loader_path
+ 
+ QMAKE_LIBS_DYNLOAD      =
+-QMAKE_LIBS_OPENGL       = -framework OpenGL -framework AGL
++QMAKE_LIBS_OPENGL       = -framework OpenGL
+ QMAKE_LIBS_THREAD       =
+ 
+ QMAKE_INCDIR_WAYLAND    =

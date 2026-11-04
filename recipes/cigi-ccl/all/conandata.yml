@@ -1,0 +1,5 @@
+sources:
+  "4.0.6a":
+    url:
+    - "https://master.dl.sourceforge.net/project/cigi/CIGI%20Class%20Library%20%28CCL%29/CCL%20Version%204.0.6a/ccl_4_0%20rev6a.zip"
+    sha256: "a55099c0418c663e572109bd62ed2f7b411c51af7b404212988e36360e8a13cc"

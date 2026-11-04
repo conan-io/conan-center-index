@@ -1,0 +1,4 @@
+sources:
+  "4.10.0.0":
+    url: "https://github.com/EttusResearch/uhd/archive/refs/tags/v4.10.0.0.tar.gz"
+    sha256: "a9c66b52abcd586b513999f3a52345807b7551d01efac8c98eed813838be0297"

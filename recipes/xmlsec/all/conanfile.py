@@ -60,11 +60,11 @@ class XmlSecConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libxml2/2.11.4", transitive_headers=True)
+        self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True)
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if self.options.with_xslt:
-            self.requires("libxslt/1.1.34")
+            self.requires("libxslt/[^1.1]")
 
     def validate(self):
         if self.options.with_nss:
@@ -80,7 +80,7 @@ class XmlSecConan(ConanFile):
         if not is_msvc(self):
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/[>=2.2 <3]")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -105,6 +105,9 @@ class XmlSecConan(ConanFile):
             tc = AutotoolsToolchain(self)
             if not self.options.shared:
                 tc.extra_defines.append("XMLSEC_STATIC")
+            if self.settings.os == "Windows":
+                tc.extra_defines.append("WIN32_LEAN_AND_MEAN")
+
             yes_no = lambda v: "yes" if v else "no"
             tc.configure_args.extend([
                 "--enable-crypto-dl=no",
@@ -120,6 +123,7 @@ class XmlSecConan(ConanFile):
                 "--enable-docs=no",
                 "--enable-mans=no",
             ])
+            tc.configure_args.append("--enable-pedantic=no")
             tc.generate()
 
             deps = AutotoolsDeps(self)
@@ -141,12 +145,7 @@ class XmlSecConan(ConanFile):
             if self.options.with_openssl:
                 ov = Version(self.dependencies["openssl"].ref.version)
                 if ov.major >= "3":
-                    if Version(self.version) < "1.2.35":
-                        # configure.js doesn't understand openssl=300 before xmlsec 1.2.35,
-                        # For these xmlsec versions, setting 110 even for OpenSSL 3.x should be compatible
-                        crypto_engines.append("openssl=110")
-                    else:
-                        crypto_engines.append("openssl=300")
+                    crypto_engines.append("openssl=300")
                 else:
                     crypto_engines.append(f"openssl={ov.major}{ov.minor}0")
 
@@ -158,14 +157,14 @@ class XmlSecConan(ConanFile):
                 f"static={yes_no(not self.options.shared)}",
                 "include=\"{}\"".format(";".join(deps_includedirs)),
                 "lib=\"{}\"".format(";".join(deps_libdirs)),
-                "with-dl=no",
                 f"xslt={yes_no(self.options.with_xslt)}",
                 "iconv=no",
                 "crypto={}".format(",".join(crypto_engines)),
+                "pedantic=no"
             ]
 
             with chdir(self, os.path.join(self.source_folder, "win32")):
-                self.run(f"cscript configure.js {' '.join(args)}")
+                self.run(f"powershell -ExecutionPolicy RemoteSigned -File configure.ps1 {' '.join(args)}")
 
             # Fix library names in generated Makefile.msvc
             def format_libs(package):
@@ -174,11 +173,12 @@ class XmlSecConan(ConanFile):
                 return " ".join(libs)
 
             makefile_msvc = os.path.join(self.source_folder, "win32", "Makefile.msvc")
-            replace_in_file(self, makefile_msvc, "libxml2.lib", format_libs("libxml2"))
-            replace_in_file(self, makefile_msvc, "libxml2_a.lib", format_libs("libxml2"))
+            debug_suffix = "d" if self.settings.build_type == "Debug" else ""
+            replace_in_file(self, makefile_msvc, f"libxml2{debug_suffix}.lib", format_libs("libxml2"))
+            replace_in_file(self, makefile_msvc, f"libxml2{debug_suffix}s.lib", format_libs("libxml2"))
             if self.options.with_xslt:
-                replace_in_file(self, makefile_msvc, "libxslt.lib", format_libs("libxslt"))
-                replace_in_file(self, makefile_msvc, "libxslt_a.lib", format_libs("libxslt"))
+                replace_in_file(self, makefile_msvc, f"libxslt{debug_suffix}.lib", format_libs("libxslt"))
+                replace_in_file(self, makefile_msvc, f"libxslt{debug_suffix}s.lib", format_libs("libxslt"))
             if self.options.with_openssl:
                 replace_in_file(self, makefile_msvc, "libcrypto.lib", format_libs("openssl"))
 
@@ -199,8 +199,6 @@ class XmlSecConan(ConanFile):
             if not self.options.shared:
                 rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
             rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-            os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec-openssl_a.lib" if self.options.shared else "libxmlsec-openssl.lib"))
-            os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec_a.lib" if self.options.shared else "libxmlsec.lib"))
         else:
             autotools = Autotools(self)
             autotools.install()

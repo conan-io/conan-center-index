@@ -1,0 +1,141 @@
+--- a/src/ANN.cpp
++++ b/src/ANN.cpp
+@@ -48,9 +48,9 @@ ANNdist annDist(						// interpoint squared distance
+ 	ANNpoint			p,
+ 	ANNpoint			q)
+ {
+-	register int d;
+-	register ANNcoord diff;
+-	register ANNcoord dist;
++	int d;
++	ANNcoord diff;
++	ANNcoord dist;
+ 
+ 	dist = 0;
+ 	for (d = 0; d < dim; d++) {
+--- a/src/kd_fix_rad_search.cpp
++++ b/src/kd_fix_rad_search.cpp
+@@ -147,11 +147,11 @@ void ANNkd_split::ann_FR_search(ANNdist box_dist)
+ 
+ void ANNkd_leaf::ann_FR_search(ANNdist box_dist)
+ {
+-	register ANNdist dist;				// distance to data point
+-	register ANNcoord* pp;				// data coordinate pointer
+-	register ANNcoord* qq;				// query coordinate pointer
+-	register ANNcoord t;
+-	register int d;
++	ANNdist dist;				// distance to data point
++	ANNcoord* pp;				// data coordinate pointer
++	ANNcoord* qq;				// query coordinate pointer
++	ANNcoord t;
++	int d;
+ 
+ 	for (int i = 0; i < n_pts; i++) {	// check points in bucket
+ 
+--- a/src/kd_pr_search.cpp
++++ b/src/kd_pr_search.cpp
+@@ -180,12 +180,12 @@ void ANNkd_split::ann_pri_search(ANNdist box_dist)
+ 
+ void ANNkd_leaf::ann_pri_search(ANNdist box_dist)
+ {
+-	register ANNdist dist;				// distance to data point
+-	register ANNcoord* pp;				// data coordinate pointer
+-	register ANNcoord* qq;				// query coordinate pointer
+-	register ANNdist min_dist;			// distance to k-th closest point
+-	register ANNcoord t;
+-	register int d;
++	ANNdist dist;				// distance to data point
++	ANNcoord* pp;				// data coordinate pointer
++	ANNcoord* qq;				// query coordinate pointer
++	ANNdist min_dist;			// distance to k-th closest point
++	ANNcoord t;
++	int d;
+ 
+ 	min_dist = ANNprPointMK->max_key(); // k-th smallest distance so far
+ 
+--- a/src/kd_search.cpp
++++ b/src/kd_search.cpp
+@@ -171,12 +171,12 @@ void ANNkd_split::ann_search(ANNdist box_dist)
+ 
+ void ANNkd_leaf::ann_search(ANNdist box_dist)
+ {
+-	register ANNdist dist;				// distance to data point
+-	register ANNcoord* pp;				// data coordinate pointer
+-	register ANNcoord* qq;				// query coordinate pointer
+-	register ANNdist min_dist;			// distance to k-th closest point
+-	register ANNcoord t;
+-	register int d;
++	ANNdist dist;				// distance to data point
++	ANNcoord* pp;				// data coordinate pointer
++	ANNcoord* qq;				// query coordinate pointer
++	ANNdist min_dist;			// distance to k-th closest point
++	ANNcoord t;
++	int d;
+ 
+ 	min_dist = ANNkdPointMK->max_key(); // k-th smallest distance so far
+ 
+--- a/src/kd_util.cpp
++++ b/src/kd_util.cpp
+@@ -127,10 +127,10 @@ ANNdist annBoxDistance(			// compute distance from point to box
+ 	const ANNpoint		hi,				// high point of box
+ 	int					dim)			// dimension of space
+ {
+-	register ANNdist dist = 0.0;		// sum of squared distances
+-	register ANNdist t;
++	ANNdist dist = 0.0;		// sum of squared distances
++	ANNdist t;
+ 
+-	for (register int d = 0; d < dim; d++) {
++	for (int d = 0; d < dim; d++) {
+ 		if (q[d] < lo[d]) {				// q is left of box
+ 			t = ANNdist(lo[d]) - ANNdist(q[d]);
+ 			dist = ANN_SUM(dist, ANN_POW(t));
+@@ -238,8 +238,8 @@ void annMedianSplit(
+ 	int l = 0;							// left end of current subarray
+ 	int r = n-1;						// right end of current subarray
+ 	while (l < r) {
+-		register int i = (r+l)/2;		// select middle as pivot
+-		register int k;
++		int i = (r+l)/2;		// select middle as pivot
++		int k;
+ 
+ 		if (PA(i,d) > PA(r,d))			// make sure last > pivot
+ 			PASWAP(i,r)
+--- a/src/pr_queue.h
++++ b/src/pr_queue.h
+@@ -86,9 +86,9 @@ public:
+ 		PQinfo inf)						// item info
+ 		{
+ 			if (++n > max_size) annError("Priority queue overflow.", ANNabort);
+-			register int r = n;
++			int r = n;
+ 			while (r > 1) {				// sift up new item
+-				register int p = r/2;
++				int p = r/2;
+ 				ANN_FLOP(1)				// increment floating ops
+ 				if (pq[p].key <= kv)	// in proper order
+ 					break;
+@@ -105,9 +105,9 @@ public:
+ 		{
+ 			kv = pq[1].key;				// key of min item
+ 			inf = pq[1].info;			// information of min item
+-			register PQkey kn = pq[n--].key;// last item in queue
+-			register int p = 1;			// p points to item out of position
+-			register int r = p<<1;		// left child of p
++			PQkey kn = pq[n--].key;// last item in queue
++			int p = 1;			// p points to item out of position
++			int r = p<<1;		// left child of p
+ 			while (r <= n) {			// while r is still within the heap
+ 				ANN_FLOP(2)				// increment floating ops
+ 										// set r to smaller child of p
+--- a/src/pr_queue_k.h
++++ b/src/pr_queue_k.h
+@@ -100,7 +100,7 @@ public:
+ 		PQKkey kv,						// key value
+ 		PQKinfo inf)					// item info
+ 		{
+-			register int i;
++			int i;
+ 										// slide larger values up
+ 			for (i = n; i > 0; i--) {
+ 				if (mk[i-1].key > kv)

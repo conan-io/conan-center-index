@@ -1,13 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
 import os
 
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.1"
 
 
 class ProtopufConan(ConanFile):
@@ -18,20 +19,9 @@ class ProtopufConan(ConanFile):
     homepage = "https://github.com/PragmaTwice/protopuf"
     topics = ("serialization", "protobuf", "metaprogramming", "header-only")
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
-    @property
-    def _minimum_cpp_standard(self):
-        return 20
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "10",
-            "clang": "12",
-        }
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -40,21 +30,16 @@ class ProtopufConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler == "apple-clang":
+        check_min_cppstd(self, 20)
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "17":
+            # there are specific C++20 features used in this library that require apple-clang 17 or higher
             raise ConanInvalidConfiguration(
-                f"{self.ref} does not yet support apple-clang."
-            )
-
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
+                f"apple-clang 17 or higher is required"
             )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def build(self):
         pass

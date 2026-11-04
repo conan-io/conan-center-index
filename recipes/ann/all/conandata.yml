@@ -1,0 +1,12 @@
+sources:
+  "1.1.2":
+    url: "https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz"
+    sha256: "eea03f2e224b66813226d775053316675375dcec45bd263674c052d9324a49a5"
+patches:
+  "1.1.2":
+    - patch_file: "patches/1.1.2-0001-fix-windows-static.patch"
+      patch_description: "Fix windows static"
+      patch_type: "portability"
+    - patch_file: "patches/1.1.2-0002-fix-cppstd17+-register-keyword.patch"
+      patch_description: "Fix compilation with C++17 (or above) standard, by removing register keyword"
+      patch_type: "portability"

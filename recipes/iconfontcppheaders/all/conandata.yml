@@ -1,0 +1,13 @@
+sources:
+  "cci.20240620":
+    sha256: 363613c9ea6b4d4b290527bc1fcd626b09accd985a40f14442e86d1df16ec487
+    url: https://github.com/juliettef/IconFontCppHeaders/archive/62d27fa93d8f1f881dac18f13881dd97af66fa74/main.zip
+  "cci.20240128":
+    sha256: de946a4471dca969426b2e7863d79136a91f2e4e4cc7a766df31bbb8412571f9
+    url: https://github.com/juliettef/IconFontCppHeaders/archive/8886c5657bac22b8fee34354871e3ade2a596433/main.zip
+  "cci.20231102":
+    sha256: 7618e844dcbfea2404c209e8b52158a37c2368a79cc77e94087375a8186442c4
+    url: https://github.com/juliettef/IconFontCppHeaders/archive/41b304750e83c0a89375cc1834f65c1204308b4a/main.zip
+  "cci.20231026":
+    sha256: b65a0256820ce24541247eeb22843968164acc40786c017392e53c5aa5a58996
+    url: https://github.com/juliettef/IconFontCppHeaders/archive/b1700cdf6ca2f78f8d27321dfecdafd7c2d8ef08/main.zip

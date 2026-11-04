@@ -4,6 +4,9 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from os import path
 
+required_conan_version = ">=1.50.0"
+
+
 class IntelNeon2sseConan(ConanFile):
     name = "intel-neon2sse"
     url = "https://github.com/conan-io/conan-center-index"
@@ -11,6 +14,7 @@ class IntelNeon2sseConan(ConanFile):
     description = "Header only library intended to simplify ARM->IA32 porting"
     license = "BSD-2-Clause"
     topics = "neon", "sse", "port", "translation", "intrinsics"
+    package_type = "header-library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "SSE4": [True, False],
@@ -21,16 +25,18 @@ class IntelNeon2sseConan(ConanFile):
         "disable_performance_warnings": False,
     }
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
+
     def validate(self):
         if self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("neon2sse only supports arch={x86,x86_64}")
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -47,13 +53,11 @@ class IntelNeon2sseConan(ConanFile):
         copy(self, "LICENSE", dst=path.join(self.package_folder, "licenses"), src=self.source_folder)
         rmdir(self, path.join(self.package_folder, "lib"))
 
-    def package_id(self):
-        self.info.clear()
-
     def package_info(self):
+        self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.set_property("cmake_file_name", "NEON_2_SSE")
-        self.cpp_info.set_property("cmake_target_name", "NEON_2_SSE::NEON_2_SSE")        
+        self.cpp_info.set_property("cmake_target_name", "NEON_2_SSE::NEON_2_SSE")
         if self.options.SSE4:
             self.cpp_info.defines.append("USE_SSE4")
         if self.options.disable_performance_warnings:

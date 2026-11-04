@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -10,10 +11,10 @@ required_conan_version = ">=1.54.0"
 class UriparserConan(ConanFile):
     name = "uriparser"
     description = "Strictly RFC 3986 compliant URI parsing and handling library written in C89"
-    topics = ("uri", "parser")
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://uriparser.github.io/"
-    license = "BSD-3-Clause"
+    topics = ("uri", "parser")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -56,7 +57,10 @@ class UriparserConan(ConanFile):
         tc.variables["URIPARSER_BUILD_CHAR"] = self.options.with_char
         tc.variables["URIPARSER_BUILD_WCHAR"] = self.options.with_wchar
         if is_msvc(self):
-            tc.variables["URIPARSER_MSVC_RUNTIME"] = f"/{msvc_runtime_flag(self)}"
+            if Version(self.version) >= "1.0.0":
+                tc.variables["URIPARSER_MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
+            else:
+                tc.variables["URIPARSER_MSVC_RUNTIME"] = f"/{msvc_runtime_flag(self)}"
         tc.generate()
 
     def build(self):
@@ -66,7 +70,10 @@ class UriparserConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) < "1.0.0":
+            copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "COPYING.BSD-3-Clause", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

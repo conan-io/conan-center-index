@@ -1,4 +1,70 @@
 sources:
+  "15.1.0":
+    mcf:
+      seh:
+        ucrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/15.1.0-rt_v12-rev0/x86_64-15.1.0-release-mcf-seh-ucrt-rt_v12-rev0.7z"
+          sha256: "334fc18101affbc32d7562f8383392278f28005a91c9bd4a2d6d20b8243ad251"
+    posix:
+      seh:
+        ucrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/15.1.0-rt_v12-rev0/x86_64-15.1.0-release-posix-seh-ucrt-rt_v12-rev0.7z"
+          sha256: "c83e2ae8af805aa2a5d458f6001f67152c8d88b5d4f74a84bcf3e9322e5d40f3"
+        msvcrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/15.1.0-rt_v12-rev0/x86_64-15.1.0-release-posix-seh-msvcrt-rt_v12-rev0.7z"
+          sha256: "ba447149a73cab43fdaf3352d1164f2bd5e96bc01ae6564fbaebd62f1b8eb435"
+    win32:
+      seh:
+        ucrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/15.1.0-rt_v12-rev0/x86_64-15.1.0-release-win32-seh-ucrt-rt_v12-rev0.7z"
+          sha256: "43d4e9df0261113a593d2639034cacd88fcb7734c51664ac327d6bfb8cc89aab"
+        msvcrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/15.1.0-rt_v12-rev0/x86_64-15.1.0-release-win32-seh-msvcrt-rt_v12-rev0.7z"
+          sha256: "e232ffc160b2d48e1b87b125e2c8f143191a0af20e3acfe899e6939105ba3f6f"
+  "14.2.0":
+    mcf:
+      seh:
+        ucrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev2/x86_64-14.2.0-release-mcf-seh-ucrt-rt_v12-rev2.7z"
+          sha256: "1f57a5c6fafe320d21483520bff2620079b4878299b87a10f91d76043b23af19"
+    posix:
+      seh:
+        ucrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev2/x86_64-14.2.0-release-posix-seh-ucrt-rt_v12-rev2.7z"
+          sha256: "918732a84fc8006586be0f5909b75896ab85d5e0e9df521b4d4f9202e7debc12"
+        msvcrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev2/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev2.7z"
+          sha256: "9b8f39d04521c078d6a7f88ae4f9f052eb574f303f4134c7b614074d34e21363"
+    win32:
+      seh:
+        ucrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev2/x86_64-14.2.0-release-win32-seh-ucrt-rt_v12-rev2.7z"
+          sha256: "e0a9f8f792143b1ad8b8ac1a750c7d4d20f09a2b95126c1dfd29cfdfa721233b"
+        msvcrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/14.2.0-rt_v12-rev2/x86_64-14.2.0-release-win32-seh-msvcrt-rt_v12-rev2.7z"
+          sha256: "01517bf6ad5fc5f697a348897582a7a4b2defe53ba633e663d4a08dbb1b86c8e"
+  "13.2.0":
+    mcf:
+      seh:
+        ucrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/13.2.0-rt_v11-rev1/x86_64-13.2.0-release-mcf-seh-ucrt-rt_v11-rev1.7z"
+          sha256: "9ae11d0b00f4deae7246471193191de62d9e0318917d3577b568e0974c3069bc"
+    posix:
+      seh:
+        ucrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/13.2.0-rt_v11-rev1/x86_64-13.2.0-release-posix-seh-ucrt-rt_v11-rev1.7z"
+          sha256: "475ee72c5ce1bd54a3e3c334bdd3be5e6575334184fd9718013aa362c9819d2f"
+        msvcrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/13.2.0-rt_v11-rev1/x86_64-13.2.0-release-posix-seh-msvcrt-rt_v11-rev1.7z"
+          sha256: "7d3f84b17b235aa233f0fb5df9765bf79dbea950177a69ff99f8ad1d75b0aa6e"
+    win32:
+      seh:
+        ucrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/13.2.0-rt_v11-rev1/x86_64-13.2.0-release-win32-seh-ucrt-rt_v11-rev1.7z"
+          sha256: "74ca64c55220edd3196681782fbff653c2b9cb4f427f9e532ab6e9a0823dc997"
+        msvcrt:
+          url: "https://github.com/niXman/mingw-builds-binaries/releases/download/13.2.0-rt_v11-rev1/x86_64-13.2.0-release-win32-seh-msvcrt-rt_v11-rev1.7z"
+          sha256: "15b914f38f2f2e2d6f7b9b8425ff22b7e406878b01920190b09ce0dd8259c6aa"
   "12.2.0":
     posix:
       seh:

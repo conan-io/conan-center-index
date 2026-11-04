@@ -25,18 +25,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         save(self, "qt.conf", """[Paths]
-Prefix = {}
-ArchData = bin/archdatadir
-HostData = bin/archdatadir
-Data = bin/datadir
-Sysconf = bin/sysconfdir
-LibraryExecutables = bin/archdatadir/bin
-Plugins = bin/archdatadir/plugins
-Imports = bin/archdatadir/imports
-Qml2Imports = bin/archdatadir/qml
-Translations = bin/datadir/translations
-Documentation = bin/datadir/doc
-Examples = bin/datadir/examples""".format(self.dependencies["qt"].package_folder.replace('\\', '/')))
+Prefix = {}""".format(self.dependencies["qt"].package_folder.replace('\\', '/')))
 
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"

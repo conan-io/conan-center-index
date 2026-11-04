@@ -8,11 +8,12 @@ required_conan_version = ">=1.50.0"
 
 class SpanLiteConan(ConanFile):
     name = "span-lite"
+    description = "A C++20-like span for C++98, C++11 and later in a single-file header-only library"
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinmoene/span-lite"
-    description = "span lite - A C++20-like span for C++98, C++11 and later in a single-file header-only library"
-    topics = ("cpp98", "cpp11", "cpp14", "cpp17", "span", "span-implementations")
-    license = "BSL-1.0"
+    topics = ("cpp98", "cpp11", "cpp14", "cpp17", "span", "span-implementations", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -23,11 +24,7 @@ class SpanLiteConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
-
-    def build(self):
-        pass
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
@@ -38,7 +35,6 @@ class SpanLiteConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "nonstd::span-lite")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "span-lite"
@@ -48,6 +44,5 @@ class SpanLiteConan(ConanFile):
         self.cpp_info.components["spanlite"].names["cmake_find_package"] = "span-lite"
         self.cpp_info.components["spanlite"].names["cmake_find_package_multi"] = "span-lite"
         self.cpp_info.components["spanlite"].set_property("cmake_target_name", "nonstd::span-lite")
-        self.cpp_info.components["spanlite"].bindirs = []
         self.cpp_info.components["spanlite"].libdirs = []
         self.cpp_info.components["spanlite"].resdirs = []

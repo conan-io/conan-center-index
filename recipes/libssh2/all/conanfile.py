@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, collect_libs
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, collect_libs, replace_in_file
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class Libssh2Conan(ConanFile):
@@ -57,14 +57,15 @@ class Libssh2Conan(ConanFile):
         tc.cache_variables['BUILD_TESTING'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
         tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        # To install relocatable shared lib on Macos by default
-        tc.variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        # Workaround until github.com/conan-io/conan/pull/12600 is merged
+    
         if is_msvc(self):
+            # Workaround until github.com/conan-io/conan/pull/12600 is merged
             tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("mbedtls", "cmake_file_name", "MbedTLS")
+        deps.set_property("mbedtls", "cmake_additional_variables_prefixes", ["MBEDTLS"])
         deps.generate()
 
     def config_options(self):
@@ -84,12 +85,15 @@ class Libssh2Conan(ConanFile):
         if self.options.crypto_backend == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.crypto_backend == "mbedtls":
-            # libssh2/<=1.10.0 doesn't support mbedtls/3.x.x
-            self.requires("mbedtls/2.25.0")
+            self.requires("mbedtls/3.5.0")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.20]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "MBEDTLS_FOUND", "MbedTLS_FOUND")
 
     def build(self):
         cmake = CMake(self)
@@ -116,11 +120,6 @@ class Libssh2Conan(ConanFile):
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_libssh2"].system_libs.extend(["pthread", "dl"])
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Libssh2"
-        self.cpp_info.names["cmake_find_package_multi"] = "Libssh2"
-        self.cpp_info.components["_libssh2"].names["cmake_find_package"] = "libssh2"
-        self.cpp_info.components["_libssh2"].names["cmake_find_package_multi"] = "libssh2"
         self.cpp_info.components["_libssh2"].set_property("cmake_target_name", "Libssh2::libssh2")
         self.cpp_info.components["_libssh2"].set_property("pkg_config_name", "libssh2")
         if self.options.with_zlib:

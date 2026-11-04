@@ -1,76 +1,30 @@
 sources:
-  "13.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-13.0.0/apache-arrow-13.0.0.tar.gz?action=download"
-    sha256: "35dfda191262a756be934eef8afee8d09762cad25021daa626eb249e251ac9e6"
-  "12.0.1":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-12.0.1/apache-arrow-12.0.1.tar.gz?action=download"
-    sha256: "3481c411393aa15c75e88d93cf8315faf7f43e180fe0790128d3840d417de858"
-  "12.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-12.0.0/apache-arrow-12.0.0.tar.gz?action=download"
-    sha256: "ddd8347882775e53af7d0965a1902b7d8fcd0a030fd14f783d4f85e821352d52"
-  "11.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-11.0.0/apache-arrow-11.0.0.tar.gz?action=download"
-    sha256: "2dd8f0ea0848a58785628ee3a57675548d509e17213a2f5d72b0d900b43f5430"
-  "10.0.1":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-10.0.1/apache-arrow-10.0.1.tar.gz?action=download"
-    sha256: "c814e0670112a22c1a6ec03ab420a52ae236a9a42e9e438c3cbd37f37e658fb3"
-  "10.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-10.0.0/apache-arrow-10.0.0.tar.gz?action=download"
-    sha256: "5b46fa4c54f53e5df0019fe0f9d421e93fc906b625ebe8e89eed010d561f1f12"
-  "8.0.1":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-8.0.1/apache-arrow-8.0.1.tar.gz?action=download"
-    sha256: "82d46929f7574715551da21700f100b39f99c3c4d6790f26cac86d869d64e94e"
-  "8.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-8.0.0/apache-arrow-8.0.0.tar.gz?action=download"
-    sha256: "ad9a05705117c989c116bae9ac70492fe015050e1b80fb0e38fde4b5d863aaa3"
-  "7.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-7.0.0/apache-arrow-7.0.0.tar.gz?action=download"
-    sha256: "e8f49b149a15ecef4e40fcfab1b87c113c6b1ee186005c169e5cdf95d31a99de"
-  "2.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-2.0.0/apache-arrow-2.0.0.tar.gz?action=download"
-    sha256: "be0342cc847bb340d86aeaef43596a0b6c1dbf1ede9c789a503d939e01c71fbe"
-  "1.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-1.0.0/apache-arrow-1.0.0.tar.gz?action=download"
-    sha256: "86ddb9feb48203a5aaf9cc4f2827525e20a2ca4d7239e492af17e74532ccf243"
+  "26.0.0":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-26.0.0/apache-arrow-26.0.0.tar.gz?action=download"
+    sha256: "b153ef472dd89ef4cb84867ca238f2a3a9347d8f4a78913d16ca2201606f0425"
+  "25.0.1":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-25.0.1/apache-arrow-25.0.1.tar.gz?action=download"
+    sha256: "43d5de0a581f43cf63a2c06b4dcf13b9ff6fcd800f023324596e5781093bc500"
+  "24.0.0":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-24.0.0/apache-arrow-24.0.0.tar.gz?action=download"
+    sha256: "9a8094d24fa33b90c672ab77fdda253f29300c8b0dd3f0b8e55a29dbd98b82c9"
+  "22.0.0":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-22.0.0/apache-arrow-22.0.0.tar.gz?action=download"
+    sha256: "131250cd24dec0cddde04e2ad8c9e2bc43edc5e84203a81cf71cf1a33a6e7e0f"
+  "19.0.1":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-19.0.1/apache-arrow-19.0.1.tar.gz?action=download"
+    sha256: "acb76266e8b0c2fbb7eb15d542fbb462a73b3fd1e32b80fad6c2fafd95a51160"
 patches:
-  "8.0.1":
-    - patch_file: "patches/8.0.0-0005-install-utils.patch"
-      patch_description: "enable utilis installation"
-      patch_type: "conan"
-    - patch_file: "patches/8.0.0-0006-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "8.0.0":
-    - patch_file: "patches/8.0.0-0005-install-utils.patch"
-      patch_description: "enable utilis installation"
-      patch_type: "conan"
-    - patch_file: "patches/8.0.0-0006-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "7.0.0":
-    - patch_file: "patches/7.0.0-0006-install-utils.patch"
-      patch_description: "enable utilis installation"
-      patch_type: "conan"
-    - patch_file: "patches/7.0.0-0007-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.0.0":
-    - patch_file: "patches/2.0.0-0003-fix-shared-msvc.patch"
-      patch_description: "make shared enabled in msvc"
-      patch_type: "official"
-    - patch_file: "patches/2.0.0-0005-gandiva-engine.patch"
-      patch_description: "fix grandiva compilation error"
-      patch_type: "official"
-    - patch_file: "patches/2.0.0-0008-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "1.0.0":
-    - patch_file: "patches/1.0.0-0003-fix-shared-msvc.patch"
-      patch_description: "make shared enabled in msvc"
-      patch_type: "official"
-    - patch_file: "patches/1.0.0-0005-fix-make12-namespace.patch"
-      patch_description: "fix ambiguous `make12` function between std and date"
-      patch_type: "official"
-    - patch_file: "patches/1.0.0-0006-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
+  "26.0.0":
+    - patch_file: "patches/26.0.0-0001-fix-downloaded-mimalloc.patch"
+  "25.0.1":
+    - patch_file: "patches/25.0.1-0001-fix-downloaded-mimalloc.patch"
+  "24.0.0":
+    - patch_file: "patches/24.0.0-0001-fix-downloaded-mimalloc.patch"
+  "22.0.0":
+    - patch_file: "patches/22.0.0-0001-fix-downloaded-mimalloc.patch"
+    - patch_file: "patches/22.0.0-0002-fix-msvc-arm64.patch"
+  "19.0.1":
+    - patch_file: "patches/19.0.1-0001-fix-cmake.patch"
+    - patch_file: "patches/19.0.1-0002-fix-downloaded-mimalloc.patch"
+

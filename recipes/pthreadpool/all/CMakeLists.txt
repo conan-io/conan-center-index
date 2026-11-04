@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(cmake_wrapper)
 
 find_package(fxdiv REQUIRED CONFIG)

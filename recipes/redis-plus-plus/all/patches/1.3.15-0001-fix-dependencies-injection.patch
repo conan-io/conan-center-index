@@ -1,0 +1,19 @@
+diff --git a/cmake/FindHiredis.cmake b/cmake/FindHiredis.cmake
+index 6ea12bd..f1be652 100644
+--- a/cmake/FindHiredis.cmake
++++ b/cmake/FindHiredis.cmake
+@@ -19,7 +19,6 @@ if(hiredis_FOUND)
+     endif()
+
+     if(REDIS_PLUS_PLUS_USE_TLS)
+-        find_package(hiredis_ssl REQUIRED)
+         list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS hiredis::hiredis_ssl)
+         find_package(OpenSSL REQUIRED)
+         list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS ${OPENSSL_LIBRARIES})
+@@ -35,4 +34,4 @@ else()
+         find_package(OpenSSL REQUIRED)
+         list(APPEND REDIS_PLUS_PLUS_HIREDIS_LIBS ${OPENSSL_LIBRARIES})
+     endif()
+-endif()
+\ No newline at end of file
++endif()

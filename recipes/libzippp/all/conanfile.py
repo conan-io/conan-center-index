@@ -1,12 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class LibZipppConan(ConanFile):
@@ -28,38 +27,17 @@ class LibZipppConan(ConanFile):
         "fPIC": True,
         "with_encryption": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        if Version(self.version) == "4.0":
-            self.requires("libzip/1.7.3")
-        else:
-            versions = str(self.version).split("-")
-            if len(versions) == 2:
-                self.requires(f"libzip/{versions[1]}")
+        self.requires("libzip/[>=1.10.1 <2]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        libzippp_version = str(self.version)
-        if libzippp_version != "4.0" and len(libzippp_version.split("-")) != 2:
-            raise ConanInvalidConfiguration(f"{self.ref}: version number must include '-'. (ex. '5.0-1.8.0')")
+        check_min_cppstd(self, 11)
 
         if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libc++. Use libstdc++ instead.")
@@ -83,14 +61,7 @@ class LibZipppConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_source(self):
-        if Version(self.version) <= "6.0":
-            replace_in_file(self, os.path.join(self.source_folder, 'CMakeLists.txt'),
-                            'find_package(LIBZIP MODULE REQUIRED)',
-                            'find_package(libzip REQUIRED CONFIG)')
-
     def build(self):
-        self._patch_source()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

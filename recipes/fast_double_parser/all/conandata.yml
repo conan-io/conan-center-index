@@ -1,4 +1,7 @@
 sources:
+  "0.8.1":
+    url: "https://github.com/lemire/fast_double_parser/archive/v0.8.1.tar.gz"
+    sha256: "685c1b7b9383f5fcd96264467bb2efa0c9995d7e8afb66ed9c84663466c3cefd"
   "0.7.0":
     url: "https://github.com/lemire/fast_double_parser/archive/v0.7.0.tar.gz"
     sha256: "eb80a1d9c406bbe8cb22fffd3c007651f716abd03225009302d8aba8e9c4df77"

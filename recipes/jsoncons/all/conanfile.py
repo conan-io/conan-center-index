@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
+from conan.tools.build import check_min_cppstd
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0"
 
 
 class JsonconsConan(ConanFile):
@@ -19,15 +20,19 @@ class JsonconsConan(ConanFile):
         "csv-reader", "jsonschema", "json-construction", "streaming-json-read",
         "header-only",
     )
-    pckage_type = "header-library"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
+
+    def validate(self):
+        check_min_cppstd(self, "14")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -41,8 +46,5 @@ class JsonconsConan(ConanFile):
         self.cpp_info.libdirs = []
 
         self.cpp_info.set_property("cmake_file_name", "jsoncons")
-        self.cpp_info.set_property("cmake_target_name", "jsoncons")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "jsoncons"
-        self.cpp_info.names["cmake_find_package_multi"] = "jsoncons"
+        self.cpp_info.set_property("cmake_target_name", "jsoncons::jsoncons")
+        self.cpp_info.set_property("cmake_target_aliases", ["jsoncons"])

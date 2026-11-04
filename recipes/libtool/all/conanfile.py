@@ -5,13 +5,14 @@ from conan.tools.env import Environment
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc, unix_path_package_info_legacy
+from conan.tools.microsoft import is_msvc
 
 import os
 import re
 import shutil
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.4"
+
 
 class LibtoolConan(ConanFile):
     name = "libtool"
@@ -24,6 +25,8 @@ class LibtoolConan(ConanFile):
     topics = ("configure", "library", "shared", "static")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     settings = "os", "arch", "compiler", "build_type"
+    languages = ["C"]
+    implements = ["auto_shared_fpic"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -36,44 +39,23 @@ class LibtoolConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("automake/1.16.5")
 
-        #TODO: consider adding m4 as direct dependency, perhaps when we start using version ranges.
-        # https://github.com/conan-io/conan-center-index/pull/16248#discussion_r1116332095
-        #self.requires("m4/1.4.19") 
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def build_requirements(self):
-        if hasattr(self, "settings_build"):
-            self.tool_requires("automake/1.16.5")
-            self.tool_requires("m4/1.4.19")               # Needed by configure
-
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("m4/1.4.19")               # Needed by configure
         self.tool_requires("gnu-config/cci.20210814")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _datarootdir(self):
@@ -91,10 +73,6 @@ class LibtoolConan(ConanFile):
             env.vars(self, scope="build").save_script("conanbuild_vcvars_options.bat")
 
         tc = AutotoolsToolchain(self)
-
-        if is_msvc(self) and check_min_vs(self, "180", raise_invalid=False):
-            tc.extra_cflags.append("-FS")
-
         tc.configure_args.extend([
             "--datarootdir=${prefix}/res",
             "--enable-shared",
@@ -209,9 +187,16 @@ class LibtoolConan(ConanFile):
         replace_in_file(self, libtool_m4,
                               "lt_cv_deplibs_check_method='file_magic ^x86 archive import|^x86 DLL'",
                               method_pass_all)
-        replace_in_file(self, libtool_m4,
-                              "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
+
+        if self.version == "2.4.7":
+            replace_in_file(self, libtool_m4,
+                                "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64)'",
+                                method_pass_all)
+        else:
+            replace_in_file(self, libtool_m4,
+                              "lt_cv_deplibs_check_method='file_magic file format (pei*-i386(.*architecture: i386)?|pe-arm-wince|pe-x86-64|pe-aarch64)'",
                               method_pass_all)
+
 
     def package_info(self):
         self.cpp_info.libs = ["ltdl"]
@@ -230,12 +215,3 @@ class LibtoolConan(ConanFile):
         self.buildenv_info.append_path("AUTOMAKE_CONAN_INCLUDES", libtool_aclocal_dir)
         self.runenv_info.append_path("ACLOCAL_PATH", libtool_aclocal_dir)
         self.runenv_info.append_path("AUTOMAKE_CONAN_INCLUDES", libtool_aclocal_dir)
-        
-        # For Conan 1.x downstream consumers, can be removed once recipe is Conan 1.x only:
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH env: bin_path{bin_path}")
-        self.env_info.PATH.append(bin_path)
-
-        self.env_info.ACLOCAL_PATH.append(unix_path_package_info_legacy(self, libtool_aclocal_dir))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(unix_path_package_info_legacy(self, libtool_aclocal_dir))
-

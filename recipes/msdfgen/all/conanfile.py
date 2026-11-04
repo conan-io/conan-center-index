@@ -2,22 +2,21 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
 
-
 class MsdfgenConan(ConanFile):
     name = "msdfgen"
     description = "Multi-channel signed distance field generator"
     license = "MIT"
-    topics = ("msdf", "shape", "glyph", "font")
-    homepage = "https://github.com/Chlumsky/msdfgen"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/Chlumsky/msdfgen"
+    topics = ("msdf", "shape", "glyph", "font")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -49,12 +48,13 @@ class MsdfgenConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.12.1")
+        self.requires("freetype/2.13.2")
         if  Version(self.version) < "1.10":
             self.requires("lodepng/cci.20200615")
         else:
-            self.requires("libpng/1.6.39")
-        self.requires("tinyxml2/9.0.0")
+            self.requires("libpng/[>=1.6 <2]")
+        self.requires("tinyxml2/10.0.0")
+
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -65,58 +65,44 @@ class MsdfgenConan(ConanFile):
             raise ConanInvalidConfiguration("skia recipe not available yet in CCI")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["MSDFGEN_BUILD_MSDFGEN_STANDALONE"] = self.options.utility
-        tc.variables["MSDFGEN_USE_OPENMP"] = self.options.with_openmp
-        tc.variables["MSDFGEN_USE_CPP11"] = True
-        tc.variables["MSDFGEN_USE_SKIA"] = self.options.with_skia
-        tc.variables["MSDFGEN_INSTALL"] = True
+        tc.cache_variables["MSDFGEN_BUILD_MSDFGEN_STANDALONE"] = self.options.utility
+        tc.cache_variables["MSDFGEN_USE_OPENMP"] = self.options.with_openmp
+        tc.cache_variables["MSDFGEN_USE_CPP11"] = True
+        tc.cache_variables["MSDFGEN_USE_SKIA"] = self.options.with_skia
+        tc.cache_variables["MSDFGEN_INSTALL"] = True
         if Version(self.version) >= "1.10":
-            tc.variables["MSDFGEN_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
-            tc.variables["MSDFGEN_USE_VCPKG"] = False
+            tc.cache_variables["MSDFGEN_USE_VCPKG"] = False
+            # Because in upstream CMakeLists, project() is called after some logic based on BUILD_SHARED_LIBS
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        if Version(self.version) >= "1.11":
+            tc.cache_variables["MSDFGEN_DYNAMIC_RUNTIME"] = not is_msvc_static_runtime(self)
+        if self.settings.os == "Linux":
+            # Workaround for https://github.com/conan-io/conan/issues/13560
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        # workaround against CMAKE_FIND_PACKAGE_PREFER_CONFIG ON in conan toolchain
-        replace_in_file(self, cmakelists, "find_package(Freetype REQUIRED)", "find_package(Freetype REQUIRED MODULE)")
-        # remove bundled lodepng & tinyxml2
-        rmdir(self, os.path.join(self.source_folder, "lib"))
-        rmdir(self, os.path.join(self.source_folder, "include"))
-        # very weird but required for Visual Studio when libs are unvendored (at least for Ninja generator)
-        if is_msvc(self):
-            if Version(self.version) < "1.10":
+
+        if Version(self.version) < "1.10":
+            # remove bundled lodepng & tinyxml2
+            rmdir(self, os.path.join(self.source_folder, "lib"))
+            rmdir(self, os.path.join(self.source_folder, "include"))
+
+            # very weird but required for Visual Studio when libs are unvendored (at least for Ninja generator)
+            if is_msvc(self):
                 replace_in_file(
                     self,
-                    cmakelists,
+                    os.path.join(self.source_folder, "CMakeLists.txt"),
                     "set_target_properties(msdfgen-standalone PROPERTIES ARCHIVE_OUTPUT_DIRECTORY archive OUTPUT_NAME msdfgen)",
                     "set_target_properties(msdfgen-standalone PROPERTIES OUTPUT_NAME msdfgen IMPORT_PREFIX foo)",
-                )
-            else:
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    'set_property(TARGET msdfgen-core PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
-                    ''
-                )
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    'set_property(TARGET msdfgen-ext PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
-                    ''
-                )
-                replace_in_file(
-                    self,
-                    cmakelists,
-                    'set_property(TARGET msdfgen PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
-                    ''
                 )
 
     def build(self):
@@ -130,6 +116,7 @@ class MsdfgenConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "msdfgen")
@@ -167,7 +154,6 @@ class MsdfgenConan(ConanFile):
         if self.options.with_skia:
             self.cpp_info.components["msdfgen-ext"].defines.append("MSDFGEN_USE_SKIA")
 
+        # TODO: to remove once conan v1 support dropped
         if self.options.utility:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

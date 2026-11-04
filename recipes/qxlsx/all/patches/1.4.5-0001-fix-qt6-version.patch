@@ -1,0 +1,13 @@
+diff --git a/QXlsx/CMakeLists.txt b/QXlsx/CMakeLists.txt
+index 7207f94..5cbb2dd 100644
+--- a/QXlsx/CMakeLists.txt
++++ b/QXlsx/CMakeLists.txt
+@@ -16,7 +16,7 @@ include(GNUInstallDirs)
+ if(NOT DEFINED QT_VERSION_MAJOR)
+     find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui REQUIRED)
+ endif()
+-find_package(Qt${QT_VERSION_MAJOR} 5.9 COMPONENTS Core Gui REQUIRED)
++find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui REQUIRED)
+ set(EXPORT_NAME QXlsxQt${QT_VERSION_MAJOR})
+ 
+ if (QT_VERSION_MAJOR EQUAL 6)

@@ -1,12 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-
-include(FindPkgConfig)
-
-pkg_check_modules(OsiCbc REQUIRED IMPORTED_TARGET osi-cbc)
+find_package(coin-cbc REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::OsiCbc)
+target_link_libraries(${PROJECT_NAME} PRIVATE coin-cbc::osi-cbc)

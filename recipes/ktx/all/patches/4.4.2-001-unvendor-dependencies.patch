@@ -1,0 +1,64 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5712cf8..6de509e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -389,7 +389,6 @@ set(KTX_MAIN_SRC
+     external/basisu/transcoder/basisu_transcoder.cpp
+     external/basisu/transcoder/basisu_transcoder.h
+     external/basisu/transcoder/basisu.h
+-    external/basisu/zstd/zstd.c
+     lib/checkheader.c
+     external/dfdutils/createdfd.c
+     external/dfdutils/colourspaces.c
+@@ -838,6 +837,15 @@ endmacro(common_libktx_settings)
+ common_libktx_settings(ktx 1 ${LIB_TYPE})
+ common_libktx_settings(ktx_read 0 ${LIB_TYPE})
+ 
++find_package(zstd REQUIRED CONFIG)
++if (TARGET zstd::libzstd_shared)
++   target_link_libraries(ktx PUBLIC zstd::libzstd_shared)
++   target_link_libraries(ktx_read PUBLIC zstd::libzstd_shared)
++else()
++   target_link_libraries(ktx PUBLIC zstd::libzstd_static)
++   target_link_libraries(ktx_read PUBLIC zstd::libzstd_static)
++endif()
++
+ if(KTX_FEATURE_JNI)
+     add_subdirectory(interface/java_binding)
+ endif()
+@@ -1316,7 +1324,7 @@ if((KTX_FEATURE_TOOLS OR KTX_FEATURE_TESTS) AND NOT TARGET fmt::fmt)
+     set(BUILD_SHARED_LIBS OFF)
+     set(FMT_INSTALL OFF)
+     set(FMT_SYSTEM_HEADERS ON)
+-    add_subdirectory(external/fmt)
++    find_package(fmt CONFIG REQUIRED)
+     set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_RESET})
+ endif()
+ if(KTX_FEATURE_TOOLS AND NOT TARGET cxxopts::cxxopts)
+diff --git a/external/basisu/CMakeLists.txt b/external/basisu/CMakeLists.txt
+index 492233a..a70df44 100644
+--- a/external/basisu/CMakeLists.txt
++++ b/external/basisu/CMakeLists.txt
+@@ -145,9 +145,6 @@ set(BASISU_SRC_LIST ${COMMON_SRC_LIST}
+ 	transcoder/basisu_transcoder.cpp
+ 	)
+ 
+-if (ZSTD)
+-	set(BASISU_SRC_LIST ${BASISU_SRC_LIST} zstd/zstd.c)
+-endif()
+ 
+ if (APPLE)
+    set(BIN_DIRECTORY "bin_osx")
+@@ -160,6 +157,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${BIN_DIRECTORY})
+ add_executable(basisu ${BASISU_SRC_LIST})
+ 
+ if (ZSTD)
++   find_package(zstd REQUIRED CONFIG)
++	if (TARGET zstd::libzstd_shared)
++        target_link_libraries(basisu PRIVATE zstd::libzstd_shared)
++    else()
++        target_link_libraries(basisu PRIVATE zstd::libzstd_static)
++    endif()
+ 	target_compile_definitions(basisu PRIVATE BASISD_SUPPORT_KTX2_ZSTD=1)
+ else()
+ 	target_compile_definitions(basisu PRIVATE BASISD_SUPPORT_KTX2_ZSTD=0)

@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class OpenCVConan(ConanFile):
@@ -17,7 +17,7 @@ class OpenCVConan(ConanFile):
     description = "OpenCV (Open Source Computer Vision Library)"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("computer-vision", "deep-learning", "image-processing")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -78,30 +78,30 @@ class OpenCVConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.1.5")
+            self.requires("libjpeg-turbo/[>=3.0.2 <4]")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
+            self.requires("mozjpeg/[>=4.1.5 <5]")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_jasper:
-            self.requires("jasper/4.0.0")
+            self.requires("jasper/[>=4.2.0 <5]")
         if self.options.with_openexr:
             # opencv 3.x doesn't support openexr >= 3
             self.requires("openexr/2.5.7")
         if self.options.with_tiff:
-            self.requires("libtiff/4.5.1")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.parallel == "tbb":
             # opencv 3.x doesn't support onetbb >= 2021
-            self.requires("onetbb/2020.3")
+            self.requires("onetbb/2020.3.3")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/[>=1.3.2 <5]")
         if self.options.contrib:
-            self.requires("freetype/2.13.0")
-            self.requires("harfbuzz/6.0.0")
+            self.requires("freetype/[>=2.13.2 <3]")
+            self.requires("harfbuzz/[>=8.3.0]")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")
         if self.options.get_safe("with_gtk"):
@@ -134,25 +134,11 @@ class OpenCVConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
         # Cleanup RPATH
-        if Version(self.version) < "3.4.8":
-            install_layout_file = os.path.join(self.source_folder, "CMakeLists.txt")
-        else:
-            install_layout_file = os.path.join(self.source_folder, "cmake", "OpenCVInstallLayout.cmake")
+        install_layout_file = os.path.join(self.source_folder, "cmake", "OpenCVInstallLayout.cmake")
         replace_in_file(self, install_layout_file,
                               "ocv_update(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${OPENCV_LIB_INSTALL_PATH}\")",
                               "")
         replace_in_file(self, install_layout_file, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
-
-        if self.options.contrib and Version(self.version) <= "3.4.12":
-            sfm_cmake = os.path.join(self._contrib_folder, "modules", "sfm", "CMakeLists.txt")
-            search = "  find_package(Glog QUIET)\nendif()"
-            replace_in_file(self, sfm_cmake, search, f"""{search}
-            if(NOT GFLAGS_LIBRARIES AND TARGET gflags::gflags)
-              set(GFLAGS_LIBRARIES gflags::gflags)
-            endif()
-            if(NOT GLOG_LIBRARIES AND TARGET glog::glog)
-              set(GLOG_LIBRARIES glog::glog)
-            endif()""")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -267,6 +253,7 @@ class OpenCVConan(ConanFile):
             tc.variables["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.variables["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["ENABLE_CCACHE"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         CMakeDeps(self).generate()
@@ -287,26 +274,33 @@ class OpenCVConan(ConanFile):
             rename(self, os.path.join(self.package_folder, "setup_vars_opencv3.cmd"),
                          os.path.join(self.package_folder, "res", "setup_vars_opencv3.cmd"))
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {component["target"]:"opencv::{}".format(component["target"]) for component in self._opencv_components}
-        )
+        self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_vars_rel_path))
 
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
+    def _create_cmake_module_variables(self, module_file):
+        """
+        Define several CMake variables from upstream CMake config file not defined by default by CMakeDeps.
+        See https://github.com/opencv/opencv/blob/3.4.20/cmake/templates/OpenCVConfig.cmake.in
+        """
+        v = Version(self.version)
+        content = textwrap.dedent(f"""\
+            if(NOT DEFINED OpenCV_LIBS)
+                set(OpenCV_LIBS opencv::opencv)
+            endif()
+            if(NOT DEFINED OpenCV_VERSION_MAJOR)
+                set(OpenCV_VERSION_MAJOR {v.major})
+            endif()
+            if(NOT DEFINED OpenCV_VERSION_MINOR)
+                set(OpenCV_VERSION_MINOR {v.minor})
+            endif()
+            if(NOT DEFINED OpenCV_VERSION_PATCH)
+                set(OpenCV_VERSION_PATCH {v.patch})
+            endif()
+        """)
         save(self, module_file, content)
 
     @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+    def _module_vars_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
 
     @property
     def _opencv_components(self):
@@ -428,21 +422,15 @@ class OpenCVConan(ConanFile):
                 if self.settings.os in ["Linux", "FreeBSD"]:
                     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
 
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = cmake_target
-                self.cpp_info.components[conan_component].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                self.cpp_info.components[conan_component].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
                 if cmake_component != cmake_target:
                     conan_component_alias = conan_component + "_alias"
-                    self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
-                    self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
                     self.cpp_info.components[conan_component_alias].requires = [conan_component]
                     self.cpp_info.components[conan_component_alias].bindirs = []
                     self.cpp_info.components[conan_component_alias].includedirs = []
                     self.cpp_info.components[conan_component_alias].libdirs = []
 
         self.cpp_info.set_property("cmake_file_name", "OpenCV")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
 
         add_components(self._opencv_components)
 
@@ -450,7 +438,3 @@ class OpenCVConan(ConanFile):
             self.cpp_info.components["opencv_imgcodecs"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
         elif self.settings.os == "Macos":
             self.cpp_info.components["opencv_imgcodecs"].frameworks = ["OpenCL", "Accelerate", "CoreMedia", "CoreVideo", "CoreGraphics", "AVFoundation", "QuartzCore", "Cocoa"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"

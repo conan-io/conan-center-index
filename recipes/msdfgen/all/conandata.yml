@@ -1,4 +1,10 @@
 sources:
+  "1.12":
+    url: "https://github.com/Chlumsky/msdfgen/archive/refs/tags/v1.12.tar.gz"
+    sha256: "f058117496097217d12e4ea86adbff8467adaf6f12af793925d243b86b0c4f57"
+  "1.11":
+    url: "https://github.com/Chlumsky/msdfgen/archive/refs/tags/v1.11.tar.gz"
+    sha256: "fad74e33274f591e72511bc0546189e7aec439f2a512ef1b2fde243554d457cb"
   "1.10":
     url: "https://github.com/Chlumsky/msdfgen/archive/refs/tags/v1.10.tar.gz"
     sha256: "2754d1687bfb80968d9c682e0c4c04c8fcf72df1421d076baf44ea0d87aa3662"
@@ -10,8 +16,8 @@ sources:
     sha256: "909eb88c71268dc00cdda244a1fa40a0feefae45f68a779fbfddd5463559fa40"
 patches:
   "1.10":
-    - patch_file: "patches/1.10-0001-fix-cmake.patch"
-      patch_description: "move project position to top"
+    - patch_file: "patches/1.10-0001-honor-msvc-runtime.patch"
+      patch_description: "Remove hardcoded vc runtime"
       patch_type: "conan"
   "1.9.1":
     - patch_file: "patches/1.9-0001-unvendor-external-libs.patch"

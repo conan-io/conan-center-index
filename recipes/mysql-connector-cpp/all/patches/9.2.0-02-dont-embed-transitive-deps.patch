@@ -1,0 +1,41 @@
+diff --git a/cmake/libutils.cmake b/cmake/libutils.cmake
+index 848b7cf..cb748e6 100644
+--- a/cmake/libutils.cmake
++++ b/cmake/libutils.cmake
+@@ -164,6 +164,9 @@ function(merge_libraries TARGET)
+   set_property(SOURCE "${LIBUTILS_SCRIPT_DIR}/empty.cc" PROPERTY LANGUAGE CXX)
+ 
+   add_library(${TARGET} ${TYPE} "${LIBUTILS_SCRIPT_DIR}/empty.cc")
++  if(BUILD_STATIC AND DEFINED _CONAN_CMAKE_STATIC_LIBRARY_PREFIX_ORIG)
++    set_target_properties(${TARGET} PROPERTIES PREFIX "${_CONAN_CMAKE_STATIC_LIBRARY_PREFIX_ORIG}")
++  endif()
+   target_link_libraries(${TARGET} PRIVATE ${ARGN})
+ 
+   #
+@@ -278,7 +281,8 @@ function(merge_libraries TARGET)
+       #
+ 
+       foreach(lib ${ARGN})
+-        if(CLANG)
++        if(1)
++          message("Will link target ${lib} into shared library with /wholearchive option")
+           target_link_options(${TARGET} PRIVATE /wholearchive:$<TARGET_FILE:${lib}>)
+         else()
+           target_link_options(${TARGET} PRIVATE /wholearchive:${lib})
+diff --git a/cmake/libutils/merge_archives.cmake.in b/cmake/libutils/merge_archives.cmake.in
+index 33094a6..506705a 100644
+--- a/cmake/libutils/merge_archives.cmake.in
++++ b/cmake/libutils/merge_archives.cmake.in
+@@ -570,9 +570,9 @@ function(process_deps)
+       AND NOT lib MATCHES "${NAME}${libext}$"
+       AND EXISTS "${libpath}"
+     )
+-      if(lib MATCHES "protobuf|uuid_gen|libssl|libcrypto|mysqlclient")
++      if(0)
+         list(APPEND LIBS1 "${lib}")
+-      else()
++      elseif(lib MATCHES concpp_internal)
+         list(APPEND LIBS "${lib}")
+       endif()
+     endif()
+

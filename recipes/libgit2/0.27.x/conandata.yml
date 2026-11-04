@@ -1,4 +1,0 @@
-sources:
-  "0.27.10":
-    url: "https://github.com/libgit2/libgit2/archive/v0.27.10.tar.gz"
-    sha256: "f6fd26378ff71bd7a4b17b576c82c774a2e9c2d6b74b24718a8fb29551e1c4a5"

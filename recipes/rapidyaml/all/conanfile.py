@@ -11,7 +11,8 @@ required_conan_version = ">=1.53.0"
 class RapidYAMLConan(ConanFile):
     name = "rapidyaml"
     description = "a library to parse and emit YAML, and do it fast."
-    license = "MIT",
+    license = "MIT"
+    package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/biojppm/rapidyaml"
     topics = ("yaml", "parser", "emitter")
@@ -21,12 +22,16 @@ class RapidYAMLConan(ConanFile):
         "fPIC": [True, False],
         "with_default_callbacks": [True, False],
         "with_tab_tokens": [True, False],
+        "with_default_callback_uses_exceptions": [True, False],
+        "with_assert": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_default_callbacks": True,
         "with_tab_tokens": False,
+        "with_default_callback_uses_exceptions": False,
+        "with_assert": False,
     }
 
     @property
@@ -39,18 +44,27 @@ class RapidYAMLConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.4.0":
-            del self.options.with_tab_tokens
+        if Version(self.version) < "0.6.0":
+            del self.options.with_default_callback_uses_exceptions
+            del self.options.with_assert
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # with_default_callback_uses_exceptions should only be valid if with_default_callbacks is true
+        if not self.options.with_default_callbacks:
+            self.options.rm_safe("with_default_callback_uses_exceptions")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("c4core/0.1.11", transitive_headers=True)
+        if Version(self.version) < "0.6.0":
+            self.requires("c4core/0.1.11", transitive_headers=True)
+        elif Version(self.version) >= "0.15.2":
+            self.requires("c4core/0.4.0", transitive_headers=True)
+        else:
+            self.requires("c4core/0.2.0", transitive_headers=True)
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -63,8 +77,10 @@ class RapidYAMLConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["RYML_DEFAULT_CALLBACKS"] = self.options.with_default_callbacks
-        if Version(self.version) >= "0.4.0":
-            tc.variables["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
+        tc.variables["RYML_WITH_TAB_TOKENS"] = self.options.with_tab_tokens
+        if Version(self.version) >= "0.6.0":
+            tc.variables["RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS"] = self.options.with_default_callback_uses_exceptions
+            tc.variables["RYML_USE_ASSERT"] = self.options.with_assert
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -88,6 +104,5 @@ class RapidYAMLConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "ryml")
         self.cpp_info.set_property("cmake_target_name", "ryml::ryml")
         self.cpp_info.libs = ["ryml"]
-
-        self.cpp_info.names["cmake_find_package"] = "ryml"
-        self.cpp_info.names["cmake_find_package_multi"] = "ryml"
+        if Version(self.version) >= "0.15.2" and self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("C4CORE_SHARED")

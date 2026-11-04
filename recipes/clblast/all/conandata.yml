@@ -1,0 +1,4 @@
+sources:
+  "1.7.0":
+    url: "https://github.com/CNugteren/CLBlast/archive/refs/tags/1.7.0.zip"
+    sha256: "dab3654ef524e30bf574b71ef9a1a60bb40c8f777d7cbd85766d5002fc576940"

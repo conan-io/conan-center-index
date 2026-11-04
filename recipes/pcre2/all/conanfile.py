@@ -1,12 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class PCRE2Conan(ConanFile):
@@ -29,6 +30,7 @@ class PCRE2Conan(ConanFile):
         "with_bzip2": [True, False],
         "support_jit": [True, False],
         "grep_support_callout_fork": [True, False],
+        "link_size": [2, 3, 4],
     }
     default_options = {
         "shared": False,
@@ -36,11 +38,12 @@ class PCRE2Conan(ConanFile):
         "build_pcre2_8": True,
         "build_pcre2_16": True,
         "build_pcre2_32": True,
-        "build_pcre2grep": True,
+        #"build_pcre2grep": True,   #see config_options()
         "with_zlib": True,
         "with_bzip2": True,
         "support_jit": False,
         "grep_support_callout_fork": True,
+        "link_size": 2,
     }
 
     def export_sources(self):
@@ -49,6 +52,9 @@ class PCRE2Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        # by default, dont build the pcre2grep executable on iOS derivatives
+        self.options.build_pcre2grep = not (is_apple_os(self) and not self.settings.os == "Macos")
 
     def configure(self):
         if self.options.shared:
@@ -83,11 +89,15 @@ class PCRE2Conan(ConanFile):
         # Mandatory because upstream CMakeLists overrides BUILD_SHARED_LIBS as a CACHE variable
         # (see https://github.com/conan-io/conan/issues/11840)
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        if Version(self.version) >= "10.38":
-            tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["PCRE2_BUILD_PCRE2GREP"] = self.options.build_pcre2grep
         tc.variables["PCRE2_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
         tc.variables["PCRE2_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
+        # libedit and libreadline are used only for testing (pcre2test executable)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Editline"] = True
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Readline"] = True
+        tc.variables["PCRE2_SUPPORT_LIBEDIT"] = False
+        tc.variables["PCRE2_SUPPORT_LIBREADLINE"] = False
         tc.variables["PCRE2_BUILD_TESTS"] = False
         if is_msvc(self):
             tc.variables["PCRE2_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
@@ -96,10 +106,10 @@ class PCRE2Conan(ConanFile):
         tc.variables["PCRE2_BUILD_PCRE2_16"] = self.options.build_pcre2_16
         tc.variables["PCRE2_BUILD_PCRE2_32"] = self.options.build_pcre2_32
         tc.variables["PCRE2_SUPPORT_JIT"] = self.options.support_jit
+        tc.variables["PCRE2_LINK_SIZE"] = self.options.link_size
         tc.variables["PCRE2GREP_SUPPORT_CALLOUT_FORK"] = self.options.get_safe("grep_support_callout_fork", False)
-        if Version(self.version) < "10.38":
-            # relocatable shared libs on Macos
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if Version(self.version) < "10.43":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         cd = CMakeDeps(self)
@@ -108,16 +118,24 @@ class PCRE2Conan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        # Do not add ${PROJECT_SOURCE_DIR}/cmake because it contains a custom
-        # FindPackageHandleStandardArgs.cmake which can break conan generators
-        if Version(self.version) < "10.34":
-            replace_in_file(self, cmakelists, "SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
-        else:
+
+        if Version(self.version) < "10.47":
+            # Do not add ${PROJECT_SOURCE_DIR}/cmake because versions older than 10.47 contain
+            #  a custom FindPackageHandleStandardArgs.cmake which can break conan generators
             replace_in_file(self, cmakelists, "LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)", "")
-        # Avoid CMP0006 error (macos bundle)
-        replace_in_file(self, cmakelists,
-                              "RUNTIME DESTINATION bin",
-                              "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
+
+        # pcre2-config does not correctly include '-static' in static library names
+        if is_msvc(self):
+            replace = None
+            if Version(self.version) >= "10.43":
+                replace = "configure_file(pcre2-config.in"
+            else:
+                replace = "CONFIGURE_FILE(pcre2-config.in"
+            postfix = "-static" if not self.options.shared else ""
+            if replace:
+                if self.settings.build_type == "Debug":
+                    postfix += "d"
+                replace_in_file(self, cmakelists, replace, f'set(LIB_POSTFIX "{postfix}")\n{replace}')
 
     def build(self):
         self._patch_sources()
@@ -126,13 +144,14 @@ class PCRE2Conan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENCE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENCE.md" if Version(self.version) >= "10.47" else "LICENCE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "man"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "PCRE2")
@@ -149,6 +168,9 @@ class PCRE2Conan(ConanFile):
             self.cpp_info.components["pcre2-posix"].set_property("pkg_config_name", "libpcre2-posix")
             self.cpp_info.components["pcre2-posix"].libs = [self._lib_name("pcre2-posix")]
             self.cpp_info.components["pcre2-posix"].requires = ["pcre2-8"]
+            if Version(self.version) >= "10.43" and is_msvc(self) and self.options.shared:
+                self.cpp_info.components["pcre2-posix"].defines.append("PCRE2POSIX_SHARED=1")
+
         # pcre2-16
         if self.options.build_pcre2_16:
             self.cpp_info.components["pcre2-16"].set_property("cmake_target_name", "PCRE2::16BIT")
@@ -165,9 +187,6 @@ class PCRE2Conan(ConanFile):
                 self.cpp_info.components["pcre2-32"].defines.append("PCRE2_STATIC")
 
         if self.options.build_pcre2grep:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
             # FIXME: This is a workaround to avoid ConanException. zlib and bzip2
             # are optional requirements of pcre2grep executable, not of any pcre2 lib.
             if self.options.with_zlib:
@@ -175,25 +194,9 @@ class PCRE2Conan(ConanFile):
             if self.options.with_bzip2:
                 self.cpp_info.components["pcre2-8"].requires.append("bzip2::bzip2")
 
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generator removed
-        self.cpp_info.names["cmake_find_package"] = "PCRE2"
-        self.cpp_info.names["cmake_find_package_multi"] = "PCRE2"
-        self.cpp_info.names["pkg_config"] = "libpcre2"
-        if self.options.build_pcre2_8:
-            self.cpp_info.components["pcre2-8"].names["cmake_find_package"] = "8BIT"
-            self.cpp_info.components["pcre2-8"].names["cmake_find_package_multi"] = "8BIT"
-            self.cpp_info.components["pcre2-posix"].names["cmake_find_package"] = "POSIX"
-            self.cpp_info.components["pcre2-posix"].names["cmake_find_package_multi"] = "POSIX"
-        if self.options.build_pcre2_16:
-            self.cpp_info.components["pcre2-16"].names["cmake_find_package"] = "16BIT"
-            self.cpp_info.components["pcre2-16"].names["cmake_find_package_multi"] = "16BIT"
-        if self.options.build_pcre2_32:
-            self.cpp_info.components["pcre2-32"].names["cmake_find_package"] = "32BIT"
-            self.cpp_info.components["pcre2-32"].names["cmake_find_package_multi"] = "32BIT"
-
     def _lib_name(self, name):
         libname = name
-        if Version(self.version) >= "10.38" and is_msvc(self) and not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             libname += "-static"
         if self.settings.os == "Windows":
             if self.settings.build_type == "Debug":

@@ -1,4 +1,13 @@
 sources:
+  "1.10.0":
+    url: "https://github.com/baylej/tmx/archive/refs/tags/tmx_1.10.0.tar.gz"
+    sha256: "8ee42d1728c567d6047a58b2624c39c8844aaf675c470f9f284c4ed17e94188f"
   "1.4.0":
     url: "https://github.com/baylej/tmx/archive/refs/tags/tmx_1.4.0.tar.gz"
     sha256: "5ab52e72976141260edd1b15ea34e1626c0f4ba9b8d2afe7f4d68b51fc9fedf7"
+patches:
+  "1.4.0":
+    - patch_file: "patches/0001-missing-stdlib-include.patch"
+      patch_description: "fix missing stdlib include"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/baylej/tmx/commit/2d20ed631618f5e9ca89d90147aab8157989f5da.patch"

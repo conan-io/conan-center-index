@@ -1,26 +1,18 @@
 sources:
-  "2.41":
-    url: "https://ftp.gnu.org/gnu/binutils/binutils-2.41.tar.gz"
-    sha256: "48d00a8dc73aa7d2394a7dc069b96191d95e8de8f0da6dc91da5cce655c20e45"
-  "2.40":
-    url: "https://ftp.gnu.org/gnu/binutils/binutils-2.40.tar.gz"
-    sha256: "d7f82c4047decf43a6f769ac32456a92ddb6932409a585c633cdd4e9df23d956"
-  "2.38":  # 2022-02-09
-    url: "https://ftp.gnu.org/gnu/binutils/binutils-2.38.tar.gz"
-    sha256: "b3f1dc5b17e75328f19bd88250bee2ef9f91fc8cbb7bd48bdb31390338636052"
-  "2.37":
-    url: "https://ftp.gnu.org/gnu/binutils/binutils-2.37.tar.gz"
-    sha256: "c44968b97cd86499efbc4b4ab7d98471f673e5414c554ef54afa930062dbbfcb"
+  "2.46.1":
+    url:
+      - "https://ftpmirror.gnu.org/gnu/binutils/binutils-2.46.1.tar.xz"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/binutils/binutils-2.46.1.tar.xz"
+      - "https://ftp.gnu.org/gnu/binutils/binutils-2.46.1.tar.xz"
+    sha256: "e127a709cba24c76de8936cb7083dd768f28cd37eb010492e2f19b71eb1294e4"
+  "2.42":
+    url:
+      - "https://ftpmirror.gnu.org/gnu/binutils/binutils-2.42.tar.xz"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/binutils/binutils-2.42.tar.xz"
+      - "https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.xz"
+    sha256: "f6e4d41fd5fc778b06b7891457b3620da5ecea1006c6a4a41ae998109f85a800"
 patches:
-  "2.41":
-    - patch_file: "patches/2.41-0001-no-texinfo.patch"
-      patch_type: conan
-      patch_description: "disable texinfo"
-  "2.40":
-    - patch_file: "patches/2.40-0001-no-texinfo.patch"
-      patch_type: conan
-      patch_description: "disable texinfo"
-  "2.38":
-    - patch_file: "patches/2.38-0001-no-texinfo.patch"
-      patch_type: conan
+  "2.42":
+    - patch_file: "patches/2.42-0001-no-texinfo.patch"
+      patch_type: "conan"
       patch_description: "disable texinfo"

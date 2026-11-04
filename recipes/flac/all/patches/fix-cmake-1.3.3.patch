@@ -1,14 +1,5 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -13,7 +13,7 @@ option(BUILD_EXAMPLES "Build and install examples" ON)
- option(WITH_OGG "ogg support (default: test for libogg)" ON)
- 
- if(WITH_OGG)
--    find_package(OGG REQUIRED)
-+    find_package(Ogg REQUIRED CONFIG)
- endif()
- 
- if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 @@ -25,9 +25,6 @@ endif()
  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wcast-align -Wshadow -Wwrite-strings -Wctor-dtor-privacy -Wnon-virtual-dtor -Wreorder -Wsign-promo -Wundef")
@@ -55,12 +46,3 @@
  install(TARGETS metaflac EXPORT targets
 -    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 +    DESTINATION "${CMAKE_INSTALL_BINDIR}")
---- a/src/share/getopt/CMakeLists.txt
-+++ b/src/share/getopt/CMakeLists.txt
-@@ -1,6 +1,5 @@
- check_include_file("string.h" HAVE_STRING_H)
- 
--find_package(Intl)
- 
- add_library(getopt STATIC getopt.c getopt1.c)
- 

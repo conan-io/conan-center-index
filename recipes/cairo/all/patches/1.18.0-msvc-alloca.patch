@@ -1,0 +1,28 @@
+From 27cdee5e4cf19e7959b80fe1a39e61188de1b654 Mon Sep 17 00:00:00 2001
+From: Dan Yeaw <dan@yeaw.me>
+Date: Sat, 30 Sep 2023 13:30:51 -0400
+Subject: [PATCH] Fix alloca undefined with MSVC
+
+Conditionally includes malloc.h when compiling with
+MSVC so that alloca is defined.
+---
+ src/cairo-colr-glyph-render.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/cairo-colr-glyph-render.c b/src/cairo-colr-glyph-render.c
+index 28254fd51..a9ad84bbf 100644
+--- a/src/cairo-colr-glyph-render.c
++++ b/src/cairo-colr-glyph-render.c
+@@ -43,6 +43,10 @@
+ #include <stdio.h>
+ #include <string.h>
+ 
++#ifdef _MSC_VER
++#include <malloc.h>
++#endif
++
+ #if HAVE_FT_COLR_V1
+ 
+ #include <ft2build.h>
+-- 
+GitLab

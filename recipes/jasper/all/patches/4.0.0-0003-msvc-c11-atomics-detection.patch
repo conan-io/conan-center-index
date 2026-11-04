@@ -1,0 +1,14 @@
+Backported from https://github.com/jasper-software/jasper/pull/370
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b244f88..523bf4e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -579,6 +579,7 @@ set(JAS_HAVE_WIN32_THREADS FALSE)
+ if(JAS_ENABLE_MULTITHREADING_SUPPORT)
+ 	check_c_source_compiles("
+ 	#include <threads.h>
++	#include <stdatomic.h>
+ 	int main() {
+ 		thrd_t thread;
+ 		mtx_t mutex;

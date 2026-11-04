@@ -84,7 +84,7 @@ class JsonnetConan(ConanFile):
             raise ConanInvalidConfiguration(f"shared {self.ref} requires rapidyaml to be built as shared")
 
     def requirements(self):
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.3")
         if Version(self.version) >= "0.18.0":
             self.requires("rapidyaml/0.5.0")
 

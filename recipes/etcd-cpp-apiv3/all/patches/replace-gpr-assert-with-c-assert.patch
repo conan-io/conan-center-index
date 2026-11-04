@@ -1,0 +1,39 @@
+Backport https://github.com/etcd-cpp-apiv3/etcd-cpp-apiv3/pull/281
+
+From 216b86f8d763acf88e4ed7265f983b57c12da2df Mon Sep 17 00:00:00 2001
+From: Khem Raj
+Date: Mon, 11 Nov 2024 18:14:43 -0800
+Subject: [PATCH] Replacing GPR_ASSERT with c assert (#281)
+
+Latest GRPC >= 2.66 has dropped GRPC_ASSERT macro [1]
+
+[1]
+https://github.com/grpc/grpc/commit/0e23c2259da967a037e839e80cafd62bc6f9f68e
+
+Upstream-Status: Pending
+
+Signed-off-by: Khem Raj
+---
+ src/v3/Action.cpp | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/v3/Action.cpp b/src/v3/Action.cpp
+index fff45e4..d64e259 100644
+--- a/src/v3/Action.cpp
++++ b/src/v3/Action.cpp
+@@ -2,6 +2,15 @@
+ #include <grpc/support/log.h>
+ #include <grpcpp/support/status.h>
+ #include "etcd/v3/action_constants.hpp"
++#include <cstdlib>
++
++#ifndef GPR_ASSERT
++#define GPR_ASSERT(x)                                             \
++  if (!(x)) {                                                     \
++    fprintf(stderr, "%s:%d assert failed\n", __FILE__, __LINE__); \
++    abort();                                                      \
++}
++#endif
+ 
+ etcdv3::Action::Action(etcdv3::ActionParameters const& params) {
+   parameters = params;

@@ -29,20 +29,23 @@ class GccConan(ConanFile):
         if self.settings.compiler in ["clang", "apple-clang"]:
             # Can't remove this from cxxflags with autotools - so get rid of it
             del self.settings.compiler.libcxx
+            
+        # https://github.com/gcc-mirror/gcc/blob/6b5248d15c6d10325c6cbb92a0e0a9eb04e3f122/libcody/configure#L2505C11-L2505C25
+        del self.settings.compiler.cppstd
 
     def build_requirements(self):
         if self.settings.os == "Linux":
             # binutils recipe is broken for Macos, and Windows uses tools
             # distributed with msys/mingw
-            self.tool_requires("binutils/2.38")
+            self.tool_requires("binutils/2.42")
         self.tool_requires("flex/2.6.4")
 
     def requirements(self):
         self.requires("mpc/1.2.0")
-        self.requires("mpfr/4.1.0")
-        self.requires("gmp/6.2.1")
-        self.requires("zlib/1.2.13")
-        self.requires("isl/0.24")
+        self.requires("mpfr/4.2.0")
+        self.requires("gmp/6.3.0")
+        self.requires("zlib/[>=1.2.13 <2]")
+        self.requires("isl/0.26")
 
     def package_id(self):
         del self.info.settings.compiler

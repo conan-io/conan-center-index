@@ -4,7 +4,9 @@ sources:
     sha256: "2148162138eaf4b431a6ee94104f87877b85a589da803dff9433c698b4cf4f19"
 patches:
   "1.4.0":
-    - patch_file: "patches/001-add_conan_1.4.0.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/002-add_gstreamer_1.4.0.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/001-skip-module-path.patch"
+      patch_description: "Do not use module path provided by the upstream"
+      patch_type: "conan"
+    - patch_file: "patches/002-use-conan-gstreamer.patch"
+      patch_description: "Adapt to consume gstreamer from Conan"
+      patch_type: "conan"

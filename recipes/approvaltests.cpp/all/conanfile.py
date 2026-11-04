@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, download, rename
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.53"
 
 
 class ApprovalTestsCppConan(ConanFile):
@@ -39,24 +38,18 @@ class ApprovalTestsCppConan(ConanFile):
     def _header_file(self):
         return "ApprovalTests.hpp"
 
-    def config_options(self):
-        if Version(self.version) < "8.6.0":
-            del self.options.with_boosttest
-        if Version(self.version) < "10.4.0":
-            del self.options.with_cpputest
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("with_boosttest"):
-            self.requires("boost/1.81.0")
+        if self.options.with_boosttest:
+            self.requires("boost/1.83.0")
         if self.options.with_catch2:
-            self.requires("catch2/2.13.10")
+            self.requires("catch2/[>=3.5.0 <4]")
         if self.options.with_gtest:
-            self.requires("gtest/1.12.1")
+            self.requires("gtest/[>=1.14.0 <2]")
         if self.options.with_doctest:
-            self.requires("doctest/2.4.10")
+            self.requires("doctest/2.4.11")
         if self.options.get_safe("with_cpputest"):
             self.requires("cpputest/4.0")
 
@@ -64,15 +57,14 @@ class ApprovalTestsCppConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if Version(self.version) >= "10.2.0":
-            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
-                raise ConanInvalidConfiguration(f"{self.ref} with compiler gcc requires at least compiler version 5")
+        check_min_cppstd(self, 11)
 
     def source(self):
         for source in self.conan_data["sources"][self.version]:
-            url = source["url"]
+            urls = source["url"]
+            url = urls[0] if isinstance(urls, (list, tuple)) else urls
             filename = url[url.rfind("/") + 1:]
-            download(self, url, filename, sha256=source["sha256"])
+            download(self, urls, filename, sha256=source["sha256"])
         rename(self, src=os.path.join(self.source_folder, f"ApprovalTests.v.{self.version}.hpp"),
                      dst=os.path.join(self.source_folder, self._header_file))
 
@@ -85,7 +77,3 @@ class ApprovalTestsCppConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "ApprovalTests::ApprovalTests")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "ApprovalTests"
-        self.cpp_info.names["cmake_find_package_multi"] = "ApprovalTests"

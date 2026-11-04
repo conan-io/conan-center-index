@@ -1,4 +1,4 @@
 sources:
-  "2.0.5":
-    url: "https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.5.tar.gz"
-    sha256: "bdd5f6e026682f7d7e1be0b6051b209da2f402a2dd8bd1c4bd9c25ad263108d0"
+  "2.8.12":
+    url: "https://github.com/libsdl-org/SDL_image/releases/download/release-2.8.12/SDL2_image-2.8.12.tar.gz"
+    sha256: "393f5efb50536ec13ca4f4affb69cc9966d3c3f969e6c5e701faddf9f9785381"

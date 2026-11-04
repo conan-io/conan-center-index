@@ -1,8 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, collect_libs
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -10,10 +12,11 @@ required_conan_version = ">=1.53.0"
 class Log4cplusConan(ConanFile):
     name = "log4cplus"
     description = "simple to use C++ logging API, modelled after the Java log4j API"
-    license = ("BSD-2-Clause, Apache-2.0")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/log4cplus/log4cplus"
+    license = ("BSD-2-Clause, Apache-2.0")
     topics = ("logging", "log", "logging-library")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -62,6 +65,11 @@ class Log4cplusConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
+            if Version(self.version) < 2 and valid_min_cppstd(self, 17):
+                raise ConanInvalidConfiguration(f"${self.ref} does not support C++17")
+        if Version(self.version) >= "2.1.2" and \
+           is_msvc(self) and Version(self.settings.compiler.version) < 191:
+            raise ConanInvalidConfiguration(f"${self.ref} requires Visual Studio 2017 or newer")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -80,6 +88,11 @@ class Log4cplusConan(ConanFile):
         tc.variables["WITH_ICONV"] = self.options.with_iconv
         tc.variables["LOG4CPLUS_WORKING_LOCALE"] = self.options.working_locale
         tc.variables["LOG4CPLUS_WORKING_C_LOCALE"] = self.options.working_c_locale
+
+        # Prevent linking against unused found library
+        # https://github.com/log4cplus/log4cplus/blob/de729f76b256b8f55ced3a246434f7280be2a20d/ConfigureChecks.cmake#L51
+        tc.cache_variables["LIBNSL"] = "LIBNSL-NOTFOUND"
+
         tc.generate()
 
         dpes = CMakeDeps(self)
@@ -110,7 +123,7 @@ class Log4cplusConan(ConanFile):
         if self.options.unicode:
             self.cpp_info.defines = ["UNICODE", "_UNICODE"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl", "m", "rt", "nsl"]
+            self.cpp_info.system_libs = ["dl", "m", "rt"]
             if not self.options.single_threaded:
                 self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":

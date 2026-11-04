@@ -3,7 +3,8 @@ import os
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, move_folder_contents
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -64,6 +65,8 @@ class Hdf4Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if Version(self.version) > "4.2.15":
+            move_folder_contents(self, os.path.join(self.source_folder, f"hdf-{self.version}"), self.source_folder)
 
     def generate(self):
         tc = CMakeToolchain(self)

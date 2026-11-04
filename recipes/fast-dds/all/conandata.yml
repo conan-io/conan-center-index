@@ -1,37 +1,29 @@
 sources:
-  "2.11.1":
-    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.11.1.tar.gz"
-    sha256: "3fe8b9f67a13a5d2aa40c0bd10581bd90f0a192b39c71f92ee233ffe584d3374"
-  "2.10.1":
-    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.10.1.tar.gz"
-    sha256: "2cc2682db5dc7e87684b7f23166e2f32faf8d5c4b4a8c94c6c21211a8a38f553"
-  "2.3.4":
-    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.3.4.tar.gz"
-    sha256: "b1b2322de0ca55a16495666e3fbda8aca32b888bbfaecda29f2ffc4b072ef7ac"
-  "2.3.3":
-    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.3.3.tar.gz"
-    sha256: "5ebf27d810c6ab68eef7d42937cd421d85e50509ae96883239979a1b3a2f4f82"
-  "2.3.2":
-    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.3.2.tar.gz"
-    sha256: "4d8183cf4d37c3de9e6fd28d2850dd08023a9079001c4880b23c95f0d8c0b5ce"
+  "3.4.3":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v3.4.3.tar.gz"
+    sha256: "107de2c0213ae1615eb7402af16fd9a90696944643a73f4e9b2a4c29687e420d"
+  "3.2.1":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v3.2.1.tar.gz"
+    sha256: "8c088fb967d39785f1f83454d75308ae6c55fc74fc31de173713bc293635b2fd"
+  "2.14.3":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.14.3.tar.gz"
+    sha256: "292e4170e4689d878eb5ddd38661134a704a1541402a4f564353190e4aadd23d"
 patches:
-  "2.11.1":
-    - patch_file: "patches/2.11.1-0001-fix-find-asio-and-tinyxml2.patch"
+  "3.4.3":
+    - patch_file: "patches/3.2.1-0002-fix-tool-paths.patch"
       patch_type: "conan"
-      patch_description: "Fixup find asio and tinyxml2"
-  "2.10.1":
-    - patch_file: "patches/2.10.1-0001-fix-find-asio-and-tinyxml2.patch"
+      patch_description: "Fixup paths in tools to match conan package structure"
+    - patch_file: "patches/3.4.3-0003-remove-werror.patch"
       patch_type: "conan"
-      patch_description: "Fixup find asio and tinyxml2"
-  "2.3.4":
-    - patch_file: "patches/2.3.X-0001-fix-find-asio-and-tinyxml2.patch"
+      patch_description: "Remove werror which fixes kIOMainPortDefault not defined in MacOS < 12"
+  "3.2.1":
+    - patch_file: "patches/3.2.1-0002-fix-tool-paths.patch"
       patch_type: "conan"
-      patch_description: "Fixup find asio and tinyxml2"
-  "2.3.3":
-    - patch_file: "patches/2.3.X-0001-fix-find-asio-and-tinyxml2.patch"
+      patch_description: "Fixup paths in tools to match conan package structure"
+    - patch_file: "patches/3.2.1-0003-remove-werror.patch"
       patch_type: "conan"
-      patch_description: "Fixup find asio and tinyxml2"
-  "2.3.2":
-    - patch_file: "patches/2.3.2-0001-fix-find-asio-and-tinyxml2.patch"
+      patch_description: "Remove werror which fixes kIOMainPortDefault not defined in MacOS < 12"
+  "2.14.3":
+    - patch_file: "patches/2.14.3-0002-fix-tool-paths.patch"
       patch_type: "conan"
-      patch_description: "Fixup find asio and tinyxml2"
+      patch_description: "Fixup paths in tools to match conan package structure"

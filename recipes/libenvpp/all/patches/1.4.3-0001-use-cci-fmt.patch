@@ -1,0 +1,31 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8aa4975..231e523 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -55,7 +55,7 @@ endfunction()
+ 
+ # External dependencies.
+ include(FetchContent)
+-
++if(0)
+ if(LIBENVPP_INSTALL)
+ 	set(FMT_INSTALL ON CACHE BOOL "" FORCE)
+ endif()
+@@ -78,7 +78,8 @@ macro(fetch_content_from_submodule DEPNAME RELPATH)
+ endmacro()
+ 
+ fetch_content_from_submodule(fmt external/fmt)
+-
++endif()
++find_package(fmt REQUIRED CONFIG)
+ if(LIBENVPP_TESTS)
+ 	fetch_content_from_submodule(Catch2 external/Catch2)
+ 	list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+@@ -144,6 +145,7 @@ endif()
+ 
+ # Installation target.
+ if(LIBENVPP_INSTALL)
++	include(CMakePackageConfigHelpers)
+ 	# Libenvpp installation.
+ 	set(LIBENVPP_PROJECT_CONFIG_OUT "${CMAKE_CURRENT_BINARY_DIR}/libenvpp-config.cmake")
+ 	set(LIBENVPP_VERSION_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/libenvpp-config-version.cmake")

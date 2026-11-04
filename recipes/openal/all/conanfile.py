@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class OpenALConan(ConanFile):
@@ -20,7 +20,7 @@ class OpenALConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://openal-soft.org/"
     license = "LGPL-2.0-or-later"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -100,6 +100,8 @@ class OpenALConan(ConanFile):
         tc.variables["ALSOFT_EXAMPLES"] = False
         tc.variables["ALSOFT_TESTS"] = False
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_SoundIO"] = True
+        # Version 1.24.0 already support CMake 4 but this recipe is deprecated in favor to openal-soft
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -144,10 +146,6 @@ class OpenALConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "OpenAL::OpenAL")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.set_property("pkg_config_name", "openal")
-
-        self.cpp_info.names["cmake_find_package"] = "OpenAL"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenAL"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
 
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "AL"))

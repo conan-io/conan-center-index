@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import os
 
@@ -39,7 +39,7 @@ class MagicEnumConan(ConanFile):
         }
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -56,15 +56,29 @@ class MagicEnumConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["MAGIC_ENUM_OPT_BUILD_EXAMPLES"] = False
+        tc.cache_variables["MAGIC_ENUM_OPT_BUILD_TESTS"] = False
+        tc.generate()
+
     def build(self):
-        pass
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        if "0.9.4" <= Version(self.version) <= "0.9.6":
+            copy(self, "*", os.path.join(self.package_folder, "include"), os.path.join(self.package_folder, "include", "magic_enum"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "magic_enum")
         self.cpp_info.set_property("cmake_target_name", "magic_enum::magic_enum")
+        self.cpp_info.set_property("pkg_config_name", "magic_enum")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []

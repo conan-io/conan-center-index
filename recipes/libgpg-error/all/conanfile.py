@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
@@ -26,9 +26,6 @@ class GPGErrorConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
@@ -57,14 +54,9 @@ class GPGErrorConan(ConanFile):
         ])
         if self.options.get_safe("fPIC", True):
             tc.configure_args.append("--with-pic")
-        host = None
-        if self.settings.os == "Linux" and self.settings.arch == "x86":
-            host = "i686-linux-gnu"
-        tc.update_configure_args({"--host": host})
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()

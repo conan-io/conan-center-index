@@ -1,4 +1,7 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "ef45723cd439f855bae2304d9488b68cd6d1e0dc3203c97ebd1cbb26197edb55"
   "1.0.1":
     url: "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/refs/tags/v1.0.1.tar.gz"
     sha256: "d04732217c74687c5498665b353cb089d725ca7f5b5da61a3f984f7fbefb2ac9"

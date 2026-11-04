@@ -1,0 +1,34 @@
+https://github.com/cyrusimap/cyrus-sasl/commit/06f41c41e5c0f62ed5c1d703a9e2da42dfdb71f6
+https://github.com/cyrusimap/cyrus-sasl/issues/831
+
+From 06f41c41e5c0f62ed5c1d703a9e2da42dfdb71f6 Mon Sep 17 00:00:00 2001
+From: Howard Chu
+Date: Wed, 24 Jul 2024 19:27:04 +0100
+Subject: [PATCH] include: only use __attribute__ on Gnu C
+
+It's a compiler-specific feature and we can't depend on other
+compilers supporting it identically or at all.
+Fix #831.
+
+Signed-off-by: Howard Chu
+---
+ include/prop.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/include/prop.h b/include/prop.h
+index fed3fa77..ea38707a 100644
+--- a/include/prop.h
++++ b/include/prop.h
+@@ -53,6 +53,12 @@
+ # define LIBSASL_VAR extern
+ #endif /* WIN32 */
+ 
++/* Only use __attribute__ on Gnu C */
++#ifndef __GNUC__
++#undef __attribute__
++#define __attribute__(foo)
++#endif /* __GNUC__ */
++
+ /* the resulting structure for property values
+  */
+ struct propval {

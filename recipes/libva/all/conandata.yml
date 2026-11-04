@@ -1,0 +1,4 @@
+sources:
+  "2.23.0":
+    url: "https://github.com/intel/libva/archive/refs/tags/2.23.0.tar.gz"
+    sha256: "b10aceb30e93ddf13b2030eb70079574ba437be9b3b76065caf28a72c07e23e7"

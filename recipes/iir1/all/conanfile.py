@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class Iir1Conan(ConanFile):
@@ -64,10 +64,18 @@ class Iir1Conan(ConanFile):
         tc = CMakeToolchain(self)
         if self.options.get_safe("noexceptions"):
             tc.preprocessor_definitions["IIR1_NO_EXCEPTIONS"] = "1"
+        if Version(self.version) < "1.9.4":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Disable test and demo subdirs
+        save(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "demo", "CMakeLists.txt"), "")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -95,10 +103,4 @@ class Iir1Conan(ConanFile):
             self.cpp_info.components["iir"].defines.append("IIR1_NO_EXCEPTIONS")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["iir"].system_libs.append("m")
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "iir"
-        self.cpp_info.names["cmake_find_package_multi"] = "iir"
-        self.cpp_info.components["iir"].names["cmake_find_package"] = name
-        self.cpp_info.components["iir"].names["cmake_find_package_multi"] = name
         self.cpp_info.components["iir"].set_property("cmake_target_name", f"iir::{name}")

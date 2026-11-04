@@ -1,4 +1,7 @@
 sources:
+  "cci.20231129":
+    url: "https://github.com/google/ruy/archive/690c14c441387a4ea6e07a9ed89657cec8200b92.tar.gz"
+    sha256: "98077cf3c38f0d8c5156953c4044a6104108f247fab021477d1cff1012eb82f3"
   "cci.20220628":
     url: "https://github.com/google/ruy/archive/841ea4172ba904fe3536789497f9565f2ef64129.tar.gz"
     sha256: "fbd20e6c8cd5cf8ef159f69600ea0c7ef0f1401a4c16a9cd04e5a12ffa9c6e14"

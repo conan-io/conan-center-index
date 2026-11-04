@@ -3,8 +3,9 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
@@ -20,6 +21,12 @@ class MathterConan(ConanFile):
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "with_xsimd": [True, False] # XSimd is optionally used for hand-rolled vectorization.
+    }
+    default_options = {
+        "with_xsimd": True
+    }
     no_copy_source = True
 
     @property
@@ -31,12 +38,12 @@ class MathterConan(ConanFile):
         return {
             "apple-clang": 10,
             "clang": 6,
-            "gcc": 7,
+            "gcc": 9,
             "Visual Studio": 16,
         }
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -46,28 +53,45 @@ class MathterConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, "
-                                                f"which your compiler does not support.")
-        else:
-            self.output.warning(f"{self.name} requires C++{self._min_cppstd}. "
-                                f"Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd}, "
+                                            "which your compiler does not support.")
+
+    def requirements(self):
+        if self.options.get_safe("with_xsimd"):
+            self.requires("xsimd/13.0.0")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.25 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["MATHTER_BUILD_TESTS"] = "OFF"
+        tc.variables["MATHTER_BUILD_BENCHMARKS"] = "OFF"
+        tc.variables["MATHTER_BUILD_EXAMPLES"] = "OFF"
+        tc.variables["MATHTER_ENABLE_SIMD"] = "ON" if self.options.get_safe("with_xsimd") else "OFF"
+        tc.generate()
+        cmake_deps = CMakeDeps(self)
+        cmake_deps.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
     def package(self):
-        copy(self, "*.hpp",
-             dst=os.path.join(self.package_folder, "include", "Mathter"),
-             src=os.path.join(self.source_folder, "Mathter"))
-        copy(self, "*.natvis",
-             dst=os.path.join(self.package_folder, "include", "Mathter"),
-             src=os.path.join(self.source_folder, "Mathter"))
-        copy(self, "LICENCE",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
+        copy(self, "LICENCE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if self.options.get_safe("with_xsimd"):
+            self.cpp_info.defines = ["MATHTER_ENABLE_SIMD=1"]

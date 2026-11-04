@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(tiny-regex-c LANGUAGES C)
 
 add_library(${PROJECT_NAME} ${TINY_REGEX_C_SRC_DIR}/re.c)

@@ -1,4 +1,4 @@
-#include "lunasvg.h"
+#include "lunasvg/lunasvg.h"
 #include <iostream>
 
 int main() {

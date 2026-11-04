@@ -1,7 +1,12 @@
 sources:
+  "1.20.0":
+    url: "https://www.x.org/releases/individual/util/util-macros-1.20.0.tar.gz"
+    sha256: "8daf36913d551a90fd1013cb078401375dabae021cb4713b9b256a70f00eeb74"
   "1.19.3":
     url: "https://www.x.org/releases/individual/util/util-macros-1.19.3.tar.gz"
     sha256: "624bb6c3a4613d18114a7e3849a3d70f2d7af9dc6eabeaba98060d87e3aef35b"
 patches:
+  "1.20.0":
+    - patch_file: "patches/0001-export-XORG_MACROS_VERSION-macro.patch"
   "1.19.3":
     - patch_file: "patches/0001-export-XORG_MACROS_VERSION-macro.patch"

@@ -16,6 +16,7 @@ class NVTXConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
     topics = ("profiler", "nvidia", "nsight")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -26,8 +27,7 @@ class NVTXConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -35,8 +35,13 @@ class NVTXConan(ConanFile):
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.h", src=os.path.join(self.source_folder, "c", "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "c", "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "nvtx")
+        # This name does not match upstream, but consumers might be relying on it
+        self.cpp_info.set_property("cmake_target_name", "nvtx::nvtx")
+        self.cpp_info.set_property("cmake_target_aliases", ["nvtx3::nvtx3-cpp", "nvtx3::nvtx3-c"])
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:

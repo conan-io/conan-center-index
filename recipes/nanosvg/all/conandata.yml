@@ -1,4 +1,7 @@
 sources:
+  "cci.20231025":
+    url: "https://github.com/memononen/nanosvg/archive/cb0ae54e6b147ccdf85401ef3ef20f2c761252c0.tar.gz"
+    sha256: "33d743c4e6a2c2cd223c2d9a0ceffe9fb735198fc52ea1ac6140bed10959fdcd"
   "cci.20210904":
     url: "https://github.com/memononen/nanosvg/archive/ccdb1995134d340a93fb20e3a3d323ccb3838dd0.zip"
     sha256: "d45fb75b9652f45f3ab4e23e76d77c4a4db02939702d36def6fcd244fb0a44c6"

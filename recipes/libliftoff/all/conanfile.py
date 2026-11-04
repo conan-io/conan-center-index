@@ -16,7 +16,7 @@ class LibliftoffConan(ConanFile):
     description = "Lightweight KMS plane library."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/project/package"
+    homepage = "https://gitlab.freedesktop.org/emersion/libliftoff"
     topics = ("drm", "KMS", "plane")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -39,16 +39,16 @@ class LibliftoffConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libdrm/2.4.114")
+        self.requires("libdrm/2.4.119")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.name} only supports FreeBSD and Linux")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.3.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

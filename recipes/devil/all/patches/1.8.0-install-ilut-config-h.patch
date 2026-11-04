@@ -1,0 +1,11 @@
+--- a/DevIL/src-ILUT/CMakeLists.txt
++++ b/DevIL/src-ILUT/CMakeLists.txt
+@@ -76,7 +76,7 @@ install (TARGETS ILUT
+     LIBRARY DESTINATION lib
+     RUNTIME DESTINATION bin
+ )
+-install (FILES ../include/IL/ilut.h DESTINATION include/IL)
++install (FILES ../include/IL/ilut.h ../include/IL/ilut_config.h DESTINATION include/IL)
+ 
+ install(FILES
+     ${CMAKE_CURRENT_BINARY_DIR}/ILUT.pc

@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 61ed3ed..6d0de20 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -107,3 +107,10 @@ add_library( MockNetworkAccessManager STATIC EXCLUDE_FROM_ALL "MockNetworkAccess
+ target_include_directories( MockNetworkAccessManager PUBLIC "${PROJECT_SOURCE_DIR}" )
+ target_link_libraries( MockNetworkAccessManager Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network )
+ 
++install(TARGETS MockNetworkAccessManager
++        LIBRARY DESTINATION lib
++        ARCHIVE DESTINATION lib)
++
++install(FILES "${PROJECT_SOURCE_DIR}/MockNetworkAccessManager.hpp"
++        DESTINATION include)
++

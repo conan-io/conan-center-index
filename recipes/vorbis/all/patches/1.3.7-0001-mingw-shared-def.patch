@@ -1,0 +1,29 @@
+--- a/win32/vorbis.def
++++ b/win32/vorbis.def
+@@ -1,6 +1,6 @@
+ ; vorbis.def
+ ; 
+-LIBRARY
++
+ EXPORTS
+ _floor_P
+ _mapping_P
+--- a/win32/vorbisenc.def
++++ b/win32/vorbisenc.def
+@@ -1,6 +1,5 @@
+ ; vorbisenc.def
+ ;
+-LIBRARY
+ 
+ EXPORTS
+ vorbis_encode_init
+--- a/win32/vorbisfile.def
++++ b/win32/vorbisfile.def
+@@ -1,6 +1,6 @@
+ ; vorbisfile.def
+ ;
+-LIBRARY
++
+ EXPORTS
+ ov_clear
+ ov_open

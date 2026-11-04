@@ -1,6 +1,6 @@
 from conan import ConanFile, conan_version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, replace_in_file
 from conan.tools.scm import Version
 import os
 
@@ -25,6 +25,10 @@ class NinjaConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+
+        #prevent re2c (which is optional and not needed) from being used
+        replace_in_file(self, cmakelists, "if(RE2C)", "if(FALSE)")
 
     def generate(self):
         tc = CMakeToolchain(self)

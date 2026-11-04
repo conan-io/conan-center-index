@@ -2,9 +2,10 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.microsoft import check_min_vs
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class DoubleConversionConan(ConanFile):
@@ -25,14 +26,7 @@ class DoubleConversionConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -40,12 +34,15 @@ class DoubleConversionConan(ConanFile):
     def validate(self):
         check_min_vs(self, "190")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.29]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support for 3.3.0
         tc.generate()
 
     def build(self):
@@ -57,6 +54,7 @@ class DoubleConversionConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
@@ -64,3 +62,4 @@ class DoubleConversionConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "double-conversion")
         self.cpp_info.set_property("cmake_target_name", "double-conversion::double-conversion")
         self.cpp_info.libs = ["double-conversion"]
+        self.cpp_info.set_property("cmake_target_aliases", ["double-conversion"])

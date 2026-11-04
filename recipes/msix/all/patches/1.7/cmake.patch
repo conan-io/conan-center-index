@@ -103,31 +103,29 @@ index 92b082e6..ebae9789 100644
 +# define installing rules for target files
 +install(TARGETS ${PROJECT_NAME})
 diff --git a/src/msix/CMakeLists.txt b/src/msix/CMakeLists.txt
-index 75d3afdf..e1fb2984 100644
 --- a/src/msix/CMakeLists.txt
 +++ b/src/msix/CMakeLists.txt
-@@ -6,6 +6,11 @@ cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
+@@ -5,6 +5,11 @@
+ cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
  
  project(msix)
- 
++
 +# Define the library
 +add_library(${PROJECT_NAME}
 +    msix.cpp
 +)
-+
+ 
  # Handle exports and flags we need to set
  list(APPEND MSIX_UNPACK_EXPORTS
-     "UnpackPackage"
-@@ -144,7 +149,7 @@ if(NOT SKIP_BUNDLES)
-     if (WIN32)
+@@ -145,6 +150,7 @@
          list(APPEND MsixSrc PAL/Applicability/Win32/Applicability.cpp)
      elseif(LINUX)
--        find_package(ICU REQUIRED COMPONENTS uc)
-+        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::icu)
+         find_package(ICU REQUIRED COMPONENTS uc)
++        target_link_libraries(${PROJECT_NAME} PRIVATE ICU::uc)
          list(APPEND MsixSrc PAL/Applicability/Linux/Applicability.cpp)
      elseif(AOSP)
          list(APPEND MsixSrc PAL/Applicability/AOSP/Applicability.cpp)
-@@ -195,14 +200,16 @@ if(CRYPTO_LIB MATCHES crypt32)
+@@ -195,14 +201,17 @@
          PAL/Signature/Win32/SignatureValidator.cpp
      )
  elseif(CRYPTO_LIB MATCHES openssl)
@@ -136,22 +134,23 @@ index 75d3afdf..e1fb2984 100644
 -            PAL/Crypto/OpenSSL/Crypto.cpp
 -            PAL/Signature/OpenSSL/SignatureValidator.cpp
 -        )
++    find_package(OpenSSL REQUIRED CONFIG)
 +    list(APPEND MsixSrc
 +        PAL/Crypto/OpenSSL/Crypto.cpp
 +        PAL/Signature/OpenSSL/SignatureValidator.cpp
 +    )
 +    if((IOS) OR (MACOS))
-+        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::openssl -Wl,-dead_strip)
++        target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL -Wl,-dead_strip)
 +    elseif(NOT MSVC)
-+        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::openssl -Wl,--gc-sections)
++        target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL -Wl,--gc-sections)
      else()
 -        # ... and were done here...  :/
 -        message(FATAL_ERROR "OpenSSL NOT FOUND!")
-+        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::openssl)
++        target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::SSL)
      endif()
  endif()
  
-@@ -220,14 +227,7 @@ foreach(FILE ${MsixSrc})
+@@ -220,14 +229,7 @@
      message(STATUS "\t${FILE}")
  endforeach()
  
@@ -167,7 +166,7 @@ index 75d3afdf..e1fb2984 100644
  
  # Copy out public headers to <binary dir>/src/unpack
  configure_file(../inc/MSIXWindows.hpp   ${CMAKE_CURRENT_BINARY_DIR}/MSIXWindows.hpp  )
-@@ -260,7 +260,7 @@ if(WIN32)
+@@ -260,7 +262,7 @@
              "/DELAYLOAD:api-ms-win-core-winrt-l1-1-0.dll")
      string(REPLACE ";" " " DELAYFLAGS "${DELAYFLAGS}")
      set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS "${DELAYFLAGS} /LTCG")
@@ -176,48 +175,44 @@ index 75d3afdf..e1fb2984 100644
      if(USE_STATIC_MSVC)
          if(CMAKE_BUILD_TYPE MATCHES Debug)
              set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS " /NODEFAULTLIB:MSVCRTD")
-@@ -285,29 +285,20 @@ if(((IOS) OR (MACOS)) AND (NOT USE_MSIX_SDK_ZLIB))
-     target_link_libraries(${PROJECT_NAME} PRIVATE libcompression.dylib)
- elseif((AOSP) AND (NOT USE_MSIX_SDK_ZLIB))
-     # for AOSP, use the libz.so from the android ndk.
--    find_package(ZLIB REQUIRED)
+@@ -288,17 +290,8 @@
+     find_package(ZLIB REQUIRED)
      target_link_libraries(${PROJECT_NAME} PRIVATE -lz)
--else() # WIN32 or USE_MSIX_SDK_ZLIB
+ else() # WIN32 or USE_MSIX_SDK_ZLIB
 -    target_include_directories(${PROJECT_NAME} PRIVATE 
 -            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/zlib
 -            ${MSIX_PROJECT_ROOT}/lib/zlib
 -        )
-+else()
-     if(USE_SHARED_ZLIB)
-         message(STATUS "MSIX takes a dynamic dependency on zlib")
+-    if(USE_SHARED_ZLIB)
+-        message(STATUS "MSIX takes a dynamic dependency on zlib")
 -        target_link_libraries(${PROJECT_NAME} PRIVATE zlib)
-+        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::zlib)
-     else()
-         message(STATUS "MSIX takes a static dependency on zlib")
+-    else()
+-        message(STATUS "MSIX takes a static dependency on zlib")
 -        target_link_libraries(${PROJECT_NAME} PRIVATE zlibstatic)
-+        target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::zlib)
-     endif()
+-    endif()
++    find_package(ZLIB REQUIRED CONFIG)
++    target_link_libraries(${PROJECT_NAME} PRIVATE ZLIB::ZLIB)
  endif()
  
  # Parser
- if(XML_PARSER MATCHES xerces)
--    target_include_directories(${PROJECT_NAME} PRIVATE
--        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/xerces/src
--        ${MSIX_PROJECT_ROOT}/lib/xerces/src
--    )
+@@ -307,7 +299,8 @@
+         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/xerces/src
+         ${MSIX_PROJECT_ROOT}/lib/xerces/src
+     )
 -    target_link_libraries(${PROJECT_NAME} PRIVATE xerces-c)
-+    target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::xerces-c)
++    find_package(XercesC REQUIRED CONFIG)
++    target_link_libraries(${PROJECT_NAME} PRIVATE XercesC::XercesC)
  endif()
  
  if(XML_PARSER MATCHES applexml)
-@@ -363,18 +354,6 @@ endif()
+@@ -363,18 +356,6 @@
  if((IOS) OR (MACOS))
      target_link_libraries(${PROJECT_NAME} PRIVATE ${COREFOUNDATION_LIBRARY} ${FOUNDATION_LIBRARY})
  endif()
 -if(LINUX)
 -    target_link_libraries(${PROJECT_NAME} PRIVATE ${ICU_LIBRARIES})
 -endif()
- 
+-
 -if(OpenSSL_FOUND)
 -    # include the libraries needed to use OpenSSL
 -    target_include_directories(${PROJECT_NAME} PRIVATE ${OpenSSL_INCLUDE_PATH})
@@ -229,5 +224,6 @@ index 75d3afdf..e1fb2984 100644
 -        target_link_libraries(${PROJECT_NAME} PRIVATE crypto)
 -    endif()
 -endif()
++
 +# define installing rules for target files
 +install(TARGETS ${PROJECT_NAME})

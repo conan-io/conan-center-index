@@ -1,4 +1,8 @@
 sources:
+  "0.0.3":
+    url: "https://github.com/ArashPartow/exprtk/archive/0.0.3.tar.gz"
+    sha256: "f9dec6975e86c702033d6a65ba9a0368eba31a61b89d74f2b5d24457c02c8439"
+
   "0.0.2":
     url: "https://github.com/ArashPartow/exprtk/archive/0.0.2.tar.gz"
     sha256: "7e8de4a0bfc9855c1316d8b8bc422061aef9a307c2f42d2e66298980463195c1"

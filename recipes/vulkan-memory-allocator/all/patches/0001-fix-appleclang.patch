@@ -1,5 +1,3 @@
-from https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/commit/3f9f66740aa6cd8a329cc738c21aaff9020fed46
-
 --- a/include/vk_mem_alloc.h
 +++ b/include/vk_mem_alloc.h
 @@ -2569,6 +2569,7 @@ VMA_CALL_PRE void VMA_CALL_POST vmaFreeStatsString(

@@ -1,5 +1,5 @@
 versions:
-  "0.10":
+  "0.11":
     folder: all
-  "cci.20210701":
+  "0.10.1":
     folder: all

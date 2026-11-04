@@ -1,0 +1,16 @@
+Custom CCI patch: Let Conan configure MACOSX_DEPLOYMENT_TARGET
+
+diff --git a/src/Makefile b/src/Makefile
+index 0b8c04f..e41c735 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -318,9 +318,6 @@ ifeq (,$(shell $(TARGET_CC) -o /dev/null -c -x c /dev/null -fno-stack-protector
+   TARGET_XCFLAGS+= -fno-stack-protector
+ endif
+ ifeq (Darwin,$(TARGET_SYS))
+-  ifeq (,$(MACOSX_DEPLOYMENT_TARGET))
+-    $(error missing: export MACOSX_DEPLOYMENT_TARGET=XX.YY)
+-  endif
+   TARGET_STRIP+= -x
+   TARGET_XCFLAGS+= -DLUAJIT_UNWIND_EXTERNAL
+   TARGET_XSHLDFLAGS= -dynamiclib -undefined dynamic_lookup -fPIC

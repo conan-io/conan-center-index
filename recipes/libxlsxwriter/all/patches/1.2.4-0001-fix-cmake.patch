@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c9ceb6c..8789f73 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -238,10 +238,10 @@ endif()
+ 
+ if(NOT BUILD_SHARED_LIBS)
+     if(UNIX)
+-        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++#        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+     elseif(MINGW OR MSYS)
+         set(CMAKE_C_FLAGS
+-            "${CMAKE_C_FLAGS} -static -static-libgcc -Wno-char-subscripts -Wno-long-long"
++            "${CMAKE_C_FLAGS} -Wno-char-subscripts -Wno-long-long"
+         )
+         list(APPEND LXW_PRIVATE_COMPILE_DEFINITIONS USE_FILE32API)
+     elseif(MSVC)
+@@ -309,9 +309,9 @@ list(APPEND LXW_PRIVATE_INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS})
+ 
+ # Set the minizip includes.
+ if(USE_SYSTEM_MINIZIP)
+-    if(MSVC)
+-        find_package(MINIZIP NAMES unofficial-minizip REQUIRED)
+-        set(MINIZIP_LIBRARIES unofficial::minizip::minizip)
++    if(1)
++        find_package(minizip REQUIRED)
++        set(MINIZIP_LIBRARIES minizip::minizip)
+     else()
+         find_package(PkgConfig REQUIRED)
+         pkg_check_modules(MINIZIP minizip)

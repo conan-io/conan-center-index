@@ -1,4 +1,11 @@
 sources:
+  "20230627":
+    url:
+      - "https://www.openpam.org/downloads/openpam-20230627.tar.gz"
+      - "https://sourceforge.net/projects/openpam/files/openpam/Ximenia/openpam-20230627.tar.gz"
+    sha256: "0d9ac8f5b55a6241f5073f13eff1e95461422c45ac1a30445d7e1068e91db4fd"
   "20190224":
-    url: "https://sourceforge.net/projects/openpam/files/openpam/Tabebuia/openpam-20190224.tar.gz"
+    url:
+      - "https://www.openpam.org/downloads/openpam-20190224.tar.gz"
+      - "https://sourceforge.net/projects/openpam/files/openpam/Tabebuia/openpam-20190224.tar.gz"
     sha256: "31f871f16b6868aef9c849f39aff6c52227977e09eee22b00fb8b7435ddf7105"

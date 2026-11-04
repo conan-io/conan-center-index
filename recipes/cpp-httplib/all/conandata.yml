@@ -1,22 +1,22 @@
 sources:
-  "0.14.1":
-    url: "https://github.com/yhirose/cpp-httplib/archive/v0.14.1.tar.gz"
-    sha256: "2d4fb5544da643e5d0a82585555d8b7502b4137eb321a4abbb075e21d2f00e96"
-  "0.14.0":
-    url: "https://github.com/yhirose/cpp-httplib/archive/v0.14.0.tar.gz"
-    sha256: "3a92248ef8cf2c32ad07f910b8e3052ff2427022b2adb871cf326fb620d2438e"
-  "0.13.3":
-    url: "https://github.com/yhirose/cpp-httplib/archive/v0.13.3.tar.gz"
-    sha256: "2a4503f9f2015f6878baef54cd94b01849cc3ed19dfe95f2c9775655bea8b73f"
-  "0.13.1":
-    url: "https://github.com/yhirose/cpp-httplib/archive/v0.13.1.tar.gz"
-    sha256: "9b837d290b61e3f0c4239da0b23bbf14c382922e2bf2a9bac21c1e3feabe1ff9"
-  "0.12.6":
-    url: "https://github.com/yhirose/cpp-httplib/archive/v0.12.6.tar.gz"
-    sha256: "24bc594a9efcc08a5a6f3928e848d046d411a88b07bcd6f7f3851227a1f0133e"
-  "0.11.4":
-    url: "https://github.com/yhirose/cpp-httplib/archive/v0.11.4.tar.gz"
-    sha256: "28f76b875a332fb80972c3212980c963f0a7d2e11a8fe94a8ed0d847b9a2256f"
-  "0.10.9":
-    url: "https://github.com/yhirose/cpp-httplib/archive/refs/tags/v0.10.9.tar.gz"
-    sha256: "95ac0740ef760829a079c01a44164fd74af3fdc0748a40fc6beefd0276fd2345"
+  "0.62.0":
+    url: "https://github.com/yhirose/cpp-httplib/archive/v0.62.0.tar.gz"
+    sha256: "7bba5949c56e772236432f69da03197fd4c12dc443455b9d81f6a05575431fc8"
+  "0.61.0":
+    url: "https://github.com/yhirose/cpp-httplib/archive/v0.61.0.tar.gz"
+    sha256: "f03bdb0bee4911d6db0335bc103f0f441ae70c527e993c1f4b3f177586b042d3"
+  "0.59.0":
+    url: "https://github.com/yhirose/cpp-httplib/archive/v0.59.0.tar.gz"
+    sha256: "7c8cc7df044abb837d75f7c1e56333305acb40335c3788b8f5fbf5927e63e148"
+  "0.56.0":
+    url: "https://github.com/yhirose/cpp-httplib/archive/v0.56.0.tar.gz"
+    sha256: "41f214d844e3b9117b734a8cc305b6141c5b47d63009681944e03bc31d92b9ca"
+  "0.53.1":
+    url: "https://github.com/yhirose/cpp-httplib/archive/v0.53.1.tar.gz"
+    sha256: "185af9587e270de9a3bfee234c6740f02e82265da33c7a41f97e02ee42f979d2"
+  "0.47.0":
+    url: "https://github.com/yhirose/cpp-httplib/archive/v0.47.0.tar.gz"
+    sha256: "f6676dd6539c1d05978aa8ecfae86d71e73c46f48c7766a04b991aa545c2f065"
+  "0.28.0":
+    url: "https://github.com/yhirose/cpp-httplib/archive/v0.28.0.tar.gz"
+    sha256: "ccb32f9832c906d571f61794f453223dbb724ba738265551e3cd28ca325b529d"

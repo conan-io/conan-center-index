@@ -105,7 +105,7 @@ class bxConan(ConanFile):
         if is_msvc(self):
             # Conan to Genie translation maps
             vs_ver_to_genie = {"17": "2022", "16": "2019", "15": "2017",
-                            "193": "2022", "192": "2019", "191": "2017"}
+                            "194": "2022", "193": "2022", "192": "2019", "191": "2017"}
 
             # Use genie directly, then msbuild on specific projects based on requirements
             genie_VS = f"vs{vs_ver_to_genie[str(self.settings.compiler.version)]}"
@@ -144,8 +144,13 @@ class bxConan(ConanFile):
 
             # Build project folder and path from given settings
             projFolder = f"gmake-{gmake_os_to_proj[str(self.settings.os)]}"
-            if self.settings.os == "Windows" or compiler_str not in ["gcc", "apple-clang"]:
-                projFolder += f"-{compiler_str}" #mingw-gcc or mingw-clang for windows; -clang for linux (where gcc on linux has no extra)
+            # mingw-gcc or mingw-clang for windows; -clang for linux (where gcc on linux has no extra)
+            # on macos, both clang versions do not have an extra
+            if (self.settings.os == "Windows"
+                or self.settings.os == "Macos" and compiler_str not in ["apple-clang", "clang"]
+                or self.settings.os == "Linux" and compiler_str != "gcc"
+            ):
+                projFolder += f"-{compiler_str}"
             if os_to_use_arch_config_suffix[str(self.settings.os)]:
                 projFolder += gmake_arch_to_genie_suffix[str(self.settings.arch)]
             proj_path = os.path.sep.join([self._bx_path, ".build", "projects", projFolder])

@@ -23,10 +23,12 @@ class UtilLinuxLibuuidConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_python_bindings": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_python_bindings": True,
     }
 
     @property
@@ -73,7 +75,7 @@ class UtilLinuxLibuuidConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Macos":
             # Required because libintl.{a,dylib} is not distributed via libc on Macos
-            self.requires("libgettext/0.21")
+            self.requires("libgettext/0.22")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -82,10 +84,13 @@ class UtilLinuxLibuuidConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--disable-all-programs")
         tc.configure_args.append("--enable-libuuid")
+        if not self.options.with_python_bindings:
+            tc.configure_args.append("--without-python")
         if self._has_sys_file_header:
             tc.extra_defines.append("HAVE_SYS_FILE_H")
         if "x86" in self.settings.arch:
             tc.extra_cflags.append("-mstackrealign")
+
         tc.generate()
 
         deps = AutotoolsDeps(self)
@@ -117,3 +122,6 @@ class UtilLinuxLibuuidConan(ConanFile):
 
         self.cpp_info.libs = ["uuid"]
         self.cpp_info.includedirs.append(os.path.join("include", "uuid"))
+
+        if self.settings.os == "Linux" and Version(self.version) >= "2.41.2":
+            self.cpp_info.system_libs.extend(["pthread"])

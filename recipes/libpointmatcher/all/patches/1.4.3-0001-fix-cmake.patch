@@ -1,0 +1,109 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0acebe3..b17f3d5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.10.2)
++cmake_minimum_required(VERSION 3.15)
+ 
+ include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
+ include(CheckSymbolExists)
+@@ -9,8 +9,6 @@ include(CMakePackageConfigHelpers)
+ # Project details / setup
+ #========================
+ 
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON) # add -fPIC as required
+-
+ # Extract version from header, done first to satisfy CMP0048,
+ # see `cmake --help-policy CMP0048` for more information.
+ file(
+@@ -51,6 +49,7 @@ if( BUILD_32 )
+ endif()
+ 
+ # Ensure proper build type
++if(0)
+ if (NOT CMAKE_BUILD_TYPE)
+   message("-- No build type specified; defaulting to CMAKE_BUILD_TYPE=Release.")
+   set(CMAKE_BUILD_TYPE Release CACHE STRING
+@@ -64,6 +63,7 @@ else ()
+     message("\n=================================================================================")
+   endif ()
+ endif ()
++endif()
+ 
+ 
+ #================= extra building definitions ==============================
+@@ -110,9 +110,6 @@ endforeach()
+ # initially
+ set(EXTERNAL_LIBS "")
+ 
+-# compile local version of gtest
+-add_subdirectory(contrib)
+-
+ #---------------------------
+ # DEPENDENCY:  POSIX Threads
+ #---------------------------
+@@ -134,22 +131,10 @@ endif ()
+ #--------------------
+ # DEPENDENCY: eigen 3
+ #--------------------
+-find_path(EIGEN_INCLUDE_DIR NAMES signature_of_eigen3_matrix_library
+-  HINTS  ENV EIGEN3_INC_DIR
+-         ENV EIGEN3_DIR
+-  PATHS  Eigen/Core
+-         /usr/local/include
+-         /usr/include
+-  PATH_SUFFIXES include eigen3 eigen
+-  DOC "Directory containing the Eigen3 header files"
+-)
+ 
+ # Suppress Eigen's warning by adding it to the system's library
+-include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
+-
+-#TODO: this should be a more standard way
+-#find_package(Eigen3 REQUIRED)
+-#message("-- eigen3 , version ${EIGEN_VERSION}")
++find_package(Eigen3 REQUIRED)
++set(EXTERNAL_LIBS ${EXTERNAL_LIBS} Eigen3::Eigen )
+ 
+ 
+ 
+@@ -158,7 +143,7 @@ include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
+ #--------------------
+ if (NOT TARGET nabo)
+   # Find libnabo:
+-  find_package(libnabo REQUIRED PATHS ${LIBNABO_INSTALL_DIR})
++  find_package(libnabo REQUIRED PATHS)
+   if (TARGET libnabo::nabo)
+  	set(libnabo_LIBRARIES libnabo::nabo)
+     message(STATUS "libnabo found, version ${libnabo_VERSION} (Config mode,  libs=${libnabo_LIBRARIES})")
+@@ -238,6 +223,7 @@ check_symbol_exists(_POSIX_TIMERS "unistd.h;time.h" POSIX_TIMERS)
+ #========================== libpointmatcher itself ==============================
+ 
+ # Check the compiler version as we need full C++17 support.
++if(0)
+ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+ 	# using Clang
+ 	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5")
+@@ -273,6 +259,7 @@ if (CMAKE_VERSION VERSION_LESS "3.8")
+ else ()
+ 	set (CMAKE_CXX_STANDARD 17)
+ endif ()
++endif ()
+ 
+ # SOURCE
+ 
+@@ -483,7 +470,7 @@ endif()
+ #  include_directories(${libpointmatcher_INCLUDE_DIRS})
+ #  target_link_libraries(executableName ${libpointmatcher_LIBRARIES})
+ #  ...
+-
++if(0)
+ # 1- local build #
+ 
+ # Install cmake config module
+@@ -574,3 +561,4 @@ if (NOT TARGET uninstall)
+   add_custom_target(uninstall
+ 	  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+ endif()
++endif()

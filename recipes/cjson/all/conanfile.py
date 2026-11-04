@@ -1,24 +1,23 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
-import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class CjsonConan(ConanFile):
     name = "cjson"
     description = "Ultralightweight JSON parser in ANSI C."
     license = "MIT"
-    topics = ("json", "parser")
-    homepage = "https://github.com/DaveGamble/cJSON"
     url = "https://github.com/conan-io/conan-center-index"
-
-    package_type = "library"
+    homepage = "https://github.com/DaveGamble/cJSON"
+    topics = ("json", "parser")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -31,9 +30,6 @@ class CjsonConan(ConanFile):
         "utils": False,
         "use_locales": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -59,8 +55,10 @@ class CjsonConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_SANITIZERS"] = False
         tc.variables["ENABLE_SAFE_STACK"] = False
-        tc.variables["ENABLE_PUBLIC_SYMBOLS"] = True
-        tc.variables["ENABLE_HIDDEN_SYMBOLS"] = False
+        tc.variables["ENABLE_PUBLIC_SYMBOLS"] = self.options.shared
+        tc.variables["ENABLE_HIDDEN_SYMBOLS"] = not self.options.shared
+        if not self.options.shared:
+            tc.variables["CMAKE_C_VISIBILITY_PRESET"] = "hidden"
         tc.variables["ENABLE_TARGET_EXPORT"] = False
         tc.variables["BUILD_SHARED_AND_STATIC_LIBS"] = False
         tc.variables["CJSON_OVERRIDE_BUILD_SHARED_LIBS"] = False
@@ -69,12 +67,14 @@ class CjsonConan(ConanFile):
         tc.variables["ENABLE_LOCALES"] = self.options.use_locales
         tc.variables["ENABLE_FUZZING"] = False
         tc.variables["ENABLE_CUSTOM_COMPILER_FLAGS"] = False
-        # Relocatable shared libs on macOS
+        # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.7.19": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -86,36 +86,15 @@ class CjsonConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        targets = {"cjson": "cJSON::cjson"}
-        if self.options.utils:
-            targets.update({"cjson_utils": "cJSON::cjson_utils"})
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            targets
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cJSON")
 
         self.cpp_info.components["_cjson"].set_property("cmake_target_name", "cjson")
         self.cpp_info.components["_cjson"].set_property("pkg_config_name", "libcjson")
         self.cpp_info.components["_cjson"].libs = ["cjson"]
+        if self.settings.os == "Windows":
+            # cJSON.h defaults to __declspec(dllexport); tell consumers how the library was built
+            self.cpp_info.components["_cjson"].defines = ["CJSON_IMPORT_SYMBOLS" if self.options.shared else "CJSON_HIDE_SYMBOLS"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_cjson"].system_libs = ["m"]
 
@@ -124,18 +103,3 @@ class CjsonConan(ConanFile):
             self.cpp_info.components["cjson_utils"].set_property("pkg_config_name", "libcjson_utils")
             self.cpp_info.components["cjson_utils"].libs = ["cjson_utils"]
             self.cpp_info.components["cjson_utils"].requires = ["_cjson"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "cJSON"
-        self.cpp_info.names["cmake_find_package_multi"] = "cJSON"
-        self.cpp_info.components["_cjson"].names["cmake_find_package"] = "cjson"
-        self.cpp_info.components["_cjson"].names["cmake_find_package_multi"] = "cjson"
-        self.cpp_info.components["_cjson"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["_cjson"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.components["_cjson"].names["pkg_config"] = "libcjson"
-        if self.options.utils:
-            self.cpp_info.components["cjson_utils"].names["cmake_find_package"] = "cjson_utils"
-            self.cpp_info.components["cjson_utils"].names["cmake_find_package_multi"] = "cjson_utils"
-            self.cpp_info.components["cjson_utils"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["cjson_utils"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-            self.cpp_info.components["cjson_utils"].names["pkg_config"] = "libcjson_utils"

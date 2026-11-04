@@ -1,0 +1,4 @@
+sources:
+  "2.2.1":
+    url: "https://github.com/martin-olivier/dylib/archive/refs/tags/v2.2.1.tar.gz"
+    sha256: "6af0d2a91860743dc9f564ba0ab7f036a9b37c904395610288791571d4dbea5b"

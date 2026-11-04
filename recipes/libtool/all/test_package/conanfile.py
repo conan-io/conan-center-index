@@ -17,11 +17,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     test_type = "explicit"
     short_paths = True
-    win_bash = True # This assignment must be *here* to avoid "Cannot wrap command with different envs." in Conan 1.x
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def layout(self):
         basic_layout(self)
@@ -30,12 +25,9 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str) # Since we are testing libltdl as well
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and not cross_building(self):
-            self.tool_requires(self.tested_reference_str) # We are testing libtool/libtoolize
-    
         self.tool_requires("autoconf/2.71")
         self.tool_requires("automake/1.16.5")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -75,7 +67,7 @@ class TestPackageConan(ConanFile):
         env = tc.environment()
         if is_msvc(self):
             for key, value in msvc_vars.items():
-                env.append(key, value)
+                env.define(key, value)
         tc.generate(env)
 
         # "sis" subfder: project to test building shared library using libtool
@@ -87,7 +79,7 @@ class TestPackageConan(ConanFile):
         env = tc.environment()
         if is_msvc(self):
             for key, value in msvc_vars.items():
-                env.append(key, value)
+                env.define(key, value)
         tc.generate(env)
 
         # Note: Using AutotoolsDeps causes errors on Windows when configure tries to determine compiler
@@ -110,6 +102,10 @@ class TestPackageConan(ConanFile):
         for var in ["DYLD_LIBRARY_PATH", "LD_LIBRARY_PATH"]:
             env.append_path(var, os.path.join(self.autotools_package_folder, "lib"))
         env.vars(self, scope="run").save_script("conanrun_libtool_testpackage")
+
+        env = Environment()
+        env.prepend_path("PATH", os.path.join(self.dependencies["libtool"].package_folder, "bin"))
+        env.vars(self, scope="build").save_script("conanbuild_libtoolize")
 
         runenv = VirtualRunEnv(self)
         runenv.generate()

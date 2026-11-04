@@ -15,30 +15,26 @@ class ItoaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jeaiii/itoa/"
     topics = ("string-conversion", "itona", "integer-conversion",)
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 17
-
-    def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
 
     def package_id(self):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -49,6 +45,4 @@ class ItoaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

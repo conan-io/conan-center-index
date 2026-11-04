@@ -15,7 +15,7 @@ required_conan_version = ">=1.53.0"
 
 class LibSafeCConan(ConanFile):
     name = "libsafec"
-    description = ("This library implements the secure C11 Annex K[^5] functions"
+    description = ("This library implements the secure C11 Annex K functions"
                    " on top of most libc implementations, which are missing from them.")
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
@@ -65,7 +65,7 @@ class LibSafeCConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if is_apple_os(self) and self.settings.arch == "armv8":
+        if Version(self.version) < "3.9.1" and is_apple_os(self) and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration(
                 f"This platform is not yet supported by {self.ref} (os=Macos arch=armv8)"
             )
@@ -118,10 +118,14 @@ class LibSafeCConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.includedirs.append(os.path.join("include", "libsafec"))
-        self.cpp_info.libs = [f"safec-{self.version}"]
         self.cpp_info.set_property("pkg_config_name", "libsafec")
 
+        if Version(self.version) >= "3.7.0":
+            self.cpp_info.includedirs.append(os.path.join("include", "safeclib"))
+            self.cpp_info.libs = ["safec"]
+        else:
+            self.cpp_info.includedirs.append(os.path.join("include", "libsafec"))
+            self.cpp_info.libs = [f"safec-{self.version}"]
+
         bin_dir = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_dir}")
         self.env_info.PATH.append(bin_dir)

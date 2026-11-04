@@ -1,8 +1,8 @@
+import os
+
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
-import os
+from conan.tools.cmake import CMake, cmake_layout
 
 
 class TestPackageConan(ConanFile):
@@ -16,12 +16,6 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        if Version(self.dependencies["libaec"].ref.version) >= "1.0.6":
-            tc.variables["CMAKE_C_STANDARD"] = "11"
-        tc.generate()
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -29,5 +23,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")

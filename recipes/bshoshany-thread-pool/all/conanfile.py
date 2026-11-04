@@ -4,20 +4,22 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.43.0"
 
 
 class BShoshanyThreadPoolConan(ConanFile):
-    description = "BS::thread_pool: a fast, lightweight, and easy-to-use C++17 thread pool library"
+    name = "bshoshany-thread-pool"
+    description = "BS::thread_pool: a fast, lightweight, modern, and easy-to-use C++17 / C++20 / C++23 thread pool library"
     homepage = "https://github.com/bshoshany/thread-pool"
     license = "MIT"
-    name = "bshoshany-thread-pool"
-    no_copy_source = True
-    settings = "arch", "build_type", "compiler", "os"
-    topics = ("concurrency", "cpp17", "header-only", "library", "multi-threading", "parallel-computing", "thread-pool", "threads")
+    topics = ("concurrency", "cpp17", "cpp20", "cpp23", "header-only", "library", "multi-threading", "parallel-computing", "thread-pool", "threads", "module", "modules")
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
+    settings = "arch", "build_type", "compiler", "os"
+    no_copy_source = True
 
     @property
     def _minimum_compilers_version(self):
@@ -33,26 +35,11 @@ class BShoshanyThreadPoolConan(ConanFile):
     def _min_cppstd(self):
         return "17"
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def package(self):
-        copy(self, "*.hpp", self.source_folder, os.path.join(self.package_folder, "include"))
-        copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
-        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
-
-    def package_info(self):
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
-        self.cpp_info.names["cmake_find_package"] = "bshoshany-thread-pool"
-        self.cpp_info.names["cmake_find_package_multi"] = "bshoshany-thread-pool"
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
@@ -63,3 +50,20 @@ class BShoshanyThreadPoolConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def package(self):
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) < "5.0.0":
+            copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+        else:
+            copy(self, "BS_thread_pool.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+            copy(self, "BS.thread_pool.cppm", os.path.join(self.source_folder, "modules"), os.path.join(self.package_folder, "modules"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]

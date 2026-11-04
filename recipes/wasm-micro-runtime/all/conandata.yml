@@ -1,4 +1,10 @@
 sources:
+  "2.2.0":
+    url: "https://github.com/bytecodealliance/wasm-micro-runtime/archive/refs/tags/WAMR-2.2.0.tar.gz"
+    sha256: "93b6ba03f681e061967106046b1908631ee705312b9a6410f3baee7af7c6aac9"
+  "1.3.3":
+    url: "https://github.com/bytecodealliance/wasm-micro-runtime/archive/refs/tags/WAMR-1.3.3.tar.gz"
+    sha256: "94d18b081b6fac0574faf36338c7762a659ff175b9ae2cbc1c0a8f045edcbe7a"
   "1.2.3":
     url: "https://github.com/bytecodealliance/wasm-micro-runtime/archive/refs/tags/WAMR-1.2.3.tar.gz"
     sha256: "85057f788630dc1b8c371f5443cc192627175003a8ea63c491beaff29a338346"
@@ -6,6 +12,14 @@ sources:
     url: "https://github.com/bytecodealliance/wasm-micro-runtime/archive/refs/tags/WAMR-1.2.2.tar.gz"
     sha256: "d328fc1e19c54cfdb4248b861de54b62977b9b85c0a40eaaeb9cd9b628c0c788"
 patches:
+  "2.2.0":
+    - patch_file: "patches/2.2.0-0001-fix-cmake.patch"
+      patch_description: "link ntdll on Windows"
+      patch_type: "conan"
+  "1.3.3":
+    - patch_file: "patches/1.3.3-0001-fix-cmake.patch"
+      patch_description: "separate static and shared build, link ntdll on Windows"
+      patch_type: "conan"
   "1.2.3":
     - patch_file: "patches/1.2.3-0001-fix-cmake.patch"
       patch_description: "separate static and shasred build"

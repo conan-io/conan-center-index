@@ -1,18 +1,10 @@
 sources:
-  "2.2":
-    url: "https://github.com/axboe/liburing/archive/liburing-2.2.tar.gz"
-    sha256: "e092624af6aa244ade2d52181cc07751ac5caba2f3d63e9240790db9ed130bbc"
-  "2.1":
-    url: "https://github.com/axboe/liburing/archive/liburing-2.1.tar.gz"
-    sha256: "f1e0500cb3934b0b61c5020c3999a973c9c93b618faff1eba75aadc95bb03e07"
-  "2.0":
-    url: "https://github.com/axboe/liburing/archive/liburing-2.0.tar.gz"
-    sha256: "ca069ecc4aa1baf1031bd772e4e97f7e26dfb6bb733d79f70159589b22ab4dc0"
-  "0.7":
-    url: "https://github.com/axboe/liburing/archive/liburing-0.7.tar.gz"
-    sha256: "8e2842cfe947f3a443af301bdd6d034455536c38a455c7a700d0c1ad165a7543"
-
-patches:
-  "2.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-liburing-2.1-memfd-create.patch"
+  "2.15":
+    url: "https://github.com/axboe/liburing/archive/liburing-2.15.tar.gz"
+    sha256: "8d052f2622dcb3678cbaee5ff582a87572672a6c0a56533cdda5b65cb636120a"
+  "2.6":
+    url: "https://github.com/axboe/liburing/archive/liburing-2.6.tar.gz"
+    sha256: "682f06733e6db6402c1f904cbbe12b94942a49effc872c9e01db3d7b180917cc"
+  "2.4":
+    url: "https://github.com/axboe/liburing/archive/liburing-2.4.tar.gz"
+    sha256: "2398ec82d967a6f903f3ae1fd4541c754472d3a85a584dc78c5da2fabc90706b"

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 project(test_package)
 
 find_package(opengl_system REQUIRED CONFIG)

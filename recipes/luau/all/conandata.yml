@@ -1,37 +1,4 @@
 sources:
-  "0.598":
-    url: "https://github.com/Roblox/luau/archive/0.598.tar.gz"
-    sha256: "a2bab4b513fe5f2fe174c45de4807846e6ce83420c9ba7a34c81c48b99e01c98"
-  "0.593":
-    url: "https://github.com/Roblox/luau/archive/0.593.tar.gz"
-    sha256: "1cbe4390ef71bb0f2210853978c900974aa02fab73de92b6e18e7bb10dd0e3c1"
-  "0.589":
-    url: "https://github.com/Roblox/luau/archive/0.589.tar.gz"
-    sha256: "dc4489de52dbf29cd3d04d78c1112f812e04a03b68d57585749260ba791e65ed"
-  "0.582":
-    url: "https://github.com/Roblox/luau/archive/0.582.tar.gz"
-    sha256: "ee6da6329e58afc956bcca907ed9c6bc0455cd580990aa73f7cfb285aea22a6d"
-  "0.577":
-    url: "https://github.com/Roblox/luau/archive/0.577.tar.gz"
-    sha256: "4fd3f0d7a3bb6a9f4ed69711d261c4ae6ab6dfe8eb8e444f738c3338c559c7c8"
-  "0.572":
-    url: "https://github.com/Roblox/luau/archive/0.572.tar.gz"
-    sha256: "5cdd13233eefc4b3f27970118272254a24be81fafcccf60e7a29391fbc529151"
-  "0.568":
-    url: "https://github.com/Roblox/luau/archive/0.568.tar.gz"
-    sha256: "8218f1943b53439b9cc076bcb6d6223c089093659cc75dda6e2695ee9b370a8c"
-  "0.563":
-    url: "https://github.com/Roblox/luau/archive/0.563.tar.gz"
-    sha256: "717c1b3e03d20829d75eb484e0699fc824b651b8f394164bc4ab8194482890b2"
-  "0.558":
-    url: "https://github.com/Roblox/luau/archive/0.558.tar.gz"
-    sha256: "3484adddb18872700e033f5917af44d90c266f9e0fff2fac21aec1061f472a06"
-patches:
-  "0.563":
-    - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      patch_description: "rename lerp function to avoid name conflict"
-      patch_type: "portability"
-  "0.558":
-    - patch_file: "patches/0.536-0002-rename-lerp.patch"
-      patch_description: "rename lerp function to avoid name conflict"
-      patch_type: "portability"
+  "0.700":
+    url: "https://github.com/Roblox/luau/archive/0.700.tar.gz"
+    sha256: "e0dffe07a4b27c568b9688916e1d97ba7204b7a4d487d0a03648c99b88fc8df8"

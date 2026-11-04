@@ -2,13 +2,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class LibsodiumConan(ConanFile):
@@ -18,7 +18,7 @@ class LibsodiumConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://doc.libsodium.org/"
     topics = "encryption", "signature", "hashing"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -40,9 +40,6 @@ class LibsodiumConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -92,57 +89,38 @@ class LibsodiumConan(ConanFile):
             if self._is_mingw:
                 tc.extra_ldflags.append("-lssp")
             if self.settings.os == "Emscripten":
-                # FIXME: this is an old comment/test, has not been re-tested with conan2 upgrade
-                self.output.warn("os=Emscripten is not tested/supported by this recipe")
-                # FIXME: ./dist-build/emscripten.sh does not respect options of this recipe
+                tc.configure_args.append("--enable-minimal")
+                tc.configure_args.append("--without-pthreads")
+                tc.configure_args.append("--disable-ssp")
+                tc.configure_args.append("--disable-asm")
             tc.generate()
 
     @property
     def _msvc_sln_folder(self):
         sln_folders = {
-            "Visual Studio": {
-                "10": "vs2010",
-                "11": "vs2012",
-                "12": "vs2013",
-                "14": "vs2015",
-                "15": "vs2017",
-                "16": "vs2019",
-            },
             "msvc": {
                 "170": "vs2012",
                 "180": "vs2013",
                 "190": "vs2015",
                 "191": "vs2017",
                 "192": "vs2019",
-            },
+                "193": "vs2022",
+                "194": "vs2022",
+                "195": "vs2026",
+            }
         }
-        default_folder = "vs2019"
-        if self.version != "1.0.18":
-            sln_folders["Visual Studio"]["17"] = "vs2022"
-            sln_folders["msvc"]["193"] = "vs2022"
-            default_folder = "vs2022"
-
-        return sln_folders.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version), default_folder)
+        fallback = "vs2026" # in case of yet-to-be-released Visual Studio version, try the latest available solution
+        return sln_folders.get(str(self.settings.compiler), {}).get(str(self.settings.compiler.version), fallback)
 
     def _build_msvc(self):
         msvc_sln_folder = os.path.join(self.source_folder, "builds", "msvc", self._msvc_sln_folder)
 
-        #==============================
-        # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client
-        if self.version == "1.0.18" and self._msvc_sln_folder == "vs2019":
-            toolset = MSBuildToolchain(self).toolset
-            replace_in_file(
-                self, os.path.join(msvc_sln_folder, "libsodium", "libsodium.vcxproj"),
-                "<PlatformToolset>v142</PlatformToolset>",
-                f"<PlatformToolset>{toolset}</PlatformToolset>",
-            )
         conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
         replace_in_file(
             self, os.path.join(msvc_sln_folder, "libsodium", "libsodium.vcxproj"),
             "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
             f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
         )
-        #==============================
 
         msbuild = MSBuild(self)
         msbuild.build_type = "{}{}".format(
@@ -153,7 +131,6 @@ class LibsodiumConan(ConanFile):
         msbuild.build(os.path.join(msvc_sln_folder, "libsodium.sln"))
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             self._build_msvc()
         else:

@@ -43,8 +43,15 @@ class LibUDEVConan(ConanFile):
         zypper = package_manager.Zypper(self)
         zypper.install_substitutes(["libudev-devel"], ["systemd-devel"], update=True, check=True)
 
+        alpine = package_manager.Apk(self)
+        alpine.install(["eudev-dev"], update=True, check=True)
+
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         pkg_config = PkgConfig(self, "libudev")
         pkg_config.fill_cpp_info(self.cpp_info)
+        self.cpp_info.set_property("system_package_version", str(pkg_config.version))
+
+        # todo Remove this workaround for Conan v1
+        self.cpp_info.set_property("component_version", str(pkg_config.version))

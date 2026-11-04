@@ -4,13 +4,13 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
-from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, copy, mkdir
+from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, mkdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
+
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.1"
 
 
 class LibMysqlClientCConan(ConanFile):
@@ -34,19 +34,6 @@ class LibMysqlClientCConan(ConanFile):
     package_type = "library"
     short_paths = True
 
-    @property
-    def _min_cppstd(self):
-        return "17" if Version(self.version) >= "8.0.27" else "11"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "7" if Version(self.version) >= "8.0.27" else "5.3",
-            "clang": "6",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -62,49 +49,24 @@ class LibMysqlClientCConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "8.0.30":
-            self.requires("openssl/1.1.1w")
-        else:
-            self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/1.5.5")
+        self.requires("zstd/[~1.5]")
         self.requires("lz4/1.9.4")
         if self.settings.os == "FreeBSD":
-            self.requires("libunwind/1.6.2")
+            self.requires("libunwind/1.7.2")
 
     def validate_build(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 17)
 
-        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
+        if cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross compilation not yet supported by the recipe. Contributions are welcomed.")
-
-    def validate(self):
-        def loose_lt_semver(v1, v2):
-            lv1 = [int(v) for v in v1.split(".")]
-            lv2 = [int(v) for v in v2.split(".")]
-            min_length = min(len(lv1), len(lv2))
-            return lv1[:min_length] < lv2[:min_length]
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} {minimum_version} or newer")
-
-        # Sice 8.0.17 this doesn't support shared library on MacOS.
-        # https://github.com/mysql/mysql-server/blob/mysql-8.0.17/cmake/libutils.cmake#L333-L335
-        if self.settings.compiler == "apple-clang" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared library")
-
-        # mysql < 8.0.29 uses `requires` in source code. It is the reserved keyword in C++20.
-        # https://github.com/mysql/mysql-server/blob/mysql-8.0.0/include/mysql/components/services/dynamic_loader.h#L270
-        if self.settings.compiler.get_safe("cppstd") == "20" and Version(self.version) < "8.0.29":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support C++20")
 
     def build_requirements(self):
         if is_apple_os(self):
-            self.tool_requires("cmake/[>=3.18 <4]")
+            self.tool_requires("cmake/[>=3.18]")
         if self.settings.os == "FreeBSD" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/[>=2.0.3 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -127,7 +89,7 @@ class LibMysqlClientCConan(ConanFile):
                             f"# WARN_MISSING_SYSTEM_{lib.upper()}({lib.upper()}_WARN_GIVEN)",
                             strict=False)
 
-            if lib != "libevent" or Version(self.version) < "8.0.34":
+            if lib != "libevent":
                 replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                 f"SET({lib.upper()}_WARN_GIVEN)",
                                 f"# SET({lib.upper()}_WARN_GIVEN)",
@@ -144,12 +106,6 @@ class LibMysqlClientCConan(ConanFile):
                             t,
                             "",
                             strict=False)
-
-        # Upstream does not actually load lz4 directories for system, force it to
-        if Version(self.version) < "8.0.34":
-            replace_in_file(self, os.path.join(self.source_folder, "libbinlogevents", "CMakeLists.txt"),
-                            "INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)",
-                            "MY_INCLUDE_SYSTEM_DIRECTORIES(LZ4)\nINCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libbinlogevents/include)")
 
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "zstd.cmake"),
                         "NAMES zstd",
@@ -181,8 +137,6 @@ class LibMysqlClientCConan(ConanFile):
 
         # Do not copy shared libs of dependencies to package folder
         deps_shared = ["SSL", "KERBEROS", "SASL", "LDAP", "PROTOBUF"]
-        if Version(self.version) < "8.0.34":
-            deps_shared.append("CURL")
         for dep in deps_shared:
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             f"MYSQL_CHECK_{dep}_DLLS()",
@@ -255,20 +209,28 @@ class LibMysqlClientCConan(ConanFile):
         rm(self, "README", self.package_folder)
         rm(self, "*.pdb", self.package_folder, recursive=True)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "plugin"))
         rmdir(self, os.path.join(self.package_folder, "docs"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        if self.settings.os == "Windows" and self.options.shared:
-            copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-        if self.options.shared:
-            rm(self, "*.a", self.package_folder, recursive=True)
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                rename(self, os.path.join(self.package_folder, "lib", "libmysql.dll"),
+                             os.path.join(self.package_folder, "bin", "libmysql.dll"))
+                rm(self, "*mysqlclient.*", os.path.join(self.package_folder, "lib"))
+            else:
+                rm(self, "*.dll", os.path.join(self.package_folder, "lib"))
+                rm(self, "*libmysql.*", os.path.join(self.package_folder, "lib"))
         else:
-            rm(self, "*.dll", self.package_folder, recursive=True)
-            rm(self, "*.dylib", self.package_folder, recursive=True)
-            rm(self, "*.so*", self.package_folder, recursive=True)
+            if self.options.shared:
+                rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            else:
+                rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
+                rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "mysqlclient")
         self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.shared else "mysqlclient"]
+        self.cpp_info.includedirs.append(os.path.join("include", "mysql"))
         if not self.options.shared:
             stdcpplib = stdcpp_library(self)
             if stdcpplib:
@@ -278,7 +240,3 @@ class LibMysqlClientCConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["dnsapi", "secur32"])
 
-        # TODO: There is no official FindMySQL.cmake, but it's a common Find files in many projects
-        #       do we want to support it in CMakeDeps?
-        self.cpp_info.names["cmake_find_package"] = "MySQL"
-        self.cpp_info.names["cmake_find_package_multi"] = "MySQL"

@@ -6,6 +6,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -14,7 +15,7 @@ required_conan_version = ">=1.53.0"
 class LibmpdclientConan(ConanFile):
     name = "libmpdclient"
     description = "libmpdclient is a C library which implements the Music Player Daemon protocol."
-    license = "BSD-3-Clause"
+    license = "BSD-2-Clause", "BSD-3-Clause"
     topics = ("music", "music-player-demon", "sound")
     homepage = "https://www.musicpd.org/libs/libmpdclient"
     url = "https://github.com/conan-io/conan-center-index"
@@ -80,7 +81,10 @@ class LibmpdclientConan(ConanFile):
         meson.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) >= "2.22":
+            copy(self, "*", os.path.join(self.source_folder, "LICENSES"), os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

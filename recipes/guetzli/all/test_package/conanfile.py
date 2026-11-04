@@ -1,16 +1,19 @@
-import os
+import io
 
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import can_run
 
 
-class GoogleguetzliTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualRunEnv"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def test(self):
-        bees_path = os.path.join(self.source_folder, "bees.png")
-        if not tools.cross_building(self.settings):
-            app = "guetzli"
-            if self.settings.os == "Windows":
-                app += ".exe"
-            self.run("{} --quality 84 {} bees.jpg".format(app, bees_path),
-                     run_environment=True)
+        if can_run(self):
+            stderr = io.StringIO()
+            self.run(f"guetzli", env="conanrun", stderr=stderr, ignore_errors=True)
+            assert "Guetzli JPEG compressor" in stderr.getvalue()

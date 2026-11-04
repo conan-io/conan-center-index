@@ -83,19 +83,20 @@ class NASMConan(ConanFile):
             with chdir(self, self.source_folder):
                 self.run(f'nmake /f {os.path.join("Mkfiles", "msvc.mak")}')
         else:
-            autotools = Autotools(self)
-            autotools.configure()
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.configure()
 
-            # GCC9 - "pure" attribute on function returning "void"
-            replace_in_file(self, "Makefile", "-Werror=attributes", "")
+                # GCC9 - "pure" attribute on function returning "void"
+                replace_in_file(self, "Makefile", "-Werror=attributes", "")
 
-            # Need "-arch" flag for the linker when cross-compiling.
-            # FIXME: Revisit after https://github.com/conan-io/conan/issues/9069, using new Autotools integration
-            # TODO it is time to revisit, not sure what to do here though...
-            if str(self.version).startswith("2.13"):
-                replace_in_file(self, "Makefile", "$(CC) $(LDFLAGS) -o", "$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o")
-                replace_in_file(self, "Makefile", "$(INSTALLROOT)", "$(DESTDIR)")
-            autotools.make()
+                # Need "-arch" flag for the linker when cross-compiling.
+                # FIXME: Revisit after https://github.com/conan-io/conan/issues/9069, using new Autotools integration
+                # TODO it is time to revisit, not sure what to do here though...
+                if str(self.version).startswith("2.13"):
+                    replace_in_file(self, "Makefile", "$(CC) $(LDFLAGS) -o", "$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o")
+                    replace_in_file(self, "Makefile", "$(INSTALLROOT)", "$(DESTDIR)")
+                autotools.make()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
@@ -105,8 +106,9 @@ class NASMConan(ConanFile):
                 shutil.copy2("nasm.exe", "nasmw.exe")
                 shutil.copy2("ndisasm.exe", "ndisasmw.exe")
         else:
-            autotools = Autotools(self)
-            autotools.install()
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.install()
             rmdir(self, os.path.join(self.package_folder, "share"))
         self._chmod_plus_x(self._nasm)
         self._chmod_plus_x(self._ndisasm)

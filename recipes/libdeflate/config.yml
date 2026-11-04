@@ -1,11 +1,9 @@
 versions:
-  "1.19":
+  "1.26":
     folder: "all"
-  "1.18":
+  "1.25":
     folder: "all"
-  "1.17":
-    folder: "all"
-  "1.15":
+  "1.22":
     folder: "all"
   "1.14":
     folder: "pre_1.15"

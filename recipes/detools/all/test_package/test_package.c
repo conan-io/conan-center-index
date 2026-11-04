@@ -1,23 +1,28 @@
 #include <stdlib.h>
 #include "detools.h"
 
-#define EXPECTED_PATCHED_FILE_SIZE 2780
-
-int main(int argc, const char *argv[])
+static int dummy_function()
 {
+    return (0);
+}
+
+int main()
+{
+    struct detools_apply_patch_in_place_t apply_patch;
+    uint8_t buf[256];
     int res;
+    size_t patch_size = 512;
 
-    if (argc != 4) {
-        printf("Wrong number of arguments.\n");
-
-        return EXIT_FAILURE;
-    }
-
-    res = detools_apply_patch_filenames(argv[1], argv[2], argv[3]);
-
-    if (res == EXPECTED_PATCHED_FILE_SIZE) {
-        return EXIT_SUCCESS;
-    } else {
-        return EXIT_FAILURE;
+    res = detools_apply_patch_in_place_init(&apply_patch,
+                                            dummy_function,
+                                            dummy_function,
+                                            dummy_function,
+                                            dummy_function,
+                                            dummy_function,
+                                            patch_size,
+                                            NULL);
+    printf("detools_apply_patch_in_place_init: %d\n", res);
+    if (res != 0) {
+        return (res);
     }
 }

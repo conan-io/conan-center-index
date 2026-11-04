@@ -1,0 +1,16 @@
+sources:
+  "0.385":
+    url: "https://github.com/vcrhonek/hwdata/archive/v0.385.tar.gz"
+    sha256: "577219d44d9686e8177f6291adbff7bacdd785ad4e8a8d0c4b2a14dbf850d6ac"
+  "0.382":
+    url: "https://github.com/vcrhonek/hwdata/archive/v0.382.tar.gz"
+    sha256: "5e25457b562a5227eb77eac21d5e4344bd1183c7d62b41e7d3e780ae33e053c1"
+  "0.378":
+    url: "https://github.com/vcrhonek/hwdata/archive/v0.378.tar.gz"
+    sha256: "098ea8db12a50290f4b23f7f521edf9c5bab25935d2740de17e4a487110b40c8"
+  "0.376":
+    url: "https://github.com/vcrhonek/hwdata/archive/v0.376.tar.gz"
+    sha256: "48d85dbf05650b2c382ffaadeb601cac1650f5a34ee5c452df8021af988ea090"
+  "0.374":
+    url: "https://github.com/vcrhonek/hwdata/archive/v0.374.tar.gz"
+    sha256: "2a0988bf5e97e49159d7f02a5e02a719c8976d4ec883a8abb635149d221ceca0"

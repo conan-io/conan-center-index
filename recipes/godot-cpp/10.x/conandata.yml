@@ -1,0 +1,8 @@
+sources:
+  "10.0.0":
+    url: "https://github.com/godotengine/godot-cpp/archive/refs/tags/10.0.0-stable.tar.gz"
+    sha256: "ebbf64f0f8f8b8b66bc4bc4d3797db97f95b19cf0dfb5b3f8cf56683d9df7db4"
+patches:
+  "10.0.0":
+    - patch_file: "patches/0001-stable-lib-output-name.patch"
+    - patch_file: "patches/0002-honor-position-independent-code.patch"

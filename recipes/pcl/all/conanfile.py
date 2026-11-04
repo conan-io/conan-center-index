@@ -1,14 +1,18 @@
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
-from conan.tools.gnu import PkgConfigDeps
-from conan.tools.scm import Version
-from conan.tools.system import package_manager
 import os
 
-required_conan_version = ">=1.53.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import (apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm,
+                               replace_in_file)
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+from conan.tools.system import package_manager
+
+required_conan_version = ">=2.0"
 
 class PclConan(ConanFile):
     name = "pcl"
@@ -90,6 +94,8 @@ class PclConan(ConanFile):
         "precompile_only_core_point_types": [True, False],
         # Whether to append a ''/d/rd/s postfix to executables on Windows depending on the build type
         "add_build_type_postfix": [True, False],
+        "use_sse": [True, False],
+        "use_avx": [True, False]
     }
     default_options = {
         "shared": False,
@@ -150,6 +156,8 @@ class PclConan(ConanFile):
         # Enabled to avoid excessive memory usage during compilation in CCI
         "precompile_only_core_point_types": True,
         "add_build_type_postfix": False,
+        "use_sse": True,
+        "use_avx": True
     }
 
     short_paths = True
@@ -212,7 +220,7 @@ class PclConan(ConanFile):
             "libusb": ["libusb::libusb"],
             "metslib": [],
             "opencv": ["opencv::opencv"],
-            "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu"],
+            "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu" if is_apple_os(self) or self.settings.os == "Windows" else "mesa-glu::mesa-glu"],
             "openni": [],
             "openni2": [],
             "pcap": ["libpcap::libpcap"],
@@ -332,6 +340,9 @@ class PclConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.use_sse
+            del self.options.use_avx
 
     def configure(self):
         if self.options.shared:
@@ -361,16 +372,16 @@ class PclConan(ConanFile):
         return is_available and is_used
 
     def requirements(self):
-        self.requires("boost/1.82.0", transitive_headers=True)
-        self.requires("eigen/3.4.0", transitive_headers=True)
+        self.requires("boost/1.83.0", transitive_headers=True)
+        self.requires("eigen/[>=3.4.0 <4]", transitive_headers=True)
         if self._is_enabled("flann"):
             self.requires("flann/1.9.2", transitive_headers=True)
         if self._is_enabled("png"):
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self._is_enabled("qhull"):
-            self.requires("qhull/8.0.1", transitive_headers=True)
+            self.requires("qhull/8.0.2", transitive_headers=True)
         if self._is_enabled("qt"):
-            self.requires("qt/6.5.1")
+            self.requires("qt/[>=6.6 <7]")
         if self._is_enabled("libusb"):
             self.requires("libusb/1.0.26", transitive_headers=True)
         if self._is_enabled("pcap"):
@@ -380,9 +391,12 @@ class PclConan(ConanFile):
             self.requires("opengl/system", transitive_headers=True)
             self.requires("freeglut/3.4.0", transitive_headers=True)
             self.requires("glew/2.2.0", transitive_headers=True)
-            self.requires("glu/system", transitive_headers=True)
+            if is_apple_os(self) or self.settings.os == "Windows":
+                self.requires("glu/system", transitive_headers=True)
+            else:
+                self.requires("mesa-glu/9.0.3", transitive_headers=True)
         if self._is_enabled("opencv"):
-            self.requires("opencv/4.5.5", transitive_headers=True)
+            self.requires("opencv/[>=4.8.1 <5]", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
         # TODO:
@@ -430,6 +444,7 @@ class PclConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -440,13 +455,20 @@ class PclConan(ConanFile):
         tc.cache_variables["WITH_PCAP"] = self._is_enabled("pcap")
         tc.cache_variables["WITH_PNG"] = self._is_enabled("png")
         tc.cache_variables["WITH_QHULL"] = self._is_enabled("qhull")
+        if self._is_enabled("qhull"):
+            # Upstream FindQhull.cmake defines HAVE_QHULL which changes content of pcl_config.h
+            # Since we use CMakeDeps instead of this file, we have to manually inject HAVE_QHULL
+            tc.cache_variables["HAVE_QHULL"] = True
         tc.cache_variables["WITH_QT"] = self._is_enabled("qt")
         tc.cache_variables["WITH_VTK"] = self._is_enabled("vtk")
         tc.cache_variables["WITH_CUDA"] = self._is_enabled("cuda")
         tc.cache_variables["BUILD_CUDA"] = self._is_enabled("cuda")
         tc.cache_variables["BUILD_GPU"] = self._is_enabled("cuda")
         tc.cache_variables["WITH_SYSTEM_ZLIB"] = True
-        tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.precompile_only_core_point_types
+        if not is_msvc(self):
+            # PCL_ONLY_CORE_POINT_TYPES is always defined for MSVC and MinGW
+            # Avoid warning C4005: 'PCL_ONLY_CORE_POINT_TYPES': macro redefinition message
+            tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.precompile_only_core_point_types
         # The default False setting breaks OpenGL detection in CMake
         tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
         tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
@@ -469,6 +491,13 @@ class PclConan(ConanFile):
         for comp in disabled:
             tc.cache_variables[f"BUILD_{comp}"] = False
 
+        tc.cache_variables["PCL_ENABLE_SSE"] = self.options.get_safe("use_sse", False)
+        tc.cache_variables["PCL_ENABLE_MARCHNATIVE"] = False
+        tc.cache_variables["PCL_ENABLE_AVX"] = self.options.get_safe("use_avx", False)
+        # Let's skip the AVX2 check as it fails when cross-building from ARM to AMD
+        # because of the -march=native flag, but -mavx2 actually works
+        tc.cache_variables["HAVE_AVX2"] = self.options.get_safe("use_avx", False)
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -486,10 +515,31 @@ class PclConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         for mod in ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]:
-            os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
+            find_module_path = os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake")
+            if os.path.exists(find_module_path):
+                os.remove(find_module_path)
+        # Let users activate/deactivate the AVX/SSE optimizations without depending on extra flags
+        # added by Conan or downstream
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'if(PCL_ENABLE_AVX AND "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")',
+                        'if(PCL_ENABLE_AVX)')
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'if(PCL_ENABLE_SSE AND "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")',
+                        'if(PCL_ENABLE_SSE)')
+        # GCC case
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'if("${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")',
+                        'if(1)')
+        # Apple-clang case
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'if("${CMAKE_CXX_FLAGS}" STREQUAL "")',
+                        'if(1)')
+        # fix ignoring conan cxx flags
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'set(CMAKE_CXX_FLAGS "',
+                        'string(APPEND CMAKE_CXX_FLAGS " ')
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -523,8 +573,6 @@ class PclConan(ConanFile):
 
         for name in sorted(self._enabled_components()):
             component = self.cpp_info.components[name]
-            component.names["cmake_find_package"] = name
-            component.names["cmake_find_package_multi"] = name
             component.set_property("cmake_file_name", name)
             component.set_property("cmake_module_file_name", name)
             component.set_property("cmake_target_name", f"PCL::{name}")
@@ -539,7 +587,6 @@ class PclConan(ConanFile):
                     component.requires.append(opt_dep)
             for dep in self._external_deps.get(name, []) + self._external_optional_deps.get(name, []):
                 component.requires += self._ext_dep_to_conan_target(dep)
-            self.output.info(f"Component {name} requires: {component.requires}")
 
         if self.options.apps:
             component = self.cpp_info.components["apps"]
@@ -574,6 +621,14 @@ class PclConan(ConanFile):
         if self.settings.os == "Windows":
             common.system_libs.append("ws2_32")
 
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "PCL"
-        self.cpp_info.names["cmake_find_package_multi"] = "PCL"
+        if self.options.get_safe("use_sse"):
+            # Assuming SSE4.2 extensions
+            if not is_msvc(self):
+                common.cxxflags.extend(["-msse4.2", "-mfpmath=sse"])
+            else:
+                # MSVC: we do not need cxxflags, but SSE defines
+                common.defines.extend(["__SSE4_2__", "__SSE4_1__", "__SSSE3__",
+                                       "__SSE3__", "__SSE2__", "__SSE__"])
+        if self.options.get_safe("use_avx"):
+            # Assuming AVX2 and modern MSVC/GCC versions
+            common.cxxflags.append("/arch:AVX2" if is_msvc(self) else "-mavx2")

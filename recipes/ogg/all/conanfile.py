@@ -1,9 +1,11 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class OggConan(ConanFile):
@@ -14,6 +16,7 @@ class OggConan(ConanFile):
     homepage = "https://github.com/xiph/ogg"
     license = "BSD-2-Clause"
 
+    package_type = "library"
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "shared": [True, False],
@@ -51,6 +54,9 @@ class OggConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "1.3.5": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def build(self):
@@ -73,11 +79,5 @@ class OggConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "ogg")
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["ogglib"].libs = ["ogg"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Ogg"
-        self.cpp_info.names["cmake_find_package_multi"] = "Ogg"
-        self.cpp_info.components["ogglib"].names["cmake_find_package"] = "ogg"
-        self.cpp_info.components["ogglib"].names["cmake_find_package_multi"] = "ogg"
         self.cpp_info.components["ogglib"].set_property("cmake_target_name", "Ogg::ogg")
         self.cpp_info.components["ogglib"].set_property("pkg_config_name", "ogg")

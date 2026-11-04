@@ -1,7 +1,4 @@
 sources:
-  "1.0.0-rc1":
-    url: "https://github.com/dfleury2/beauty/archive/refs/tags/1.0.0-rc1.tar.gz"
-    sha256: "e5c0cdffd9324ed0cbe771a4aaff3a572ec553dc0275bbaf4db754ce043ecf49"
-patches:
-  "1.0.0-rc1":
-    - patch_file: "patches/0001-fix-cmake.patch"
+  "1.0.8":
+    url: "https://github.com/dfleury2/beauty/archive/refs/tags/1.0.8.tar.gz"
+    sha256: "123bb34d535688fb27f2ab56c8266ae392f618f0159ab0d618c5eb5bcff0d164"

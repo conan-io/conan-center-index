@@ -1,10 +1,10 @@
-#include <iostream>
-#include <vector>
+#include <aruco/aruco.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 
-#include <aruco/aruco.h>
+#include <iostream>
+#include <vector>
 
 int main() {
     cv::Mat image = cv::Mat::zeros(600,600,CV_8UC3);

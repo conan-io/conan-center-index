@@ -1,0 +1,4 @@
+sources:
+  "1.8.5":
+    url: "https://github.com/BLAKE3-team/BLAKE3/archive/refs/tags/1.8.5.tar.gz"
+    sha256: "220bd81286e2a0585beac66d41ac3f4c2c33ae8a4e339fc88cf22d5e00514fe9"

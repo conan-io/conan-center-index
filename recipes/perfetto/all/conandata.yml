@@ -1,35 +1,8 @@
 sources:
-  "37.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v37.0.tar.gz"
-    sha256: "39d7b3635834398828cfd189bd61afb0657ca2a3a08efbfd9866bfbcd440810b"
-  "35.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v35.0.tar.gz"
-    sha256: "224b6552e60ad0fc7c1447bdf719ddd9ceceaf2b6773b71541c21df5890f4166"
-  "34.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v34.0.tar.gz"
-    sha256: "81dbf2fac446a0389c80e309b2060dcccd926012ce2a61621a47e3e432aee8c1"
-  "32.1":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v32.1.tar.gz"
-    sha256: "0d1088b4758b3d5f3813178c6de22386329d42407d23aa1479f20dce96e49d78"
-  "31.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v31.0.tar.gz"
-    sha256: "544c68293590f53391ea4267d5a9b1a4594e1c8216fc5f5ce9d0f1227797922e"
-  "30.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v30.0.tar.gz"
-    sha256: "d1883793a2adb2a4105fc083478bf781badd566d72da45caa99095b61f938a2e"
-  "27.1":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v27.1.tar.gz"
-    sha256: "9edbafd6e2d9feaced4c0153e2f48dbb1da38429c5b1b17dfee70a91fd3101b2"
-  "27.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v27.0.tar.gz"
-    sha256: "c22750dd21419cf58132d55d634b88d9947bd0c7244dd98854b0248c7637a98c"
-  "26.1":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v26.1.tar.gz"
-    sha256: "cce387e82e2a137fce2eba927f80f20407764b77637a1a92b9b24065a500ce6d"
-patches:
-  "31.0":
-    - patch_file: "patches/v31.0/0001-tracing-fix-compile-on-MSVC.patch"
-      patch_description: "Fix compilation on MSVC"
-      patch_type: "backport"
-      patch_source: "https://android-review.googlesource.com/c/platform/external/perfetto/+/2355222"
-      sha256: "ad253a9bba3941bd8d1f206422d60eb1c06cb6d75d60eff5b5b8ae0f2ec7e15c"
+  "58.2":
+    url: "https://github.com/google/perfetto/releases/download/v58.2/perfetto-cpp-sdk-src.zip"
+    sha256: "e56126ff81f0f914d35fe03c72419d147acf2890f36fbda7d4558fd5b84c4b09"
+licenses:
+  "58.2":
+    url: "https://raw.githubusercontent.com/google/perfetto/refs/tags/v58.2/LICENSE"
+    sha256: "9a682a56cffc9524dfa9b0b1c0dca9cb81a19e96d5bd0793aaf02c08a95ee7ca"

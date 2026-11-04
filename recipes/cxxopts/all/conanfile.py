@@ -15,7 +15,7 @@ class CxxOptsConan(ConanFile):
     description = "Lightweight C++ option parser library, supporting the standard GNU style syntax for options."
     license = "MIT"
     topics = ("option-parser", "positional-arguments ", "header-only")
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "unicode": [True, False],
@@ -44,7 +44,7 @@ class CxxOptsConan(ConanFile):
 
     def requirements(self):
         if self.options.unicode:
-            self.requires("icu/72.1")
+            self.requires("icu/74.1")
 
     def package_id(self):
         self.info.clear()

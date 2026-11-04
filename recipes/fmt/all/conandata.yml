@@ -1,4 +1,40 @@
 sources:
+  "12.2.0":
+    url: "https://github.com/fmtlib/fmt/releases/download/12.2.0/fmt-12.2.0.zip"
+    sha256: "a2f4a8d51178f954e4c339007f77edd76ba0cb2e36f87a48e5a5403d9be5878f"
+  "12.1.0":
+    url: "https://github.com/fmtlib/fmt/releases/download/12.1.0/fmt-12.1.0.zip"
+    sha256: "695fd197fa5aff8fc67b5f2bbc110490a875cdf7a41686ac8512fb480fa8ada7"
+  "12.0.0":
+    url: "https://github.com/fmtlib/fmt/releases/download/12.0.0/fmt-12.0.0.zip"
+    sha256: "1c32293203449792bf8e94c7f6699c643887e826f2d66a80869b4f279fb07d25"
+  "11.2.0":
+    url: "https://github.com/fmtlib/fmt/releases/download/11.2.0/fmt-11.2.0.zip"
+    sha256: "203eb4e8aa0d746c62d8f903df58e0419e3751591bb53ff971096eaa0ebd4ec3"
+  "11.1.4":
+    url: "https://github.com/fmtlib/fmt/releases/download/11.1.4/fmt-11.1.4.zip"
+    sha256: "49b039601196e1a765e81c5c9a05a61ed3d33f23b3961323d7322e4fe213d3e6"
+  "11.1.3":
+    url: "https://github.com/fmtlib/fmt/releases/download/11.1.3/fmt-11.1.3.zip"
+    sha256: "7df2fd3426b18d552840c071c977dc891efe274051d2e7c47e2c83c3918ba6df"
+  "11.1.1":
+    url: "https://github.com/fmtlib/fmt/releases/download/11.1.1/fmt-11.1.1.zip"
+    sha256: "a25124e41c15c290b214c4dec588385153c91b47198dbacda6babce27edc4b45"
+  "11.0.2":
+    url: "https://github.com/fmtlib/fmt/releases/download/11.0.2/fmt-11.0.2.zip"
+    sha256: "40fc58bebcf38c759e11a7bd8fdc163507d2423ef5058bba7f26280c5b9c5465"
+  "11.0.1":
+    url: "https://github.com/fmtlib/fmt/releases/download/11.0.1/fmt-11.0.1.zip"
+    sha256: "62ca45531814109b5d6cef0cf2fd17db92c32a30dd23012976e768c685534814"
+  "11.0.0":
+    url: "https://github.com/fmtlib/fmt/releases/download/11.0.0/fmt-11.0.0.zip"
+    sha256: "583ce480ef07fad76ef86e1e2a639fc231c3daa86c4aa6bcba524ce908f30699"
+  "10.2.1":
+    url: "https://github.com/fmtlib/fmt/releases/download/10.2.1/fmt-10.2.1.zip"
+    sha256: "312151a2d13c8327f5c9c586ac6cf7cddc1658e8f53edae0ec56509c8fa516c9"
+  "10.2.0":
+    url: "https://github.com/fmtlib/fmt/releases/download/10.2.0/fmt-10.2.0.zip"
+    sha256: "8a942861a94f8461a280f823041cde8f620a6d8b0e0aacc98c15bb5a9dd92399"
   "10.1.1":
     url: "https://github.com/fmtlib/fmt/releases/download/10.1.1/fmt-10.1.1.zip"
     sha256: "b84e58a310c9b50196cda48d5678d5fa0849bca19e5fdba6b684f0ee93ed9d1b"
@@ -32,3 +68,19 @@ sources:
 patches:
   "5.3.0":
     - patch_file: "patches/fix-install-5.3.0.patch"
+  "11.0.2":
+    - patch_file: "patches/11.0.2-0001-backport-consteval.patch"
+  "11.0.1":
+    - patch_file: "patches/11.0.0-0001-backport-consteval.patch"
+  "11.0.0":
+    - patch_file: "patches/11.0.0-0001-backport-consteval.patch"
+  "10.2.1":
+    - patch_file: "patches/10.2-0001-backport-consteval.patch"
+  "10.2.0":
+    - patch_file: "patches/10.2-0001-backport-consteval.patch"
+  "10.1.1":
+    - patch_file: "patches/10.1.1-0001-backport-consteval.patch"
+  "10.1.0":
+    - patch_file: "patches/10.1.0-0001-backport-consteval.patch"
+  "10.0.0":
+    - patch_file: "patches/10.0.0-0001-backport-consteval.patch"

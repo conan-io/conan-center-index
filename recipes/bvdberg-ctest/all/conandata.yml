@@ -1,4 +1,7 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/bvdberg/ctest/archive/1.1.0.tar.gz"
+    sha256: "6792d7a21f62ec9caa64fc5106c8c8eed9201f1d98571917d370d0b5af721f49"
   "1.0.0":
-    sha256: 80c5899f529dc57c1eb44113fe452cd90fd69cd1ab3a0431635282f56837205c
-    url: https://github.com/bvdberg/ctest/archive/1.0.0.tar.gz
+    url: "https://github.com/bvdberg/ctest/archive/1.0.0.tar.gz"
+    sha256: "80c5899f529dc57c1eb44113fe452cd90fd69cd1ab3a0431635282f56837205c"

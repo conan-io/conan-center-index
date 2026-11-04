@@ -1,0 +1,27 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2d4ffcd..293cf7e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.10)
+ 
+ project(mtfmt)
+ 
+-set(CMAKE_C_STANDARD 11)
+-set(CMAKE_CXX_STANDARD 11)
++#set(CMAKE_C_STANDARD 11)
++#set(CMAKE_CXX_STANDARD 11)
+ 
+ # debug版的后缀
+ set(CMAKE_DEBUG_POSTFIX "_d")
+@@ -50,6 +50,11 @@ endif()
+ # including path
+ target_include_directories(${TARGET_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/inc")
+ 
++# Standards
++target_compile_features(${TARGET_NAME} PRIVATE cxx_std_11)
++target_compile_features(${TARGET_NAME} PRIVATE c_std_11)
++
++
+ # debug?
+ if(NOT MSVC)
+     if(NOT CMAKE_BUILD_TYPE)

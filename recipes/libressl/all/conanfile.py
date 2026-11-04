@@ -88,6 +88,7 @@ class LibreSSLConan(ConanFile):
         cmake.install()
         rm(self, "*.cmake", os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "include", "CMakeFiles"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 

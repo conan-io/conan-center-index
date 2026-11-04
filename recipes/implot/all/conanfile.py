@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 import os
@@ -31,29 +31,17 @@ class ImplotConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC # rm_safe not needed
+            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if Version(self.version) >= "0.15":
-            self.requires("imgui/1.89.9", transitive_headers=True)
-        elif Version(self.version) >= "0.14":
-            self.requires("imgui/1.89.4", transitive_headers=True)
-        elif Version(self.version) >= "0.13":
-            # imgui 1.89 renamed ImGuiKeyModFlags_* to  ImGuiModFlags_*
-            self.requires("imgui/1.88", transitive_headers=True)
-        else:
-            self.requires("imgui/1.86", transitive_headers=True)
+        self.requires("imgui/1.92.5", transitive_headers=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
-    def validate(self):
-        if Version(self.version) < "0.13" and is_msvc(self) and self.dependencies["imgui"].options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared imgui.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -72,6 +60,7 @@ class ImplotConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="implot*.cpp", dst=os.path.join(self.package_folder, "res", "src"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 

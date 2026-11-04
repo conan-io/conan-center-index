@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15)
 
 project(
   "newmat"
@@ -15,7 +15,7 @@ if (SETUP_C_SUBSCRIPTS)
    add_compile_definitions(SETUP_C_SUBSCRIPTS)
 endif()
 message("Build with C style element access ${SETUP_C_SUBSCRIPTS}")
- 
+
 # -------------
 # target
 # -------------
@@ -80,7 +80,7 @@ install(
     ${include_dir}/newmatrm.h
     ${include_dir}/precisio.h
     ${include_dir}/solution.h
-  DESTINATION 
+  DESTINATION
     include/newmat
 )
 install(

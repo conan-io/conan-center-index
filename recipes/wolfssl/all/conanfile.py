@@ -6,21 +6,20 @@ from conan.tools.files import copy, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class WolfSSLConan(ConanFile):
     name = "wolfssl"
-    license = "GPL-2.0-or-later"
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://www.wolfssl.com/"
     description = (
         "wolfSSL (formerly CyaSSL) is a small, fast, portable implementation "
         "of TLS/SSL for embedded devices to the cloud."
     )
+    license = "GPL-2.0-or-later"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.wolfssl.com/"
     topics = ("wolfssl", "tls", "ssl", "iot", "fips", "secure", "cryptology", "secret")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -29,6 +28,7 @@ class WolfSSLConan(ConanFile):
         "fPIC": [True, False],
         "opensslextra": [True, False],
         "opensslall": [True, False],
+        "opensslcoexist": [True, False],
         "sslv3": [True, False],
         "alpn": [True, False],
         "des3": [True, False],
@@ -39,12 +39,19 @@ class WolfSSLConan(ConanFile):
         "sessioncerts": [True, False],
         "sni": [True, False],
         "testcert": [True, False],
+        "with_curl": [True, False],
+        "with_quic": [True, False],
+        "with_experimental": [True, False],
+        "with_rpk": [True, False],
+        "keylog_export": [True, False],
+        "asio": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "opensslextra": False,
         "opensslall": False,
+        "opensslcoexist": False,
         "sslv3": False,
         "alpn": False,
         "des3": False,
@@ -55,11 +62,13 @@ class WolfSSLConan(ConanFile):
         "sessioncerts": False,
         "sni": False,
         "testcert": False,
+        "with_curl": False,
+        "with_quic": False,
+        "with_experimental": False,
+        "with_rpk": False,
+        "keylog_export": False,
+        "asio": False,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -80,7 +89,8 @@ class WolfSSLConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
-        if self._settings_build.os == "Windows":
+        self.tool_requires("cmake/[>=3.22 <4]")
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -98,13 +108,16 @@ class WolfSSLConan(ConanFile):
             "--disable-examples",
             "--disable-crypttests",
             "--enable-harden",
+            "--enable-asio={}".format(yes_no(self.options.asio)),
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--enable-keylog-export={}".format(yes_no(self.options.keylog_export)),
             "--enable-opensslall={}".format(yes_no(self.options.opensslall)),
             "--enable-opensslextra={}".format(yes_no(self.options.opensslextra)),
+            "--enable-opensslcoexist={}".format(yes_no(self.options.opensslcoexist)),
             "--enable-sslv3={}".format(yes_no(self.options.sslv3)),
             "--enable-alpn={}".format(yes_no(self.options.alpn)),
             "--enable-des3={}".format(yes_no(self.options.des3)),
-            "--enable-tls13={}".format(yes_no(self.options.tls13)),
+            "--enable-tls13={}".format(yes_no(self.options.tls13 or self.options.get_safe("with_quic"))),
             "--enable-certgen={}".format(yes_no(self.options.certgen)),
             "--enable-dsa={}".format(yes_no(self.options.dsa)),
             "--enable-ripemd={}".format(yes_no(self.options.ripemd)),
@@ -114,6 +127,14 @@ class WolfSSLConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ])
+        if self.options.get_safe("with_curl"):
+            tc.configure_args.append("--enable-curl")
+        if self.options.get_safe("with_quic"):
+            tc.configure_args.append("--enable-quic")
+        if self.options.get_safe("with_experimental"):
+            tc.configure_args.append("--enable-experimental")
+        if self.options.get_safe("with_rpk"):
+            tc.configure_args.append("--enable-rpk")
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
             if check_min_vs(self, "180", raise_invalid=False):
@@ -141,6 +162,7 @@ class WolfSSLConan(ConanFile):
         autotools.install()
         os.unlink(os.path.join(self.package_folder, "bin", "wolfssl-config"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
@@ -157,8 +179,6 @@ class WolfSSLConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])
             elif self.settings.os == "Windows":
-                self.cpp_info.system_libs.extend(["advapi32", "ws2_32"])
-                if Version(self.version) >= "5.6.0":
-                    self.cpp_info.system_libs.append("crypt32")
-            elif is_apple_os(self) and Version(self.version) >= "5.6.0":
+                self.cpp_info.system_libs.extend(["advapi32", "ws2_32", "crypt32"])
+            elif is_apple_os(self):
                 self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])

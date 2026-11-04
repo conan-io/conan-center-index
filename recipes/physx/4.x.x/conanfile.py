@@ -18,6 +18,7 @@ class PhysXConan(ConanFile):
     homepage = "https://github.com/NVIDIAGameWorks/PhysX"
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "compiler", "arch", "build_type"
     options = {
         "shared": [True, False],
@@ -35,8 +36,7 @@ class PhysXConan(ConanFile):
     }
 
     short_paths = True
-
-    generators = "CMakeDeps"
+    no_copy_source = True
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -64,30 +64,28 @@ class PhysXConan(ConanFile):
 
         if self.settings.os == "Macos":
             if self.settings.arch not in ["x86", "x86_64"]:
-                raise ConanInvalidConfiguration("{} only supports x86 and x86_64 on macOS".format(self.name))
-            
+                raise ConanInvalidConfiguration(f"{self.name} only supports x86 and x86_64 on macOS")
+
             if valid_min_cppstd(self, 17):
-                raise ConanInvalidConfiguration("{} is not supported with C++ 17. Contributions are welcome.".format(self.name))
+                raise ConanInvalidConfiguration(f"{self.name} is not supported with C++ 17. Contributions are welcome.")
 
         build_type = self.settings.build_type
         if build_type not in ["Debug", "RelWithDebInfo", "Release"]:
             raise ConanInvalidConfiguration("Current build_type is not supported")
 
         if self.settings.os == "Windows" and not is_msvc(self):
-            raise ConanInvalidConfiguration("{} only supports Visual Studio on Windows".format(self.name))
+            raise ConanInvalidConfiguration(f"{self.name} only supports Visual Studio on Windows")
 
         if is_msvc(self):
             allowed_runtimes = ["MDd", "MTd"] if build_type == "Debug" else ["MD", "MT"]
             if msvc_runtime_flag(self) not in allowed_runtimes:
                 raise ConanInvalidConfiguration(
-                    "Visual Studio runtime {0} is required for {1} build type".format(
-                        " or ".join(allowed_runtimes),
-                        build_type,
-                    )
+                    f"Visual Studio runtime {' or '.join(allowed_runtimes)} is required for {build_type} build type"
                 )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -141,8 +139,6 @@ class PhysXConan(ConanFile):
         tc.generate()
 
     def build(self):
-        self._patch_sources()
-
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "physx/compiler/public"))
         cmake.build(build_type=self._get_physx_build_type())
@@ -185,8 +181,7 @@ class PhysXConan(ConanFile):
         ):
             target, _ = os.path.splitext(os.path.basename(cmake_file))
             replace_in_file(self, os.path.join(physx_source_cmake_dir, cmake_file),
-                                  "SET_TARGET_PROPERTIES({} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)".format(target),
-                                  "")
+                            f"SET_TARGET_PROPERTIES({target} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)", "")
 
         # No error for compiler warnings
         replace_in_file(self, os.path.join(physx_source_cmake_dir, "windows", "CMakeLists.txt"),
@@ -263,7 +258,7 @@ class PhysXConan(ConanFile):
                 "pattern": "PhysXDevice*.dll",
                 "vc_ver": {"180": "vc120", "190": "vc140", "191": "vc141"}.get(str(compiler_version), "vc142")
             }]
-            
+
             package_dst_bin_dir = os.path.join(self.package_folder, "bin")
 
             for dll_info in dll_info_list:

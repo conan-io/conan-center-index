@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, replace_in_file, copy, rmdir, collect_libs, rm
+from conan.tools.files import get, replace_in_file, copy, rmdir, collect_libs, rm, apply_conandata_patches, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -8,7 +8,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class DlibConan(ConanFile):
@@ -48,8 +48,29 @@ class DlibConan(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        if Version(self.version) < "19.24.2":
+            return 11
+        return 14
+
+    @property
+    def _compilers_minimum_version(self):
+        if Version(self.version) < "19.24.2":
+            return {}
+        return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "6",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
+    @property
     def _has_with_webp_option(self):
         return Version(self.version) >= "19.24"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -72,24 +93,30 @@ class DlibConan(ConanFile):
         if self.options.with_gif:
             self.requires("giflib/5.2.1")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.get_safe("with_webp"):
             self.requires("libwebp/1.3.2")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.43.1")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_openblas:
-            self.requires("openblas/0.3.20")
+            self.requires("openblas/0.3.30")
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, "11")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared on Windows. See https://github.com/davisking/dlib/issues/1483.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def _patch_sources(self):
         dlib_cmakelists = os.path.join(self.source_folder, "dlib", "CMakeLists.txt")
@@ -154,6 +181,8 @@ class DlibConan(ConanFile):
                 tc.variables["USE_SSE4_INSTRUCTIONS"] = self.options.with_sse4
             if self.options.with_avx != "auto":
                 tc.variables["USE_AVX_INSTRUCTIONS"] = self.options.with_avx
+        if Version(self.version) < "19.24.2":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -184,6 +213,6 @@ class DlibConan(ConanFile):
         # INFO: Unix systems use dlib as library name, but on Windows it includes settings, e.g dlib19.24.0_release_64bit_msvc1933.lib
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "nsl"]
+            self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "winmm", "comctl32", "gdi32", "imm32"]

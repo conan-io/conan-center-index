@@ -1,9 +1,41 @@
 sources:
+  "2.4.7.1":
+    url: "https://proj-clhep.web.cern.ch/proj-clhep/dist1/clhep-2.4.7.1.tgz"
+    sha256: "1c8304a7772ac6b99195f1300378c6e3ddf4ad07c85d64a04505652abb8a55f9"
+  "2.4.6.4":
+    url: "https://proj-clhep.web.cern.ch/proj-clhep/dist1/clhep-2.4.6.4.tgz"
+    sha256: "49c89330f1903ef707d3c5d79c16a7c5a6f2c90fc290e2034ee3834809489e57"
   "2.4.1.3":
     url: "https://proj-clhep.web.cern.ch/proj-clhep/dist1/clhep-2.4.1.3.tgz"
     sha256: "27c257934929f4cb1643aa60aeaad6519025d8f0a1c199bc3137ad7368245913"
 patches:
+  "2.4.7.1":
+    - patch_file: "patches/2.4.6.4-0001-fix-cmake.patch"
+      patch_description: "The CLHEP build system builds BOTH shared and static by default, change that behaviour"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.6.4-0002-mingw-support.patch"
+      patch_description: "allow CLHEP to build and link properly under mingw environments"
+      patch_type: "portability"
+    - patch_file: "patches/2.4.1.3-0003-msvc-2015-no-SFINAE.patch"
+      patch_description: "work around a compiler bug in MSVC 2015"
+      patch_type: "portability"
+  "2.4.6.4":
+    - patch_file: "patches/2.4.6.4-0001-fix-cmake.patch"
+      patch_description: "The CLHEP build system builds BOTH shared and static by default, change that behaviour"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.6.4-0002-mingw-support.patch"
+      patch_description: "allow CLHEP to build and link properly under mingw environments"
+      patch_type: "portability"
+    - patch_file: "patches/2.4.1.3-0003-msvc-2015-no-SFINAE.patch"
+      patch_description: "work around a compiler bug in MSVC 2015"
+      patch_type: "portability"
   "2.4.1.3":
-    - patch_file: "patches/fix-cmake.patch"
-    - patch_file: "patches/mingw-support.patch"
-    - patch_file: "patches/msvc-2015-no-SFINAE.patch"
+    - patch_file: "patches/2.4.1.3-0001-fix-cmake.patch"
+      patch_description: "The CLHEP build system builds BOTH shared and static by default, change that behaviour"
+      patch_type: conan
+    - patch_file: "patches/2.4.1.3-0002-mingw-support.patch"
+      patch_description: "allow CLHEP to build and link properly under mingw environments"
+      patch_type: "portability"
+    - patch_file: "patches/2.4.1.3-0003-msvc-2015-no-SFINAE.patch"
+      patch_description: "work around a compiler bug in MSVC 2015"
+      patch_type: "portability"

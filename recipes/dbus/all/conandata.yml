@@ -1,0 +1,29 @@
+sources:
+  "1.15.8":
+    url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.15.8.tar.xz"
+    sha256: "84fc597e6ec82f05dc18a7d12c17046f95bad7be99fc03c15bc254c4701ed204"
+  "1.15.6":
+    url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.15.6.tar.xz"
+    sha256: "f97f5845f9c4a5a1fb3df67dfa9e16b5a3fd545d348d6dc850cb7ccc9942bd8c"
+  "1.15.2":
+    url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.15.2.tar.xz"
+    sha256: "7e640803084af59f5e477b7ded11fd888b5380910a895c51ca3aedd63c0626ca"
+  "1.15.0":
+    url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.15.0.tar.xz"
+    sha256: "5073c8cb9ad20226647bb38f4965182b762a6e1f595ccdc8e59411014bfd640a"
+patches:
+  "1.15.8":
+    - patch_file: "patches/0001-meson-Use-check_header-to-confirm-headers-work.patch"
+      patch_type: "portability"
+      patch_description: "Fix build with Visual Studio 2022"
+      patch_source: "https://gitlab.freedesktop.org/dbus/dbus/-/merge_requests/454"
+  "1.15.2":
+    - patch_file: "patches/0003-meson-monotonic-clock-check.patch"
+      patch_type: "portability"
+      patch_description: "Fix detection of necessary monotonic clock functions in pthread"
+      patch_source: "https://gitlab.freedesktop.org/dbus/dbus/-/merge_requests/352"
+  "1.15.0":
+    - patch_file: "patches/0003-meson-monotonic-clock-check.patch"
+      patch_type: "portability"
+      patch_description: "Fix detection of necessary monotonic clock functions in pthread"
+      patch_source: "https://gitlab.freedesktop.org/dbus/dbus/-/merge_requests/352"

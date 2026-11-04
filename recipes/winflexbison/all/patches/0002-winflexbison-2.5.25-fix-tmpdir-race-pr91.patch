@@ -1,0 +1,207 @@
+Backport
+https://github.com/lexxmark/winflexbison/pull/91
+to fix issue where multiple parallel instances can use the same temporary file
+
+From 2bfaf44a53b7282615cd611378f0b4e936c819b1 Mon Sep 17 00:00:00 2001
+From: jonnysoe
+Date: Mon, 6 Mar 2023 02:31:34 +0800
+Subject: [PATCH] Fix runtime error upon multiple flex processes
+diff --git a/bison/src/output.c b/bison/src/output.c
+index e2b2ac7..b5038ed 100644
+--- a/bison/src/output.c
++++ b/bison/src/output.c
+@@ -44,6 +44,7 @@
+ #include "scan-skel.h"
+ #include "symtab.h"
+ #include "tables.h"
++#include "pid_tempname.h"
+ #include "strversion.h"
+ 
+ static struct obstack format_obstack;
+@@ -727,7 +728,7 @@ output_skeleton (void)
+ {
+   FILE *m4_in = NULL;
+   FILE *m4_out = NULL;
+-  char m4_in_file_name[/*MAX_PATH*/260]; 
++  char m4_in_file_name[/*MAX_PATH*/260];
+   char m4_out_file_name[/*MAX_PATH*/260];
+   char const *argv[11];
+ 
+@@ -813,10 +814,7 @@ output_skeleton (void)
+   if (trace_flag & trace_muscles)
+     muscles_output (stderr);
+   {
+-    char* p = _tempnam(NULL, "~m4_in_");    
+-    if (!p)
+-      error (EXIT_FAILURE, get_errno (),
+-             "_tempnam");
++    char* p = pid_tempname("~m4_in_");
+     m4_in = fopen(strcpy(m4_in_file_name, p), "wb+");
+     if (!m4_in)
+       error (EXIT_FAILURE, get_errno (),
+@@ -832,10 +830,7 @@ output_skeleton (void)
+   /* Read and process m4's output.  */
+   timevar_push (tv_m4);
+   {
+-    char *p = _tempnam(NULL, "~m4_out_");    
+-    if (!m4_out_file_name)
+-      error (EXIT_FAILURE, get_errno (),
+-             "_tempnam");
++    char *p = pid_tempname("~m4_out_");
+     m4_out = fopen(strcpy(m4_out_file_name, p), "wb+");
+     if (!m4_out)
+       error (EXIT_FAILURE, get_errno (),
+diff --git a/common/misc/pid_tempname.c b/common/misc/pid_tempname.c
+new file mode 100644
+index 0000000..9f87982
+--- /dev/null
++++ b/common/misc/pid_tempname.c
+@@ -0,0 +1,39 @@
++#include "pid_tempname.h"
++#include <stdio.h>
++#include <process.h>
++
++char temp_prefix[40];
++
++// This adds the unique process id to the built in _tempnam to prevent race condition
++// This race condition is more prevalent in Ninja as it parallelizes build and instantiates multiple win_flex/win_bison
++// flex_temp_out_main fails frequently as its used for a longer time (compared to temp_file_names),
++// hence more possibility to overlap
++const char *pid_tempname (const char *prefix)
++{
++    // Here is the race condition:
++    //
++    //           flex A
++    //              |                                flex B
++    //              ↓                                   |
++    //   _tempnam returns ~file_X                       ↓
++    //              |                        _tempnam returns ~file_X
++    //              ↓                                   |
++    //      freopen ~file_X w+                          ↓
++    //              |                           freopen ~file_X w+
++    //              ↓                                   |
++    //             ...                                  ↓
++    //              |                                  ...
++    //              ↓                                   |
++    //       _unlink ~file_X                           ...       <- Fails to print
++    //                                                  ↓
++    //                                           _unlink ~file_X <- Fails to delete
++    //
++    // It is also possible that ~file_X was deleted before the lagging win_flex is done, which can cause other errors,
++    // hence changing to non-fatal error upon missing ~file_X on _unlink will not work all the time
++    // This problem can be prevented with an even more unique temporary file name by adding the current process ID
++    // Synchronization is not necessary either as there is no reason for the independent processes to wait...
++    // The reason why this is an issue is because Windows filesystem is reflected immediately,
++    // unlike inode in Linux that only properly deletes files when their link count is down to zero
++    sprintf(temp_prefix, "%s%d_", prefix, _getpid());
++    return _tempnam(NULL, temp_prefix);
++}
+\ No newline at end of file
+diff --git a/common/misc/pid_tempname.h b/common/misc/pid_tempname.h
+new file mode 100644
+index 0000000..6113fab
+--- /dev/null
++++ b/common/misc/pid_tempname.h
+@@ -0,0 +1,4 @@
++// The longer pid_tempname was used to distinguish from GNU's tempname header
++
++///@brief Generates a unique pid temporary file
++const char *pid_tempname (const char *prefix);
+\ No newline at end of file
+diff --git a/flex/src/filter.c b/flex/src/filter.c
+index 62703a6..adb73af 100644
+--- a/flex/src/filter.c
++++ b/flex/src/filter.c
+@@ -22,6 +22,7 @@
+ /*  PURPOSE. */
+ 
+ #include "flexdef.h"
++#include "pid_tempname.h"
+ static const char * check_4_gnu_m4 =
+     "m4_dnl ifdef(`__gnu__', ,"
+     "`errprint(Flex requires GNU M4. Set the PATH or set the M4 environment variable to its path name.)"
+@@ -75,9 +76,7 @@ FILE* mkstempFILE (char *pref, const char *mode)
+ 	if (!pref || !*pref)
+ 		return NULL;
+ 
+-	name = _tempnam(flex_tmp_dir, pref);
+-	if (!name)
+-		return NULL;
++	name = pid_tempname(pref);
+ 
+ 	fd = fopen(name, mode);
+ 	if (fd)
+@@ -255,7 +254,7 @@ bool filter_apply_chain (struct filter * chain, FILE* in_file, FILE* out_file)
+ 	}
+ 
+ 	return result;
+-#if 0		
++#if 0
+ 	int     pid, pipes[2];
+ 
+ 
+diff --git a/flex/src/flexdef.h b/flex/src/flexdef.h
+index 8b18711..bdcb986 100644
+--- a/flex/src/flexdef.h
++++ b/flex/src/flexdef.h
+@@ -1136,7 +1136,6 @@ extern int filter_tee_header(struct filter *chain);
+ extern int filter_fix_linedirs(struct filter *chain);
+ extern int filter_m4_p(struct filter *chain);
+ 
+-extern const char* flex_tmp_dir;
+ extern FILE* mkstempFILE(char *pref, const char *mode);
+ extern void unlinktemp();
+ 
+diff --git a/flex/src/main.c b/flex/src/main.c
+index 720b776..05a8c7e 100644
+--- a/flex/src/main.c
++++ b/flex/src/main.c
+@@ -36,6 +36,7 @@
+ //#include "version.h"
+ #include "options.h"
+ #include "tables.h"
++#include "pid_tempname.h"
+ #include "parse.h"
+ #include <io.h>
+ #include <fcntl.h>
+@@ -411,12 +412,14 @@ void check_options (void)
+ 	*/
+ 
+ 	/* collect all output to temp file to use it as input for filter chain */
+-	prev_stdout = _dup(1);   // prev_stdout now refers to "stdout" 
++	prev_stdout = _dup(1);   // prev_stdout now refers to "stdout"
++
++	flex_temp_out_main = _strdup(pid_tempname("~flex_out_main_"));
+ 	freopen(flex_temp_out_main, "w+", stdout);
+ 
+ 	if (stdout == NULL)
+ 		lerr(_("could not create %s"), flex_temp_out_main);
+-	
++
+ 	yyout = stdout;
+ 
+ 
+@@ -1039,8 +1042,6 @@ void flexend (int exit_status)
+ 
+ 
+ /* flexinit - initialize flex */
+-const char* flex_tmp_dir;
+-
+ void flexinit (int argc, char **argv)
+ {
+ 	int     i, sawcmpflag, rv, optind;
+@@ -1048,14 +1049,6 @@ void flexinit (int argc, char **argv)
+ 	scanopt_t sopt;
+ 	char *ext_path = 0;
+ 
+-	flex_tmp_dir = getenv ("FLEX_TMP_DIR");
+-	{
+-	  char *p = _tempnam(flex_tmp_dir, "~flex_out_main_");
+-	  if (!p)
+-  		flexfatal(_("_tempnam(main)"));
+-	  flex_temp_out_main = _strdup(p);
+-	}
+-
+ 	printstats = syntaxerror = trace = spprdflt = false;
+ 	lex_compat = posix_compat = C_plus_plus = backing_up_report =
+ 		ddebug = fulltbl = false;

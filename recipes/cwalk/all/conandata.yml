@@ -1,4 +1,7 @@
 sources:
+  "1.2.8":
+    url: "https://github.com/likle/cwalk/archive/v1.2.8.tar.gz"
+    sha256: "48b99bd46f0b9ce027ca882b003e44a5db0369dec6fd9898fd5420aa282d780f"
   "1.2.7":
     url: "https://github.com/likle/cwalk/archive/v1.2.7.tar.gz"
     sha256: "ae424ec30830c970412e34d9092eaa6131d91af289cdad0ad66a7b1c58e768e7"
@@ -18,15 +21,31 @@ sources:
     url: "https://github.com/likle/cwalk/archive/v1.0.0.zip"
     sha256: "9ff6d85f88e7fe4877698afb40745d301491c1d3fca96f08d1622f5fe3494182"
 patches:
+  "1.2.8":
+    - patch_file: "patches/0001-fix-cmake-1.2.8.patch"
+      patch_description: "disable warnings"
+      patch_type: "conan"
   "1.2.7":
     - patch_file: "patches/0001-fix-cmake-1.2.5.patch"
+      patch_description: "disable warnings"
+      patch_type: "conan"
   "1.2.6":
     - patch_file: "patches/0001-fix-cmake-1.2.5.patch"
+      patch_description: "disable warnings"
+      patch_type: "conan"
   "1.2.5":
     - patch_file: "patches/0001-fix-cmake-1.2.5.patch"
+      patch_description: "disable warnings"
+      patch_type: "conan"
   "1.2.2":
     - patch_file: "patches/0001-fix-cmake-1.2.2.patch"
+      patch_description: "add installer, disable test"
+      patch_type: "conan"
   "1.1.0":
     - patch_file: "patches/0001-fix-cmake-1.1.0.patch"
+      patch_description: "add installer, disable test"
+      patch_type: "conan"
   "1.0.0":
     - patch_file: "patches/0001-fix-cmake-1.0.0.patch"
+      patch_description: "add installer, disable test"
+      patch_type: "conan"

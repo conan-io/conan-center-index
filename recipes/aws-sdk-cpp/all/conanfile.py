@@ -2,13 +2,13 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building, stdcpp_library
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2"
 
 
 class AwsSdkCppConan(ConanFile):
@@ -20,54 +20,102 @@ class AwsSdkCppConan(ConanFile):
     topics = ("aws", "cpp", "cross-platform", "amazon", "cloud")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    # This list comes from tools/code-generation/api-description, which then generates the sdk sources
+    # To generate for a new one, run the build once and check src/generated/src inside your build_folder, remove the common aws-sdk-cpp prefix
+    # NON_GENERATED_CLIENT_LIST in src/cmake/sdks.cmake contains extra ones that should also be added here
+    # and that's the list of sdks. Then join it to this one
     _sdks = (
-        "access-management",
+        "AWSMigrationHub",
         "accessanalyzer",
+        "account",
+        "account-access",
         "acm",
         "acm-pca",
-        "alexaforbusiness",
+        "agent-registry",
+        "agent-registry-control",
+        "aiops",
         "amp",
         "amplify",
         "amplifybackend",
+        "amplifyuibuilder",
         "apigateway",
         "apigatewaymanagementapi",
         "apigatewayv2",
         "appconfig",
+        "appconfigdata",
+        "appfabric",
         "appflow",
         "appintegrations",
         "application-autoscaling",
         "application-insights",
+        "application-signals",
+        "applicationcostprofiler",
         "appmesh",
+        "apprunner",
         "appstream",
         "appsync",
+        "arc-region-switch",
+        "arc-zonal-shift",
+        "artifact",
         "athena",
         "auditmanager",
         "autoscaling",
         "autoscaling-plans",
         "awstransfer",
+        "b2bi",
         "backup",
+        "backup-gateway",
+        "backupsearch",
         "batch",
+        "bcm-dashboards",
+        "bcm-data-exports",
+        "bcm-pricing-calculator",
+        "bcm-recommended-actions",
+        "bedrock",
+        "bedrock-agent",
+        "bedrock-agent-runtime",
+        "bedrock-agentcore",
+        "bedrock-agentcore-control",
+        "bedrock-data-automation",
+        "bedrock-data-automation-runtime",
+        "bedrock-runtime",
+        "billing",
+        "billingconductor",
         "braket",
         "budgets",
         "ce",
+        "chatbot",
         "chime",
+        "chime-sdk-identity",
+        "chime-sdk-media-pipelines",
+        "chime-sdk-meetings",
+        "chime-sdk-messaging",
+        "chime-sdk-voice",
+        "cleanrooms",
+        "cleanroomsml",
         "cloud9",
+        "cloudcontrol",
         "clouddirectory",
         "cloudformation",
         "cloudfront",
+        "cloudfront-keyvaluestore",
         "cloudhsm",
         "cloudhsmv2",
         "cloudsearch",
         "cloudsearchdomain",
         "cloudtrail",
+        "cloudtrail-data",
+        "cloudwatchomni",
         "codeartifact",
         "codebuild",
+        "codecatalyst",
         "codecommit",
+        "codeconnections",
         "codedeploy",
         "codeguru-reviewer",
+        "codeguru-security",
         "codeguruprofiler",
         "codepipeline",
-        "codestar",
         "codestar-connections",
         "codestar-notifications",
         "cognito-identity",
@@ -76,26 +124,41 @@ class AwsSdkCppConan(ConanFile):
         "comprehend",
         "comprehendmedical",
         "compute-optimizer",
+        "compute-optimizer-automation",
         "config",
         "connect",
         "connect-contact-lens",
+        "connectcampaigns",
+        "connectcampaignsv2",
+        "connectcases",
+        "connecthealth",
         "connectparticipant",
+        "controlcatalog",
+        "controltower",
+        "cost-optimization-hub",
         "cur",
         "customer-profiles",
         "databrew",
         "dataexchange",
         "datapipeline",
         "datasync",
+        "datazone",
         "dax",
+        "deadline",
         "detective",
         "devicefarm",
+        "devops-agent",
         "devops-guru",
         "directconnect",
+        "directory-service-data",
         "discovery",
         "dlm",
         "dms",
         "docdb",
+        "docdb-elastic",
+        "drs",
         "ds",
+        "dsql",
         "dynamodb",
         "dynamodbstreams",
         "ebs",
@@ -105,148 +168,237 @@ class AwsSdkCppConan(ConanFile):
         "ecr-public",
         "ecs",
         "eks",
-        "elastic-inference",
+        "eks-auth",
         "elasticache",
         "elasticbeanstalk",
         "elasticfilesystem",
         "elasticloadbalancing",
         "elasticloadbalancingv2",
         "elasticmapreduce",
-        "elastictranscoder",
+        "elementalinference",
         "email",
         "emr-containers",
+        "emr-serverless",
+        "endusermessaging",
+        "entityresolution",
         "es",
         "eventbridge",
+        "eventbridgev2",
         "events",
+        "evs",
         "firehose",
+        "fis",
         "fms",
         "forecast",
         "forecastquery",
         "frauddetector",
+        "freetier",
         "fsx",
         "gamelift",
+        "gameliftstreams",
+        "geo-maps",
+        "geo-places",
+        "geo-routes",
         "glacier",
         "globalaccelerator",
         "glue",
+        "grafana",
         "greengrass",
         "greengrassv2",
         "groundstation",
         "guardduty",
         "health",
         "healthlake",
-        "honeycode",
         "iam",
-        "identity-management",
+        "iam-toolbox",
         "identitystore",
         "imagebuilder",
         "importexport",
         "inspector",
+        "inspector-scan",
+        "inspector2",
+        "interconnect",
+        "internetmonitor",
+        "invoicing",
         "iot",
         "iot-data",
         "iot-jobs-data",
-        "iot1click-devices",
-        "iot1click-projects",
-        "iotanalytics",
+        "iot-managed-integrations",
         "iotdeviceadvisor",
-        "iotevents",
-        "iotevents-data",
-        "iotfleethub",
+        "iotfleetwise",
         "iotsecuretunneling",
         "iotsitewise",
         "iotthingsgraph",
+        "iottwinmaker",
         "iotwireless",
         "ivs",
+        "ivs-realtime",
+        "ivschat",
         "kafka",
+        "kafkaconnect",
         "kendra",
+        "kendra-ranking",
+        "keyspaces",
+        "keyspacesstreams",
         "kinesis",
         "kinesis-video-archived-media",
         "kinesis-video-media",
         "kinesis-video-signaling",
+        "kinesis-video-webrtc-storage",
         "kinesisanalytics",
         "kinesisanalyticsv2",
         "kinesisvideo",
         "kms",
         "lakeformation",
         "lambda",
+        "lambda-core",
+        "lambda-microvms",
+        "lambda-web",
+        "launch-wizard",
         "lex",
         "lex-models",
         "lexv2-models",
         "lexv2-runtime",
         "license-manager",
+        "license-manager-linux-subscriptions",
+        "license-manager-user-subscriptions",
         "lightsail",
         "location",
         "logs",
-        "lookoutvision",
+        "lookoutequipment",
+        "m2",
         "machinelearning",
-        "macie",
         "macie2",
+        "mailmanager",
         "managedblockchain",
+        "managedblockchain-query",
+        "marketplace-agreement",
         "marketplace-catalog",
+        "marketplace-deployment",
+        "marketplace-discovery",
         "marketplace-entitlement",
+        "marketplace-reporting",
         "marketplacecommerceanalytics",
         "mediaconnect",
         "mediaconvert",
         "medialive",
         "mediapackage",
         "mediapackage-vod",
+        "mediapackagev2",
         "mediastore",
         "mediastore-data",
         "mediatailor",
+        "medical-imaging",
+        "memorydb",
         "meteringmarketplace",
+        "mgn",
+        "migration-hub-refactor-spaces",
         "migrationhub-config",
-        "mobile",
-        "mobileanalytics",
+        "migrationhuborchestrator",
+        "migrationhubstrategy",
         "monitoring",
+        "mpa",
         "mq",
         "mturk-requester",
         "mwaa",
+        "mwaa-serverless",
         "neptune",
+        "neptune-graph",
+        "neptunedata",
         "network-firewall",
+        "network-security-manager",
+        "networkflowmonitor",
         "networkmanager",
-        "opsworks",
-        "opsworkscm",
+        "networkmonitor",
+        "notifications",
+        "notificationscontacts",
+        "nova-act",
+        "oam",
+        "observabilityadmin",
+        "odb",
+        "omics",
+        "opensearch",
+        "opensearchserverless",
         "organizations",
+        "osis",
         "outposts",
+        "partnercentral-account",
+        "partnercentral-benefits",
+        "partnercentral-channel",
+        "partnercentral-revenue-measurement",
+        "partnercentral-selling",
+        "payment-cryptography",
+        "payment-cryptography-data",
+        "pca-connector-ad",
+        "pca-connector-scep",
+        "pcs",
         "personalize",
         "personalize-events",
         "personalize-runtime",
         "pi",
         "pinpoint",
         "pinpoint-email",
+        "pinpoint-sms-voice-v2",
+        "pipes",
         "polly",
-        "polly-sample",
         "pricing",
-        "qldb",
-        "qldb-session",
-        "queues",
+        "pricing-plan-manager",
+        "proton",
+        "qapps",
+        "qbusiness",
+        "qconnect",
         "quicksight",
         "ram",
+        "rbin",
         "rds",
         "rds-data",
         "redshift",
         "redshift-data",
+        "redshift-serverless",
         "rekognition",
+        "repostspace",
+        "resiliencehub",
+        "resiliencehubv2",
+        "resource-explorer-2",
         "resource-groups",
         "resourcegroupstaggingapi",
-        "robomaker",
+        "rolesanywhere",
         "route53",
+        "route53-recovery-cluster",
+        "route53-recovery-control-config",
+        "route53-recovery-readiness",
         "route53domains",
+        "route53globalresolver",
+        "route53profiles",
         "route53resolver",
+        "rtbfabric",
+        "rum",
         "s3",
         "s3-crt",
-        "s3-encryption",
         "s3control",
+        "s3files",
         "s3outposts",
+        "s3tables",
+        "s3vectors",
         "sagemaker",
         "sagemaker-a2i-runtime",
         "sagemaker-edge",
         "sagemaker-featurestore-runtime",
+        "sagemaker-geospatial",
+        "sagemaker-metrics",
         "sagemaker-runtime",
+        "sagemaker-runtime-http2",
+        "sagemakerjobruntime",
+        "sagemakertrainingsessionruntime",
         "savingsplans",
+        "scheduler",
         "schemas",
         "sdb",
         "secretsmanager",
+        "security-ir",
+        "securityagent",
         "securityhub",
+        "securitylake",
         "serverlessrepo",
         "service-quotas",
         "servicecatalog",
@@ -255,39 +407,69 @@ class AwsSdkCppConan(ConanFile):
         "sesv2",
         "shield",
         "signer",
-        "sms",
+        "signer-data",
+        "signin",
+        "simpledbv2",
         "sms-voice",
+        "snow-device-management",
         "snowball",
         "sns",
+        "socialmessaging",
         "sqs",
         "ssm",
+        "ssm-contacts",
+        "ssm-guiconnect",
+        "ssm-incidents",
+        "ssm-quicksetup",
+        "ssm-sap",
         "sso",
         "sso-admin",
         "sso-oidc",
         "states",
         "storagegateway",
         "sts",
+        "supplychain",
         "support",
+        "support-app",
+        "supportauthz",
+        "sustainability",
         "swf",
         "synthetics",
-        "text-to-speech",
+        "taxsettings",
         "textract",
+        "timestream-influxdb",
         "timestream-query",
         "timestream-write",
         "transcribe",
         "transcribestreaming",
-        "transfer",
         "translate",
+        "trustedadvisor",
+        "uxc",
+        "verifiedpermissions",
+        "voice-id",
+        "vpc-lattice",
         "waf",
         "waf-regional",
         "wafv2",
         "wellarchitected",
+        "wickr",
+        "wisdom",
         "workdocs",
-        "worklink",
         "workmail",
         "workmailmessageflow",
         "workspaces",
+        "workspaces-instances",
+        "workspaces-thin-client",
+        "workspaces-web",
         "xray",
+        # Extra modules that are not generated but exist upstream
+        "access-management",
+        "text-to-speech",
+        "queues",
+        "s3-encryption",
+        "identity-management",
+        "transfer",
+        "s3-transfer"
     )
     options = {
         **{
@@ -295,22 +477,23 @@ class AwsSdkCppConan(ConanFile):
             "fPIC": [True, False],
             "min_size": [True, False],
         },
-        **{ x: [True, False] for x in _sdks},
+        **{sdk_name: [None, True, False] for sdk_name in _sdks},
     }
-    default_options = {key: False for key in options.keys()}
-    default_options["fPIC"] = True
-    default_options["access-management"] = True
-    default_options["identity-management"] = True
-    default_options["monitoring"] = True
-    default_options["queues"] = True
-    default_options["s3-encryption"] = True
-    default_options["transfer"] = True
-    default_options["text-to-speech"] = True
-
-    short_paths = True
+    default_options = {
+        **{
+            "shared": False,
+            "fPIC": True,
+            "min_size": False
+        },
+        **{sdk_name: None for sdk_name in _sdks},
+        # Overrides
+        "monitoring": True  # TODO: Clarify why monitoring is True by default
+    }
 
     @property
     def _internal_requirements(self):
+        # These modules and dependencies come from https://github.com/aws/aws-sdk-cpp/blob/1.11.915/cmake/sdksCommon.cmake#L143 and below
+        # Additionally Core is added to all modules automatically
         return {
             "access-management": ["iam", "cognito-identity"],
             "identity-management": ["cognito-identity", "sts"],
@@ -318,11 +501,8 @@ class AwsSdkCppConan(ConanFile):
             "s3-encryption": ["s3", "kms"],
             "text-to-speech": ["polly"],
             "transfer": ["s3"],
+            "s3-transfer": ["s3"],
         }
-
-    @property
-    def _use_aws_crt_cpp(self):
-        return Version(self.version) >= "1.9"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -330,76 +510,107 @@ class AwsSdkCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "1.9":
-            self.options.rm_safe("s3-crt")
+
+        # Main modules are true by default, but the user can set them to false
+        for module in self._internal_requirements:
+            setattr(self.options, module, True)
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        # If the user does not specify a value for a specific sdk:
+        # - Set it to True if it's a dependency of a main module that is set to True
+        for module, dependencies in self._internal_requirements.items():
+            if self.options.get_safe(module):
+                for dependency in dependencies:
+                    # This returns a PackageOption object
+                    # and checking if it's None should be done this way
+                    if self.options.get_safe(dependency) == None:  # noqa
+                        setattr(self.options, dependency, True)
+
+        # - Otherwise set it to False
+        # This way there are no None options past this method, and we can control default values
+        # of the dependencies of the main modules but still give the user control over them
+        for sdk_name in self._sdks:
+            if self.options.get_safe(sdk_name) == None:  # noqa
+                setattr(self.options, sdk_name, False)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.8.2")
-        self.requires("aws-c-event-stream/0.2.7")
-        self.requires("aws-checksums/0.1.13")
-        if self._use_aws_crt_cpp:
-            self.requires("aws-c-cal/0.5.13")
-            self.requires("aws-c-http/0.6.13")
-            self.requires("aws-c-io/0.10.20")
-            self.requires("aws-crt-cpp/0.17.23", transitive_headers=True)
+        # These versions come from prefetch_crt_dependency.sh,
+        # don't bump them independently, check the file
+        # Create the new versions for the dependencies in the order shown
+        # in that script, they are mostly topo sorted
+        self.requires("aws-crt-cpp/0.43.9", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-auth/0.10.4")
+        self.requires("aws-c-cal/0.9.15")
+        self.requires("aws-c-common/0.14.5", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-compression/0.3.2")
+        self.requires("aws-c-event-stream/0.7.1", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-http/0.11.0")
+        self.requires("aws-c-io/0.27.6")
+        self.requires("aws-c-mqtt/0.16.1")
+        if self.options.get_safe("s3-crt"):
+            self.requires("aws-c-s3/0.13.5")
+        # Not used by the SDK sources directly (only through aws-crt-cpp's endpoints rule engine),
+        # but upstream's CMake calls aws_use_package() on it
+        self.requires("aws-c-sdkutils/0.2.9")
+        self.requires("aws-checksums/0.2.10")
         if self.settings.os != "Windows":
-            self.requires("openssl/[>=1.1 <4]")
-            self.requires("libcurl/[>=7.78.0 <9]")
-        if self.settings.os in ["Linux", "FreeBSD"]:
+            # Used transitively in core/utils/crypto/openssl/CryptoImpl.h public header
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
+            # Used transitively in core/http/curl/CurlHandleContainer.h public header
+            self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
+        if self.settings.os == "Linux":
+            # Pulseaudio -> libcap, libalsa only support linux, don't use pulseaudio on other platforms
             if self.options.get_safe("text-to-speech"):
-                self.requires("pulseaudio/14.2")
+                # Used transitively in text-to-speech/PulseAudioPCMOutputDriver.h public header
+                self.requires("pulseaudio/14.2", transitive_headers=True, transitive_libs=True)
+        # zlib is used if ENABLE_ZLIB_REQUEST_COMPRESSION is enabled, set ot ON by default
+        self.requires("zlib/[>=1.2.11 <2]")
 
-    def validate(self):
+    def validate_build(self):
+        if self.settings_build.os == "Windows" and self.settings.os == "Android":
+            raise ConanInvalidConfiguration("Cross-building from Windows to Android is not supported")
+
         if (self.options.shared
-            and self.settings.compiler == "gcc"
-            and Version(self.settings.compiler.version) < "6.0"):
+                and self.settings.compiler == "gcc"
+                and Version(self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration(
                 "Doesn't support gcc5 / shared. "
                 "See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744"
             )
-        if (Version(self.version) < "1.9.234"
-            and self.settings.compiler == "gcc"
-            and Version(self.settings.compiler.version) >= "11.0"
-            and self.settings.build_type == "Release"):
-            raise ConanInvalidConfiguration(
-                "Versions prior to 1.9.234 don't support release builds on >= gcc 11 "
-                "See https://github.com/aws/aws-sdk-cpp/issues/1505"
-            )
-        if self._use_aws_crt_cpp:
-            if is_msvc(self) and is_msvc_static_runtime(self):
-                raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
-        else:
-            if self.settings.os == "Macos" and self.settings.arch == "armv8":
-                raise ConanInvalidConfiguration(
-                    "This version doesn't support arm8. "
-                    "See https://github.com/aws/aws-sdk-cpp/issues/1542"
-                )
 
-    def package_id(self):
-        for hl_comp in self._internal_requirements.keys():
-            if getattr(self.info.options, hl_comp):
-                for internal_requirement in self._internal_requirements[hl_comp]:
-                    setattr(self.info.options, internal_requirement, True)
+    def validate(self):
+        if (is_msvc(self) and self.options.shared
+                and not self.dependencies["aws-c-common"].options.shared):
+            raise ConanInvalidConfiguration(f"{self.ref} with shared is not supported with aws-c-common static")
+
+        # If the user has explicitly set a main module dependency to False,
+        # error out if the main module itself is not also disabled
+        for main_module, dependencies in self._internal_requirements.items():
+            if self.options.get_safe(main_module):
+                for internal_requirement in dependencies:
+                    if not self.options.get_safe(internal_requirement):
+                        raise ConanInvalidConfiguration(f"-o={self.ref}:{main_module}=True requires -o={self.ref}:{internal_requirement}=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    def _enabled_sdks(self):
+        return [sdk for sdk in self._sdks
+                if self.options.get_safe(sdk)]
 
     def generate(self):
         tc = CMakeToolchain(self)
         # All option() are defined before project() in upstream CMakeLists,
         # therefore we must use cache_variables
 
-        build_only = ["core"]
-        for sdk in self._sdks:
-            if self.options.get_safe(sdk):
-                build_only.append(sdk)
+        build_only = ["core"] + self._enabled_sdks()
         tc.cache_variables["BUILD_ONLY"] = ";".join(build_only)
 
         tc.cache_variables["ENABLE_UNITY_BUILD"] = True
@@ -407,11 +618,11 @@ class AwsSdkCppConan(ConanFile):
         tc.cache_variables["AUTORUN_UNIT_TESTS"] = False
         tc.cache_variables["BUILD_DEPS"] = False
         if self.settings.os != "Windows":
+            tc.cache_variables["USE_OPENSSL"] = True
             tc.cache_variables["ENABLE_OPENSSL_ENCRYPTION"] = True
 
         tc.cache_variables["MINIMIZE_SIZE"] = self.options.min_size
-        if is_msvc(self) and not self._use_aws_crt_cpp:
-            tc.cache_variables["FORCE_SHARED_CRT"] = not is_msvc_static_runtime(self)
+        tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
 
         if cross_building(self):
             tc.cache_variables["CURL_HAS_H2_EXITCODE"] = "0"
@@ -426,16 +637,7 @@ class AwsSdkCppConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Disable warnings as errors
-        replace_in_file(
-            self, os.path.join(self.source_folder, "cmake", "compiler_settings.cmake"),
-            'list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-Werror" "-pedantic" "-Wextra")', "",
-        )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -446,15 +648,16 @@ class AwsSdkCppConan(ConanFile):
 
     def _create_project_cmake_module(self):
         # package files needed to build other components (e.g. aws-cdi-sdk) with this SDK
-        for file in [
+        dependant_files = [
             "cmake/compiler_settings.cmake",
             "cmake/initialize_project_version.cmake",
             "cmake/utilities.cmake",
             "cmake/sdk_plugin_conf.cmake",
             "toolchains/cmakeProjectConfig.cmake",
             "toolchains/pkg-config.pc.in",
-            "aws-cpp-sdk-core/include/aws/core/VersionConfig.h"
-        ]:
+            "src/aws-cpp-sdk-core/include/aws/core/VersionConfig.h"
+        ]
+        for file in dependant_files:
             copy(self, file, src=self.source_folder, dst=os.path.join(self.package_folder, self._res_folder))
             replace_in_file(
                 self, os.path.join(self.package_folder, self._res_folder, file),
@@ -464,7 +667,7 @@ class AwsSdkCppConan(ConanFile):
 
         # avoid getting error from hook
         rename(self, os.path.join(self.package_folder, self._res_folder, "toolchains", "cmakeProjectConfig.cmake"),
-                     os.path.join(self.package_folder, self._res_folder, "toolchains", "cmakeProjectConf.cmake"))
+               os.path.join(self.package_folder, self._res_folder, "toolchains", "cmakeProjectConf.cmake"))
         replace_in_file(
             self, os.path.join(self.package_folder, self._res_folder, "cmake", "utilities.cmake"),
             "cmakeProjectConfig.cmake", "cmakeProjectConf.cmake",
@@ -494,30 +697,25 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].set_property("pkg_config_name", "aws-sdk-cpp-core")
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
         self.cpp_info.components["core"].requires = [
+            "aws-crt-cpp::aws-crt-cpp",
+            "aws-c-auth::aws-c-auth",
+            "aws-c-cal::aws-c-cal",
             "aws-c-common::aws-c-common",
+            "aws-c-compression::aws-c-compression",
             "aws-c-event-stream::aws-c-event-stream",
+            "aws-c-http::aws-c-http",
+            "aws-c-io::aws-c-io",
+            "aws-c-mqtt::aws-c-mqtt",
             "aws-checksums::aws-checksums",
+            "zlib::zlib"
         ]
-        if self._use_aws_crt_cpp:
-            self.cpp_info.components["core"].requires.extend([
-                "aws-c-cal::aws-c-cal",
-                "aws-c-http::aws-c-http",
-                "aws-c-io::aws-c-io",
-                "aws-crt-cpp::aws-crt-cpp",
-            ])
 
-        # other components
-        enabled_sdks = [sdk for sdk in self._sdks if self.options.get_safe(sdk)]
-        for hl_comp in self._internal_requirements.keys():
-            if getattr(self.options, hl_comp):
-                for internal_requirement in self._internal_requirements[hl_comp]:
-                    if internal_requirement not in enabled_sdks:
-                        enabled_sdks.append(internal_requirement)
+        self.cpp_info.components["core"].requires.extend([
+            "aws-c-sdkutils::aws-c-sdkutils",
+        ])
 
-        for sdk in enabled_sdks:
-            # TODO: there is no way to properly emulate COMPONENTS names for
-            #       find_package(AWSSDK COMPONENTS <sdk>) in set_property()
-            #       right now: see https://github.com/conan-io/conan/issues/10258
+        for sdk in self._enabled_sdks():
+            # TODO: We might want to set cmake_components if the targets dont match the component names
             self.cpp_info.components[sdk].set_property("cmake_target_name", f"AWS::aws-sdk-cpp-{sdk}")
             self.cpp_info.components[sdk].set_property("pkg_config_name", f"aws-sdk-cpp-{sdk}")
             self.cpp_info.components[sdk].requires = ["core"]
@@ -525,12 +723,8 @@ class AwsSdkCppConan(ConanFile):
                 self.cpp_info.components[sdk].requires.extend(self._internal_requirements[sdk])
             self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
 
-            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-            self.cpp_info.components[sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
-            self.cpp_info.components[sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
-            component_alias = f"aws-sdk-cpp-{sdk}_alias" # to emulate COMPONENTS names for find_package()
-            self.cpp_info.components[component_alias].names["cmake_find_package"] = sdk
-            self.cpp_info.components[component_alias].names["cmake_find_package_multi"] = sdk
+            # TODO: Remove, Conan 1 legacy, but this component now exists, it's part of the api
+            component_alias = f"aws-sdk-cpp-{sdk}_alias"  # to emulate COMPONENTS names for find_package()
             self.cpp_info.components[component_alias].requires = [sdk]
 
         # specific system_libs, frameworks and requires of components
@@ -543,30 +737,21 @@ class AwsSdkCppConan(ConanFile):
         else:
             self.cpp_info.components["core"].requires.extend(["libcurl::curl", "openssl::openssl"])
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["core"].system_libs.append("atomic")
+        if self.settings.os == "Linux":
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].requires.append("pulseaudio::pulseaudio")
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["core"].system_libs.append("atomic")
+
+        if self.options.get_safe("s3-crt"):
+            self.cpp_info.components["s3-crt"].requires.append("aws-c-s3::aws-c-s3")
+
         if self.settings.os == "Macos":
             if self.options.get_safe("text-to-speech"):
-                self.cpp_info.components["text-to-speech"].frameworks.append("CoreAudio")
-
-        libcxx = stdcpp_library(self)
-        if libcxx:
-            self.cpp_info.components["core"].system_libs.append(libcxx)
+                self.cpp_info.components["text-to-speech"].frameworks.extend(["CoreAudio", "AudioToolbox"])
 
         self.cpp_info.components["plugin_scripts"].requires = ["core"]
         self.cpp_info.components["plugin_scripts"].builddirs.extend([
             os.path.join(self._res_folder, "cmake"),
             os.path.join(self._res_folder, "toolchains")])
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "AWSSDK"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "AWSSDK"
-        self.cpp_info.names["cmake_find_package"] = "AWS"
-        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.components["core"].names["cmake_find_package"] = "aws-sdk-cpp-core"
-        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "aws-sdk-cpp-core"
-        self.cpp_info.components["plugin_scripts"].build_modules["cmake_find_package"] = [sdk_plugin_conf]
-        self.cpp_info.components["plugin_scripts"].build_modules["cmake_find_package_multi"] = [sdk_plugin_conf]

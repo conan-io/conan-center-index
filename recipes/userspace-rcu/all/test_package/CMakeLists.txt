@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(test_package)
+project(test_package LANGUAGES C)
 
 find_package(userspace-rcu COMPONENTS urcu REQUIRED)
 
@@ -10,6 +10,3 @@ target_link_libraries(${PROJECT_NAME} userspace-rcu::urcu)
 
 add_executable(${PROJECT_NAME}-mb ${TEST_SRC})
 target_link_libraries(${PROJECT_NAME}-mb userspace-rcu::urcu-mb)
-
-add_executable(${PROJECT_NAME}-signal ${TEST_SRC})
-target_link_libraries(${PROJECT_NAME}-signal userspace-rcu::urcu-signal)

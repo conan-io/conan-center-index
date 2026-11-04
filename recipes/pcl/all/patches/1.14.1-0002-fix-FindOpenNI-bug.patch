@@ -1,0 +1,32 @@
+--- cmake/Modules/FindOpenNI.cmake
++++ cmake/Modules/FindOpenNI.cmake
+@@ -52,7 +52,12 @@
+ 
+   # Libraries
+   if(NOT WIN32)
+-    find_package(libusb REQUIRED)
++    find_package(libusb QUIET)
++    if (NOT libusb_FOUND)
++      message(WARNING "Found OpenNI library, but required libusb is not available")
++      set(OPENNI_FOUND FALSE)
++      return()
++    endif()
+     set(OPENNI_LIBRARIES ${OPENNI_LIBRARY} libusb::libusb)
+   else()
+     set(OPENNI_LIBRARIES ${OPENNI_LIBRARY})
+--- cmake/Modules/FindOpenNI2.cmake
++++ cmake/Modules/FindOpenNI2.cmake
+@@ -42,7 +42,12 @@
+ 
+   # Libraries
+   if(NOT WIN32)
+-    find_package(libusb REQUIRED)
++    find_package(libusb QUIET)
++    if (NOT libusb_FOUND)
++      message(WARNING "Found OpenNI2 library, but required libusb is not available")
++      set(OPENNI2_FOUND FALSE)
++      return()
++    endif()
+     set(OPENNI2_LIBRARIES ${OPENNI2_LIBRARY} libusb::libusb)
+   else()
+     set(OPENNI2_LIBRARIES ${OPENNI2_LIBRARY})

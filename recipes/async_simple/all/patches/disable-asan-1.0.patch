@@ -1,0 +1,21 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -106,11 +106,13 @@ 
+         #list(APPEND deplibs "-m64")
+     endif()
+ endif()
+-
+-if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+-        message("-- Use flag -fsanitize=address")
+-        list(APPEND CXX_FLAGS "-fsanitize=address")
++option(ASYNC_SIMPLE_ENABLE_ASAN "enable asan in debug when compiler is not msvc" ON)
++if (ASYNC_SIMPLE_ENABLE_ASAN)
++    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
++        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
++            message("-- Use flag -fsanitize=address")
++            list(APPEND CXX_FLAGS "-fsanitize=address")
++        endif()
+     endif()
+ endif()
+ 

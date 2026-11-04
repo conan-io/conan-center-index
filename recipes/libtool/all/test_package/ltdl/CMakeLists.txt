@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.15)
 project(test_package)
 
 find_package(libtool REQUIRED CONFIG)

@@ -1,20 +1,23 @@
-from conans import ConanFile, CMake, tools
-from conan.tools.microsoft import is_msvc
 import os
-import functools
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=1.53.0"
+
 
 class ZyreConan(ConanFile):
     name = "zyre"
+    description = "Local Area Clustering for Peer-to-Peer Applications."
     license = "MPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zeromq/zyre"
-    description = "Local Area Clustering for Peer-to-Peer Applications."
-    topics = ("zyre", "czmq", "zmq", "zeromq",
-              "message-queue", "asynchronous")
+    topics = ("czmq", "zmq", "zeromq", "message-queue", "asynchronous")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    generators = ["cmake", "cmake_find_package"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -26,18 +29,8 @@ class ZyreConan(ConanFile):
         "drafts": False,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,47 +38,67 @@ class ZyreConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("czmq/4.2.0")
-        self.requires("zeromq/4.3.4")
+        self.requires("czmq/4.2.1", transitive_headers=True)
+        self.requires("zeromq/4.3.5")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("libsystemd/249.7")
+            self.requires("libsystemd/255")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ENABLE_DRAFTS"] = self.options.drafts
-        if tools.Version(self.version) >= "2.0.1":
-            cmake.definitions["ZYRE_BUILD_SHARED"] = self.options.shared
-            cmake.definitions["ZYRE_BUILD_STATIC"] = not self.options.shared
-        cmake.configure(build_dir=self._build_subfolder)
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["ENABLE_DRAFTS"] = self.options.drafts
+        tc.variables["ZYRE_BUILD_SHARED"] = self.options.shared
+        tc.variables["ZYRE_BUILD_STATIC"] = not self.options.shared
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        if not self.options.shared:
+            tc.preprocessor_definitions["ZYRE_STATIC"] = ""
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("zeromq", "cmake_file_name", "LIBZMQ")
+        deps.set_property("czmq", "cmake_file_name", "CZMQ")
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(libzmq REQUIRED)", "find_package(LIBZMQ REQUIRED CONFIG)")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(czmq REQUIRED)", "find_package(CZMQ REQUIRED CONFIG)")
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", src=self._source_subfolder,
-                  dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig",))
-        tools.rmdir(os.path.join(self.package_folder, "share",))
-        tools.rmdir(os.path.join(self.package_folder, "cmake",))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "libzyre"
-        
-        libname = "libzyre" if tools.Version(self.version) >= "2.0.1" and is_msvc(self) and not self.options.shared else "zyre"
+        self.cpp_info.set_property("cmake_file_name", "zyre")
+        self.cpp_info.set_property("cmake_target_name", "zyre" if self.options.shared else "zyre-static")
+        self.cpp_info.set_property("pkg_config_name", "libzyre")
+
+        libname = "zyre"
+        if is_msvc(self) and not self.options.shared:
+            libname = "libzyre"
         self.cpp_info.libs = [libname]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "rt", "m"]

@@ -1,10 +1,10 @@
 sources:
-  "cci.20230205":
-    url: "https://github.com/sammycage/plutovg/archive/ccaa687ac6092ef548b840144820a757c24e718b.tar.gz"
-    sha256: "e7cb644a76612bcbaeb26f401adf7eff9cc45fbef69aadc7a9d0f84416f0ea98"
-  "cci.20221030":
-    url: "https://github.com/sammycage/plutovg/archive/4d0eee77ce7d1850aac4d90e20ddaaa313d83e6a.tar.gz"
-    sha256: "bb44b1107d1cd41032fecdf3e16cff59a1a06f15a92527029aacb73c5c4d059e"
-  "cci.20220103":
-    url: "https://github.com/sammycage/plutovg/archive/51f1a79e04fbb42ec9e93499a18869eea06f3054.tar.gz"
-    sha256: "c2ce39b8085e0a8795263666f62af15239c36964330865fd54b9db25c67e063b"
+  "1.3.3":
+    url: "https://github.com/sammycage/plutovg/archive/refs/tags/v1.3.3.tar.gz"
+    sha256: "2b0d17a6e016f47b86f9c00e2cb82600041b1ea1f7d2a00c2d46ae542cbfed3c"
+  "1.0.0":
+    url: "https://github.com/sammycage/plutovg/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "d4a8015aee9eefc29b01e6dabfd3d4b371ae12f9d5e9be09798deb77a528a794"
+  "0.0.7":
+    url: "https://github.com/sammycage/plutovg/archive/refs/tags/v0.0.7.tar.gz"
+    sha256: "31e264b6f451a0d18335d1596817c2b7f58e2fc6efeb63aac0ff9a7fbfc07c00"

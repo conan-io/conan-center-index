@@ -1,5 +1,7 @@
 #include "EbSvtAv1Enc.h"
-#include "EbSvtAv1Dec.h"
+#ifdef HAVE_DECODER
+#   include "EbSvtAv1Dec.h"
+#endif
 
 #include <iostream>
 

@@ -1,0 +1,4 @@
+sources:
+  "1.2.0":
+    url: "https://github.com/bw-hro/sqlitemap/archive/v1.2.0.tar.gz"
+    sha256: "c99358d8dd362a244fab388eb8ba1893a419612afc2cd0025e23d38db394af74"
