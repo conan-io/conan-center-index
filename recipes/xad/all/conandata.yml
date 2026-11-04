@@ -1,0 +1,4 @@
+sources:
+  "2.1.0":
+    url: "https://github.com/auto-differentiation/xad/archive/refs/tags/v2.1.0.tar.gz"
+    sha256: "110729586b1a097c9e4a7ec34c48e60f3aec7ec61ef192a417ce0774cc32be43"

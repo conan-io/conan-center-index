@@ -1,4 +1,7 @@
 sources:
+  "1.5.29":
+    url: "https://github.com/an-tao/trantor/archive/v1.5.29.tar.gz"
+    sha256: "0e6b9cc32720cbca61ac2e04d4d9b8e1afac3f4007b5978a91461d3eb21d653b"
   "1.5.28":
     url: "https://github.com/an-tao/trantor/archive/v1.5.28.tar.gz"
     sha256: "8e3e493427a1704ee0d8cacb65e61b544d4b3a7159f5a4e55517272e1fb25c8f"

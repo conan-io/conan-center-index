@@ -31,12 +31,12 @@ class AwsCS3(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.12.5", transitive_headers=True, transitive_libs=True)
-        self.requires("aws-c-cal/0.9.8")
-        self.requires("aws-c-auth/0.9.1", transitive_headers=True)
-        self.requires("aws-c-http/0.10.5")
-        self.requires("aws-c-io/0.23.2", transitive_headers=True)
-        self.requires("aws-checksums/0.2.6")
+        self.requires("aws-c-common/0.14.5", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-cal/0.9.15")
+        self.requires("aws-c-auth/0.10.4", transitive_headers=True)
+        self.requires("aws-c-http/0.11.0")
+        self.requires("aws-c-io/0.27.6", transitive_headers=True)
+        self.requires("aws-checksums/0.2.10")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

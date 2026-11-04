@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -24,6 +25,7 @@ class NanodbcConan(ConanFile):
         "async": [True, False],
         "unicode": [True, False],
         "with_boost": [True, False],
+        "utf8": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,11 +33,14 @@ class NanodbcConan(ConanFile):
         "async": True,
         "unicode": False,
         "with_boost": False,
+        "utf8": False,
     }
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "3.0.0":
+            self.options.rm_safe("utf8")
 
     def configure(self):
         if self.options.shared:
@@ -54,9 +59,12 @@ class NanodbcConan(ConanFile):
             self.requires("odbc/2.3.11")
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        check_min_cppstd(self, 17 if Version(self.version) >= "3.0.0" else 14)
         if self.options.with_boost and not self.options.unicode:
             raise ConanInvalidConfiguration("with_boost option requires unicode option to be enabled. See https://github.com/nanodbc/nanodbc#build-options")
+        if self.options.unicode and self.options.get_safe("utf8"):
+            # https://github.com/nanodbc/nanodbc/blob/v3.0.8/CMakeLists.txt#L164
+            raise ConanInvalidConfiguration("unicode and utf8 options are alternatives; enable only one")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,6 +78,8 @@ class NanodbcConan(ConanFile):
         tc.cache_variables["NANODBC_GENERATE_INSTALL"] = True
         tc.cache_variables["NANODBC_BUILD_EXAMPLES"] = False
         tc.cache_variables["NANODBC_BUILD_TESTS"] = False
+        if Version(self.version) >= "3.0.0":
+            tc.cache_variables["NANODBC_ENABLE_UTF8"] = self.options.utf8
 
         tc.generate()
 
@@ -100,6 +110,8 @@ class NanodbcConan(ConanFile):
             self.cpp_info.defines.append("NANODBC_ENABLE_BOOST")
         if not self.options.get_safe("async"):
             self.cpp_info.defines.append("NANODBC_DISABLE_ASYNC")
+        if self.options.get_safe("utf8"):
+            self.cpp_info.defines.append("NANODBC_ENABLE_UTF8")
 
         if not self.options.shared and self.settings.os == "Windows":
             self.cpp_info.system_libs = ["odbc32"]

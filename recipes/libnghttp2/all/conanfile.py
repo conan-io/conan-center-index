@@ -58,7 +58,7 @@ class Nghttp2Conan(ConanFile):
             self.requires("libev/4.33")
             self.requires("c-ares/[>=1.27 <2]")
             self.requires("libxml2/[>=2.12.5 <3]")
-            self.requires("brotli/1.1.0")
+            self.requires("brotli/[>=1.1.0 <2]")
             if self.options.with_jemalloc:
                 self.requires("jemalloc/5.3.0")
         if self.options.with_hpack:
