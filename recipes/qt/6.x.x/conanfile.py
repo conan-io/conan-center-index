@@ -363,7 +363,7 @@ class QtConan(ConanFile):
         if self.options.with_glib:
             self.requires("glib/2.78.3")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
-            self.requires("double-conversion/3.3.0")
+            self.requires("double-conversion/[>=3.3.0 <4]")
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/[>=2.13 <3]")
         if self.options.get_safe("with_fontconfig", False):
@@ -405,7 +405,7 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.requires("wayland/1.22.0")
         if self.options.with_brotli:
-            self.requires("brotli/1.1.0")
+            self.requires("brotli/[>=1.1.1 <2]")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
             self.requires("expat/[>=2.6.2 <3]")
             self.requires("opus/1.4")
@@ -423,7 +423,8 @@ class QtConan(ConanFile):
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.21.2")
         if self.options.get_safe("with_md4c", False):
-            self.requires("md4c/[>=0.4.8 <1]") # stable API since 0.3x as per md4c wiki
+            # INFO: md4c 0.6.0 breaks the Qt build: https://github.com/mity/md4c/issues/434
+            self.requires("md4c/[>=0.4.8 <0.6]") 
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25]")
