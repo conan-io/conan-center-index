@@ -36,6 +36,8 @@ class NotCursesConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("notcurses on Windows needs MSYS2/MinGW (libunistring does not support MSVC)")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21]")
