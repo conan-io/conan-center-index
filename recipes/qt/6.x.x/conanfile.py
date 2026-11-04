@@ -431,7 +431,8 @@ class QtConan(ConanFile):
             self.requires("nss/3.93")
             self.requires("libdrm/2.4.119")
         if self.options.get_safe("with_ffmpeg", False):
-            self.requires("ffmpeg/[>=7.1 <10]")
+            # FFmpeg 4.4 is the minimum Qt 6 supports; Qt's CI tests the newest
+            self.requires("ffmpeg/[>=4.4 <10]")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
