@@ -237,8 +237,6 @@ class HarfbuzzConan(ConanFile):
         self.cpp_info.components["raster"].requires = ["core"]
         if self.options.with_png:
             self.cpp_info.components["raster"].requires.append("libpng::libpng")
-        if self.settings.os == "Macos":
-            self.cpp_info.components["raster"].frameworks = ["ApplicationServices"]
 
         self.cpp_info.components["vector"].libs = ["harfbuzz-vector"]
         self.cpp_info.components["vector"].set_property("cmake_target_name", "harfbuzz::vector")
@@ -246,15 +244,11 @@ class HarfbuzzConan(ConanFile):
         self.cpp_info.components["vector"].requires = ["core"]
         if self.options.with_zlib:
             self.cpp_info.components["vector"].requires.append("zlib::zlib")
-        if self.settings.os == "Macos":
-            self.cpp_info.components["vector"].frameworks = ["ApplicationServices"]
 
         self.cpp_info.components["gpu"].libs = ["harfbuzz-gpu"]
         self.cpp_info.components["gpu"].set_property("cmake_target_name", "harfbuzz::gpu")
         self.cpp_info.components["gpu"].set_property("pkg_config_name", "harfbuzz-gpu")
         self.cpp_info.components["gpu"].requires = ["core"]
-        if self.settings.os == "Macos":
-            self.cpp_info.components["gpu"].frameworks = ["ApplicationServices"]
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
