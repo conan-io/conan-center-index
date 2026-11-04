@@ -7,13 +7,13 @@ from conan.tools.files import copy, get, rmdir
 required_conan_version = ">=2.0"
 
 
-class LemonNgConan(ConanFile):
-    name = "lemon-ng"
+class AblemonConan(ConanFile):
+    name = "ablemon"
     description = ("Maintained fork of LEMON, a C++ library of graphs and of "
                    "network optimization")
     license = ("BSL-1.0", "BSD-3-Clause")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/dmeoli/lemon-ng"
+    homepage = "https://github.com/dmeoli/abLEMON"
     topics = ("graph", "network-flow", "optimization", "lemon")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
