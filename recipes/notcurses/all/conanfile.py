@@ -99,5 +99,4 @@ class NotCursesConan(ConanFile):
         self.cpp_info.components["notcursespp"].libs = ["notcurses++"]
         self.cpp_info.components["notcursespp"].defines = ["_GNU_SOURCE", "_DEFAULT_SOURCE"]
         self.cpp_info.components["notcursespp"].set_property("pkg_config_name", "notcurses++")
-        self.cpp_info.components["notcursespp"].set_property("cmake_target_name", "Notcurses++")
         self.cpp_info.components["notcursespp"].requires = ["libnotcurses"]
