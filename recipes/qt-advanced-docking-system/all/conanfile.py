@@ -7,7 +7,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.4"
 
 
 class QtADS(ConanFile):
@@ -46,12 +46,12 @@ class QtADS(ConanFile):
         self.tool_requires("cmake/[>=3.27]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
 
     @property
-    def qt_major(self):
+    def _qt_major(self):
         return Version(self.dependencies["qt"].ref.version).major
 
     def validate(self):
         # Qt 6 needs C++17; upstream pins CXX_STANDARD 14 for Qt 5 (4.5.0 and 5.1.1 alike)
-        check_min_cppstd(self, 17 if self.qt_major >= 6 else 14)
+        check_min_cppstd(self, 17 if self._qt_major >= 6 else 14)
 
         qt_options = self.dependencies["qt"].options
         if not (qt_options.gui and qt_options.widgets):
@@ -100,9 +100,9 @@ class QtADS(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        base_name = f"qtadvanceddocking-qt{self.qt_major}"
+        base_name = f"qtadvanceddocking-qt{self._qt_major}"
         self.cpp_info.includedirs.append(os.path.join("include", base_name))
-        cmake_name = base_name if Version(self.version) >= "5.1.0" else f"qt{self.qt_major}advanceddocking"
+        cmake_name = base_name if Version(self.version) >= "5.1.0" else f"qt{self._qt_major}advanceddocking"
         debug_suffix = "d" if self.settings.build_type == "Debug" else ""
         static_suffix = "" if self.options.shared else "_static"
         if Version(self.version) >= "5.1.0":

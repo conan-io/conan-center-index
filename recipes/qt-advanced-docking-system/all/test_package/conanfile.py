@@ -11,7 +11,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("qt/[*]")
+        self.requires("qt/[>=5.15 <7]")
 
     def layout(self):
         cmake_layout(self)
