@@ -1,3 +1,5 @@
+Custom: find libunistring via its CMake config and link it to notcurses and notcurses-static
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
