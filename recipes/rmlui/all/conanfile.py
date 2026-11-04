@@ -44,7 +44,7 @@ class RmluiConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        check_min_cppstd(self, 17)
 
     def requirements(self):
         if self.options.font_interface == "freetype":
