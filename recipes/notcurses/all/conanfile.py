@@ -2,6 +2,8 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.gnu import PkgConfigDeps
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.microsoft import is_msvc
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
@@ -32,7 +34,7 @@ class NotCursesConan(ConanFile):
         self.requires("ncurses/6.5")
         self.requires("libunistring/1.1")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("ffmpeg/[>=6.0 <8]")
+        self.requires("ffmpeg/[>=6.0 <10]")
 
     def validate(self):
         check_min_cppstd(self, 17)
