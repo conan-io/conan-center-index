@@ -558,6 +558,10 @@ class QtConan(ConanFile):
                               ("with_egl", "egl"),
                               ("with_gstreamer", "gstreamer")]:
             tc.variables[f"FEATURE_{conf_arg}"] = ("ON" if self.options.get_safe(opt, False) else "OFF")
+        if self.settings.os == "Android":
+            # Android has no with_egl option, but its windows are EGL surfaces; without EGL the
+            # Android platform plugin cannot create a window
+            tc.variables["FEATURE_egl"] = "ON"
 
 
         for opt, conf_arg in [
@@ -656,7 +660,8 @@ class QtConan(ConanFile):
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Wayland"] = not with_wayland
         tc.variables["FEATURE_wayland"] = with_wayland
 
-        with_egl = self.options.get_safe("with_egl", False)
+        # Android has no with_egl option, but its OpenGL ES windows need the NDK's EGL
+        with_egl = self.options.get_safe("with_egl", False) or self.settings.os == "Android"
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_EGL"] = not with_egl
 
         tc.generate()
@@ -972,13 +977,22 @@ class QtConan(ConanFile):
                 endif()
                 """)
             filecontents += f'include("${{QT_HOST_PATH}}/{self._cmake_executables_file.replace(os.sep, "/")}")\n'
-            # The host Qt's executables file does not list the deployment tools for these platforms
+            # The host Qt's executables file lists only some tools, and deployment also needs others
+            # (androiddeployqt, qmldom, ...), so give every host Qt executable a target. Qt looks tools up
+            # by their per-configuration location, so set IMPORTED_LOCATION_RELEASE as well.
             filecontents += textwrap.dedent("""\
-                foreach(tool IN ITEMS androiddeployqt androidtestrunner macdeployqt)
-                    set(location "${QT_HOST_PATH}/bin/${tool}${CMAKE_HOST_EXECUTABLE_SUFFIX}")
-                    if(NOT TARGET Qt6::${tool} AND EXISTS "${location}")
-                        add_executable(Qt6::${tool} IMPORTED)
-                        set_target_properties(Qt6::${tool} PROPERTIES IMPORTED_LOCATION "${location}")
+                file(GLOB __qt_host_executables LIST_DIRECTORIES false
+                    "${QT_HOST_PATH}/bin/*${CMAKE_HOST_EXECUTABLE_SUFFIX}"
+                    "${QT_HOST_PATH}/libexec/*${CMAKE_HOST_EXECUTABLE_SUFFIX}")
+                foreach(__qt_host_executable IN LISTS __qt_host_executables)
+                    get_filename_component(__qt_tool "${__qt_host_executable}" NAME_WE)
+                    if(NOT TARGET Qt6::${__qt_tool})
+                        add_executable(Qt6::${__qt_tool} IMPORTED)
+                        set_target_properties(Qt6::${__qt_tool} PROPERTIES IMPORTED_LOCATION "${__qt_host_executable}")
+                    endif()
+                    get_target_property(__qt_location Qt6::${__qt_tool} IMPORTED_LOCATION)
+                    if(__qt_location)
+                        set_target_properties(Qt6::${__qt_tool} PROPERTIES IMPORTED_LOCATION_RELEASE "${__qt_location}")
                     endif()
                 endforeach()
                 """)
@@ -1711,6 +1725,11 @@ class QtConan(ConanFile):
             if component_name in self.cpp_info.components:
                 module = os.path.join("lib", "cmake", m, f"{m}Macros.cmake")
                 if os.path.isfile(module):
+                    _add_build_module(component_name, module)
+
+                # Qt6QmlConfig.cmake, deleted above, includes Qt6AndroidQmlMacros.cmake on Android (QML imports for the APK)
+                module = os.path.join("lib", "cmake", m, f"Qt6Android{m[len('Qt6'):]}Macros.cmake")
+                if self.settings.os == "Android" and os.path.isfile(module):
                     _add_build_module(component_name, module)
 
                 module = os.path.join("lib", "cmake", m, f"{m}ConfigExtras.cmake")
