@@ -80,7 +80,7 @@ class NotCursesConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["core"].libs = ["notcurses-core"]
         self.cpp_info.components["core"].set_property("pkg_config_name", "notcurses-core")
-        self.cpp_info.components["core"].set_property("cmake_file_name", "NotcursesCore")
+        self.cpp_info.components["core"].set_property("cmake_target_name", "NotcursesCore")
         self.cpp_info.components["core"].requires = ["ncurses::ncurses", "libunistring::libunistring", "zlib::zlib"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["core"].system_libs = ["pthread", "m", "rt"]
