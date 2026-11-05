@@ -5,6 +5,7 @@ import platform
 import textwrap
 
 from conan import ConanFile
+from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -131,6 +132,11 @@ class QtConan(ConanFile):
     def _apple_embedded(self):
         # UIKit platforms: no host tools, no QProcess
         return is_apple_os(self) and self.settings.os != "Macos"
+
+    @property
+    def _is_mobile(self):
+        # Android, iOS, tvOS, watchOS, and visionOS: Qt cannot build or run its tools there
+        return self.settings.os == "Android" or self._apple_embedded
 
     @property
     def _get_module_tree(self):
@@ -643,9 +649,8 @@ class QtConan(ConanFile):
             tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = self._generate_host_tools_file()
             # The iOS SDK cannot build the tools (no ApplicationServices), they come from QT_HOST_PATH.
             # Android cannot run them either, and there Qt builds executables as app libraries.
-            host_tools_only = self._apple_embedded or self.settings.os == "Android"
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = not host_tools_only
-            if host_tools_only and self.options.qttranslations:
+            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = not self._is_mobile
+            if self._is_mobile and self.options.qttranslations:
                 # qttranslations needs qt_add_lrelease(), which is not loaded when lrelease comes from CMAKE_PROJECT_Qt_INCLUDE
                 linguist_tools_macros = os.path.join(qt_build_package_folder, "lib", "cmake", "Qt6LinguistTools", "Qt6LinguistToolsMacros.cmake")
                 if os.path.exists(linguist_tools_macros):
@@ -1010,7 +1015,7 @@ class QtConan(ConanFile):
             targets.append("qopcuaxmldatatypes2cpp")
         if self.options.get_safe("qtcanvaspainter"):
             targets.append("qcshadergen")
-        if cross_building(self) and self.settings.os in ["Android", "iOS"]:
+        if cross_building(self) and self._is_mobile:
             # The tools are not built for these platforms (see QT_FORCE_BUILD_TOOLS): consumers run
             # the host Qt's, which the qt tool_requires exposes through QT_HOST_PATH.
             filecontents += textwrap.dedent("""\
@@ -1182,8 +1187,7 @@ class QtConan(ConanFile):
                 libsuffix = "_debug"
         if self.settings.os == "Android":
             # Qt for Android names every library after its ABI, e.g. libQt6Core_arm64-v8a.so
-            libsuffix += "_" + {"armv7": "armeabi-v7a", "armv8": "arm64-v8a",
-                                "x86": "x86", "x86_64": "x86_64"}[str(self.settings.arch)]
+            libsuffix += f"_{android_abi(self)}"
 
         def _get_corrected_reqs(requires):
             reqs = []
