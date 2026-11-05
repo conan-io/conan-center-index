@@ -989,6 +989,12 @@ class QtConan(ConanFile):
                     add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
                     set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{exe_path})
                 endif()
+                # Normally created by Qt6*ToolsVersionlessTargets.cmake, loaded by the *Config.cmake removed above.
+                # qtdeclarative and qtcanvaspainter check TARGET Qt::qsb before building QtQuick / CanvasPainter.
+                if(NOT QT_NO_CREATE_VERSIONLESS_TARGETS AND NOT TARGET Qt::{target})
+                    add_executable(Qt::{target} IMPORTED)
+                    set_target_properties(Qt::{target} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{exe_path})
+                endif()
                 """)
 
         filecontents += textwrap.dedent(f"""\
