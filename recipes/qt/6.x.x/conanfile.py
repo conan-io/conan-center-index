@@ -873,7 +873,9 @@ class QtConan(ConanFile):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
-            rm(self, mask, self.package_folder, recursive=True, excludes="Qt6HostInfoConfig.cmake")
+            # Qt6ShaderToolsToolsConfig.cmake: qtquick3d requires it from QT_HOST_PATH when cross building
+            rm(self, mask, self.package_folder, recursive=True,
+               excludes=["Qt6HostInfoConfig.cmake", "Qt6ShaderToolsToolsConfig.cmake"])
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
         rm(self, "*.pdb*", self.package_folder, recursive=True)
         rm(self, "ensure_pro_file.cmake", self.package_folder, recursive=True)
