@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, rmdir, copy, rm
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.0"
@@ -76,9 +77,16 @@ class ZlibConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "zlib")
 
         if self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime"):
-            # The recipe patches the CMakeLists.txt to generate different filenames when CMake
-            # detects MINGW (clang, gcc with compiler.runtime undefined and compiler.libcxx defined)
-            libname = "zdll" if self.options.shared else "zlib"
+            if Version(self.version) >= "1.4":
+                libname = "libz"
+                if not self.options.shared:
+                    libname += "s"
+                if self.settings.build_type == "Debug":
+                    libname += "d"
+            else:
+                # The recipe patches the CMakeLists.txt to generate different filenames when CMake
+                # detects MINGW (clang, gcc with compiler.runtime undefined and compiler.libcxx defined)
+                libname = "zdll" if self.options.shared else "zlib"
         else:
             libname = "z"
         self.cpp_info.libs = [libname]
