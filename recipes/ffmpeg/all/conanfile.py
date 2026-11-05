@@ -580,10 +580,13 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("mediacodec", self.options.get_safe("with_mediacodec")),
             opt_enable_disable("xlib", self.options.get_safe("with_xlib")),
             opt_enable_disable("ffnvcodec", self.options.get_safe("with_nvcodec")),
+            opt_enable_disable("cuda", self.options.get_safe("with_nvcodec")),
             opt_enable_disable("nvenc", self.options.get_safe("with_nvcodec")),
             opt_enable_disable("nvdec", self.options.get_safe("with_nvcodec")),
             opt_enable_disable("cuvid", self.options.get_safe("with_nvcodec")),
-            "--disable-cuda",  # FIXME: CUDA support
+            # FIXME: CUDA kernel compilation
+            "--disable-cuda-llvm",
+            "--disable-cuda-nvcc",
             # Licenses
             opt_enable_disable("nonfree", self.options.get_safe("with_libfdk_aac") or (self.options.with_ssl and (
                 self.options.with_libx264 or self.options.with_libx265 or self.options.get_safe("postproc")))),
