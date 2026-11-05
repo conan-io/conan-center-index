@@ -1394,7 +1394,14 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtdatavis3d") and qt_quick_enabled:
             _create_module("DataVisualization", ["Gui", "OpenGL", "Qml", "Quick"])
         if self.options.get_safe("qtlottie"):
-            _create_module("Bodymovin", ["Gui"])
+            if Version(self.version) >= "6.10.0":
+                # Bodymovin was replaced by the Lottie QML module in Qt 6.10
+                # https://github.com/qt/qtlottie/blob/v6.10.0/src/CMakeLists.txt
+                if qt_quick_enabled:
+                    _create_module("Lottie", ["Gui", "Qml", "Quick"])
+                    _create_module("LottieVectorImageHelpers", ["Quick"])
+            else:
+                _create_module("Bodymovin", ["Gui"])
         if self.options.get_safe("qtscxml"):
             _create_module("StateMachine", [])
             _create_module("StateMachineQml", ["StateMachine", "Qml"])
