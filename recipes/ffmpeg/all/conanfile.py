@@ -299,6 +299,18 @@ class FFMpegConan(ConanFile):
         if self.settings.os == "Android":
             del self.options.with_libfdk_aac
 
+        # FFmpeg disables NVENC on unsupported architectures and operating systems.
+        # https://github.com/FFmpeg/FFmpeg/blob/n9.0.2/configure#L7864-L7881
+        if self.settings.arch in ("x86", "x86_64"):
+            nvenc_oses = ("Linux", "Windows", "FreeBSD")
+        elif self.settings.arch in ("armv8", "armv8.3", "ppc64le"):
+            nvenc_oses = ("Linux", "Windows")
+        else:
+            nvenc_oses = ()
+
+        if self.settings.os not in nvenc_oses:
+            del self.options.with_nvenc
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -381,7 +393,7 @@ class FFMpegConan(ConanFile):
             self.requires("whisper-cpp/[>=1.7.6 <2]")
         if self.options.get_safe("with_openapv"):
             self.requires("openapv/0.2.0.4")
-        if self.options.with_nvenc:
+        if self.options.get_safe("with_nvenc"):
             self.requires("nv-codec-headers/[>=12.1.14.0 <14]")
 
     def validate(self):
