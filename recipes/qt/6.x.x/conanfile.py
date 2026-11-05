@@ -5,6 +5,7 @@ import platform
 import textwrap
 
 from conan import ConanFile
+from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -126,6 +127,11 @@ class QtConan(ConanFile):
     short_paths = True
 
     _submodules_tree = None
+
+    @property
+    def _is_mobile(self):
+        # Android, iOS, tvOS, watchOS, and visionOS: Qt cannot build or run its tools there
+        return self.settings.os == "Android" or (is_apple_os(self) and self.settings.os != "Macos")
 
     @property
     def _get_module_tree(self):
@@ -628,8 +634,8 @@ class QtConan(ConanFile):
             tc.cache_variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
             # Stand-in for Qt6<Module>Tools - which is loaded for the executable targets
             tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = self._generate_host_tools_file()
-            if self.settings.os not in ["Android", "iOS"]:
-                # Ensure tools for host are always built. Android and iOS cannot run them, and there Qt
+            if not self._is_mobile:
+                # Ensure tools for host are always built. Mobile platforms cannot run them, and there Qt
                 # builds executables as app libraries, so building the tools fails configure.
                 tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
 
@@ -965,7 +971,7 @@ class QtConan(ConanFile):
             targets.append("repc")
         if self.options.get_safe("qtscxml"):
             targets.append("qscxmlc")
-        if cross_building(self) and self.settings.os in ["Android", "iOS"]:
+        if cross_building(self) and self._is_mobile:
             # The tools are not built for these platforms (see QT_FORCE_BUILD_TOOLS): consumers run
             # the host Qt's, which the qt tool_requires exposes through QT_HOST_PATH.
             filecontents += textwrap.dedent("""\
@@ -1130,8 +1136,7 @@ class QtConan(ConanFile):
                 libsuffix = "_debug"
         if self.settings.os == "Android":
             # Qt for Android names every library after its ABI, e.g. libQt6Core_arm64-v8a.so
-            libsuffix += "_" + {"armv7": "armeabi-v7a", "armv8": "arm64-v8a",
-                                "x86": "x86", "x86_64": "x86_64"}[str(self.settings.arch)]
+            libsuffix += f"_{android_abi(self)}"
 
         def _get_corrected_reqs(requires):
             reqs = []
