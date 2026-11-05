@@ -61,7 +61,7 @@ class FFMpegConan(ConanFile):
         "with_libx264": [True, False],
         "with_libx265": [True, False],
         "with_libvpx": [True, False],
-        "with_nvenc": [True, False],
+        "with_nvcodec": [True, False],
         "with_libmp3lame": [True, False],
         "with_libfdk_aac": [True, False],
         "with_libwebp": [True, False],
@@ -154,7 +154,7 @@ class FFMpegConan(ConanFile):
         "with_libx264": True,
         "with_libx265": True,
         "with_libvpx": True,
-        "with_nvenc": False,
+        "with_nvcodec": False,
         "with_libmp3lame": True,
         "with_libfdk_aac": True,
         "with_libwebp": True,
@@ -242,7 +242,7 @@ class FFMpegConan(ConanFile):
             "with_libx264": ["avcodec"],
             "with_libx265": ["avcodec"],
             "with_libvpx": ["avcodec"],
-            "with_nvenc": ["avcodec"],
+            "with_nvcodec": ["avcodec"],
             "with_libmp3lame": ["avcodec"],
             "with_libfdk_aac": ["avcodec"],
             "with_libwebp": ["avcodec"],
@@ -299,17 +299,17 @@ class FFMpegConan(ConanFile):
         if self.settings.os == "Android":
             del self.options.with_libfdk_aac
 
-        # FFmpeg disables NVENC on unsupported architectures and operating systems.
+        # FFmpeg disables ffnvcodec on unsupported architectures and operating systems.
         # https://github.com/FFmpeg/FFmpeg/blob/n9.0.2/configure#L7864-L7881
         if self.settings.arch in ("x86", "x86_64"):
-            nvenc_oses = ("Linux", "Windows", "FreeBSD")
+            ffnvcodec_oses = ("Linux", "Windows", "FreeBSD")
         elif self.settings.arch in ("armv8", "armv8.3", "ppc64le"):
-            nvenc_oses = ("Linux", "Windows")
+            ffnvcodec_oses = ("Linux", "Windows")
         else:
-            nvenc_oses = ()
+            ffnvcodec_oses = ()
 
-        if self.settings.os not in nvenc_oses:
-            del self.options.with_nvenc
+        if self.settings.os not in ffnvcodec_oses:
+            del self.options.with_nvcodec
 
     def configure(self):
         if self.options.shared:
@@ -393,7 +393,7 @@ class FFMpegConan(ConanFile):
             self.requires("whisper-cpp/[>=1.7.6 <2]")
         if self.options.get_safe("with_openapv"):
             self.requires("openapv/0.2.0.4")
-        if self.options.get_safe("with_nvenc"):
+        if self.options.get_safe("with_nvcodec"):
             self.requires("nv-codec-headers/[>=12.1.14.0 <14]")
 
     def validate(self):
@@ -579,9 +579,11 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("jni", self.options.get_safe("with_jni")),
             opt_enable_disable("mediacodec", self.options.get_safe("with_mediacodec")),
             opt_enable_disable("xlib", self.options.get_safe("with_xlib")),
-            opt_enable_disable("nvenc", self.options.get_safe("with_nvenc")),
+            opt_enable_disable("ffnvcodec", self.options.get_safe("with_nvcodec")),
+            opt_enable_disable("nvenc", self.options.get_safe("with_nvcodec")),
+            opt_enable_disable("nvdec", self.options.get_safe("with_nvcodec")),
+            opt_enable_disable("cuvid", self.options.get_safe("with_nvcodec")),
             "--disable-cuda",  # FIXME: CUDA support
-            "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
             opt_enable_disable("nonfree", self.options.get_safe("with_libfdk_aac") or (self.options.with_ssl and (
                 self.options.with_libx264 or self.options.with_libx265 or self.options.get_safe("postproc")))),
@@ -967,7 +969,7 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("libjxl::libjxl")
             if self.options.get_safe("with_openapv"):
                 avcodec.requires.append("openapv::openapv")
-            if self.options.get_safe("with_nvenc"):
+            if self.options.get_safe("with_nvcodec"):
                 avcodec.requires.append("nv-codec-headers::nv-codec-headers")
 
         if self.options.avformat:
