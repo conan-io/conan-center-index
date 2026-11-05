@@ -75,6 +75,7 @@ class QtConan(ConanFile):
         "device": [None, "ANY"],
         "cross_compile": [None, "ANY"],
         "sysroot": [None, "ANY"],
+        "android_sdk": [None, "ANY"],
         "multiconfiguration": [True, False],
         "disabled_features": [None, "ANY"],
     }
@@ -117,6 +118,7 @@ class QtConan(ConanFile):
         "device": None,
         "cross_compile": None,
         "sysroot": None,
+        "android_sdk": None,
         "multiconfiguration": False,
         "disabled_features": "",
     }
@@ -176,6 +178,8 @@ class QtConan(ConanFile):
             del self.options.with_x11
             del self.options.with_egl
 
+        if self.settings.os != "Android":
+            del self.options.android_sdk
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
             del self.options.with_gssapi
@@ -271,8 +275,16 @@ class QtConan(ConanFile):
         # no_copy_source causes long relative paths, hitting Window's PATH limit when building Qt WebEngine.
         self.no_copy_source = not (self.settings_build.os == "Windows" and self.options.get_safe("qtwebengine"))
 
+    @property
+    def _android_sdk(self):
+        # The android_sdk option, else the SDK the environment names, as Android Studio and the SDK tools use
+        return self.options.get_safe("android_sdk") or os.getenv("ANDROID_SDK_ROOT") or os.getenv("ANDROID_HOME")
+
     def validate_build(self):
         check_min_cppstd(self, 17)
+        if self.settings.os == "Android" and not self._android_sdk:
+            raise ConanInvalidConfiguration("Building Qt for Android needs the Android SDK: set qt/*:android_sdk, "
+                                            "or ANDROID_SDK_ROOT in the environment.")
 
     def validate(self):
         skip_ci_reason = self.conf.get("user.conancenter:skip_ci_build", check_type=str)
@@ -611,6 +623,7 @@ class QtConan(ConanFile):
             tc.variables["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
             tc.variables["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
+            tc.variables["ANDROID_SDK_ROOT"] = str(self._android_sdk).replace("\\", "/")
             tc.variables["ANDROID_ABI"] = {"armv7": "armeabi-v7a",
                                            "armv8": "arm64-v8a",
                                            "x86": "x86",
@@ -715,6 +728,9 @@ class QtConan(ConanFile):
     def package_id(self):
         del self.info.options.cross_compile
         del self.info.options.sysroot
+        if self.info.settings.os == "Android":
+            # A path on the build machine, which does not change the binary
+            del self.info.options.android_sdk
         if self.info.options.multiconfiguration:
             if self.info.settings.compiler == "Visual Studio":
                 if "MD" in self.info.settings.compiler.runtime:
