@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -21,7 +22,10 @@ class CLUEsteringConan(ConanFile):
     license = "MPL-2.0"
 
     def requirements(self):
-        self.requires("alpaka/2.1.1", transitive_headers=True)
+        if Version(self.version) >= "2.13.0":
+            self.requires("alpaka/[>=2.2.0 <3]", transitive_headers=True)
+        else:
+            self.requires("alpaka/[>=2.1.1 <3]", transitive_headers=True)
         self.requires("boost/[>=1.74.0 <2]", transitive_headers=True)
 
     def layout(self):
