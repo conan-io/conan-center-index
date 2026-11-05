@@ -1,7 +1,14 @@
 sources:
+  "5.1.1":
+    url: "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/archive/refs/tags/v5.1.1.tar.gz"
+    sha256: "9ce947acbb1984946f9145c976e42e6984f99b98fb414dd7354a290af6d4ff04"
   "4.5.0":
     url: "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/archive/refs/tags/4.5.0.tar.gz"
     sha256: "a438810b9749684232fa29721857bb700167006f44407ab4dd51f5c90d171f09"
 patches:
+  "5.1.1":
+    - patch_file: "patches/5.1.1-qt-private-targets.patch"
+      patch_description: "Use the private GUI targets provided by Conan's Qt recipes"
+      patch_type: "conan"
   "4.5.0":
     - patch_file: "patches/fix-versioning-no-git.patch"
