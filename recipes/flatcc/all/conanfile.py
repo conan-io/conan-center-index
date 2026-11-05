@@ -2,14 +2,12 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building, can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class FlatccConan(ConanFile):
@@ -65,8 +63,6 @@ class FlatccConan(ConanFile):
             if is_msvc(self) and self.options.shared:
                 # Building flatcc shared libs with Visual Studio is broken
                 raise ConanInvalidConfiguration("Building flatcc libraries shared is not supported")
-            if Version(self.version) == "0.6.0" and self.settings.compiler == "gcc":
-                raise ConanInvalidConfiguration("Building flatcc with MinGW is not supported")
         if cross_building(self) and not can_run(self):
             raise ConanInvalidConfiguration(f"Cross-building for a non-native architecture ({self.settings.arch}) is not supported")
 
@@ -104,7 +100,6 @@ class FlatccConan(ConanFile):
             os.rename(os.path.join(self.package_folder, "bin", f"flatcc{debug_suffix}"),
                       os.path.join(self.package_folder, "bin", "flatcc"))
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
         debug_suffix = "_d" if self.settings.build_type == "Debug" else ""
