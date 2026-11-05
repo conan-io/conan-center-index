@@ -1,10 +1,10 @@
 sources:
   "13.1.15.0":
     url: "https://github.com/FFmpeg/nv-codec-headers/archive/n13.1.15.0.tar.gz"
-    sha256: "52532ceade3d5c1af62624986f13cf01b63c910576b08c0c278756c5e4b41ad0"
+    sha256: "2255bc74d038b95aa4be30f5f66322c2176acbdb90ada1851db6993536fbeaf7"
   "12.2.72.0":
     url: "https://github.com/FFmpeg/nv-codec-headers/archive/n12.2.72.0.tar.gz"
-    sha256: "c295a2ba8a06434d4bdc5c2208f8a825285210d71d91d572329b2c51fd0d4d03"
+    sha256: "dbeaec433d93b850714760282f1d0992b1254fc3b5a6cb7d76fc1340a1e47563"
   "12.1.14.1":
     url: "https://github.com/FFmpeg/nv-codec-headers/archive/n12.1.14.1.tar.gz"
-    sha256: "043e46265517855f13bcb98b3a225b2761b2a83983b1645fa1d05876f1c3a781"
+    sha256: "f40c8a27417eb2688412da32985e382e811196311c4d103d1fcaafad2876cfc1"
