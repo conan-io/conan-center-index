@@ -74,7 +74,7 @@ class LibvplConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "vpl")
 
         debug_suffix = ""
-        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
+        if is_msvc(self) and self.settings.build_type == "Debug":
             debug_suffix = "d"
 
 
