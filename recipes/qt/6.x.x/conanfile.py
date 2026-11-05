@@ -217,7 +217,14 @@ class QtConan(ConanFile):
 
         required_modules =  {}
         for module in requested_modules:
-            deps = self._get_module_tree[module]["depends"]
+            deps = list(self._get_module_tree[module]["depends"])
+            if module == "qtlottie":
+                # The Lottie QML plugin needs Qt Quick, which qtdeclarative only builds with qtshadertools (qsb)
+                deps.append("qtshadertools")
+                if Version(self.version) >= "6.10.0":
+                    # The qlottievectorimage plugin needs QuickVectorImageGeneratorPrivate,
+                    # which qtdeclarative only builds with Qt::Svg (feature quick_vectorimage)
+                    deps.append("qtsvg")
             for dep in deps:
                 required_modules.setdefault(dep,[]).append(module)
 
