@@ -93,10 +93,6 @@ class SentryCrashpadConan(ConanFile):
         self.cpp_info.components["crashpad_mini_chromium"].libs = ["mini_chromium"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_mini_chromium"].system_libs.append("pthread")
-        elif self.settings.os == "Windows":
-            # The public headers use std::min and std::max. Crashpad defines NOMINMAX only on its
-            # own private target, so consumers that include <windows.h> get the min/max macros.
-            self.cpp_info.components["crashpad_mini_chromium"].defines.append("NOMINMAX")
         elif is_apple_os(self):
             self.cpp_info.components["crashpad_mini_chromium"].frameworks = ["CoreFoundation", "Foundation", "Security"]
             if self.settings.os == "Macos":
@@ -113,18 +109,14 @@ class SentryCrashpadConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_compat"].system_libs.append("dl")
 
+        # mpack
+        self.cpp_info.components["crashpad_mpack"].set_property("cmake_target_name", "crashpad::mpack")
+        self.cpp_info.components["crashpad_mpack"].libs = ["crashpad_mpack"]
+
         # util
         self.cpp_info.components["crashpad_util"].set_property("cmake_target_name", "crashpad::util")
         self.cpp_info.components["crashpad_util"].libs = ["crashpad_util"]
-        self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
-        # crashpad_util uses the vendored mpack (MessagePack) library since 0.7.
-        self.cpp_info.components["crashpad_mpack"].set_property("cmake_target_name", "crashpad::mpack")
-        self.cpp_info.components["crashpad_mpack"].libs = ["crashpad_mpack"]
-        self.cpp_info.components["crashpad_util"].requires.append("crashpad_mpack")
-        # client/settings.h declares different private members when this is 0. Crashpad
-        # sets it with add_compile_definitions() for its own build only (1 except Android).
-        flock = "0" if self.settings.os == "Android" else "1"
-        self.cpp_info.components["crashpad_util"].defines.append(f"CRASHPAD_FLOCK_ALWAYS_SUPPORTED={flock}")
+        self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "crashpad_mpack", "zlib::zlib"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_util"].system_libs.extend(["pthread", "rt"])
             # Requires libcurl https://github.com/getsentry/crashpad/blob/2237d97ee2c38c930c07001e660be57324f69a37/util/CMakeLists.txt#L256
