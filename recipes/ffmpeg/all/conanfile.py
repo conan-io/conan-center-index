@@ -394,8 +394,8 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_openapv"):
             self.requires("openapv/0.2.0.4")
         if self.options.get_safe("with_nvcodec"):
-            self.requires("nv-codec-headers/[>=12.1.14.0 <14]")
-
+            self.requires("nv-codec-headers/[>=11.1.5.3 <12.0 || >=12.0.16.1 <12.1 || >=12.1.14.0 <14]")
+            
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
             raise ConanInvalidConfiguration(
