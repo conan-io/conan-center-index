@@ -13,3 +13,4 @@ patches:
     - patch_file: "patches/3.8.3/0-replace-find-package.patch"
     - patch_file: "patches/3.8.3/1-do-not-force-private-linking.patch"
     - patch_file: "patches/3.8.3/2-allow-cycles-in-cmake-targets.patch"
+    - patch_file: "patches/3.8.3/3-skip-sqlite-check-when-disabled.patch"
