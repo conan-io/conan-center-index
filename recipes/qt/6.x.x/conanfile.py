@@ -217,7 +217,12 @@ class QtConan(ConanFile):
 
         required_modules =  {}
         for module in requested_modules:
-            deps = self._get_module_tree[module]["depends"]
+            deps = list(self._get_module_tree[module]["depends"])
+            if module == "qtlottie" and Version(self.version) >= "6.10.0":
+                # The Lottie QML module needs Qt Quick, which qtdeclarative only builds with qtshadertools (qsb),
+                # and the qlottievectorimage plugin needs QuickVectorImageGeneratorPrivate, which
+                # qtdeclarative only builds with Qt::Svg (feature quick_vectorimage)
+                deps.extend(["qtshadertools", "qtsvg"])
             for dep in deps:
                 required_modules.setdefault(dep,[]).append(module)
 
@@ -1387,7 +1392,14 @@ class QtConan(ConanFile):
         if self.options.get_safe("qtdatavis3d") and qt_quick_enabled:
             _create_module("DataVisualization", ["Gui", "OpenGL", "Qml", "Quick"])
         if self.options.get_safe("qtlottie"):
-            _create_module("Bodymovin", ["Gui"])
+            if Version(self.version) >= "6.10.0":
+                # Bodymovin was replaced by the Lottie QML module in Qt 6.10
+                # https://github.com/qt/qtlottie/blob/v6.10.0/src/CMakeLists.txt
+                if qt_quick_enabled:
+                    _create_module("Lottie", ["Gui", "Qml", "Quick"])
+                    _create_module("LottieVectorImageHelpers", ["Quick"])
+            else:
+                _create_module("Bodymovin", ["Gui"])
         if self.options.get_safe("qtscxml"):
             _create_module("StateMachine", [])
             _create_module("StateMachineQml", ["StateMachine", "Qml"])
