@@ -1,0 +1,19 @@
+--- a/lib/cpp/CMakeLists.txt
++++ b/lib/cpp/CMakeLists.txt
+@@ -36,7 +36,6 @@
+ )
+ 
+ if(WITH_STATIC_LIBRARIES)
+ 	add_library(mosquittopp_static STATIC
+-		${C_SRC}
+ 		${CPP_SRC}
+ 	)
+@@ -52,7 +51,7 @@
+ 		"${mosquitto_SOURCE_DIR}/lib/cpp"
+ 	)
+ 
+-	target_link_libraries(mosquittopp_static PRIVATE ${LIBRARIES})
++	target_link_libraries(mosquittopp_static PRIVATE common-options cJSON)
+ 
+ 	set_target_properties(mosquittopp_static PROPERTIES
+ 		OUTPUT_NAME mosquittopp_static
