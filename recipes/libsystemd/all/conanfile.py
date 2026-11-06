@@ -83,7 +83,7 @@ class LibsystemdConan(ConanFile):
         download(self, **self.conan_data["sources"][self.version], filename="sources.tar.gz")
         with tarfile.open("sources.tar.gz", "r:gz") as tar:
             tar.extractall()
-        folder_name = f"systemd-stable-{self.version}" if Version(self.version) < "261" else f"systemd-{self.version}"
+        folder_name = f"systemd-stable-{self.version}" if Version(self.version) < "262" else f"systemd-{self.version}"
         move_folder_contents(self, os.path.join(self.source_folder, folder_name), self.source_folder)
 
     @property
@@ -137,11 +137,15 @@ class LibsystemdConan(ConanFile):
             "link-udev-shared", "link-systemctl-shared", "analyze", "pam",
             "link-networkd-shared", "link-timesyncd-shared", "kernel-install",
             "libiptc", "elfutils", "repart", "homed", "importd", "acl",
-            "dns-over-tls", "log-trace"]
+            "dns-over-tls", "log-trace", "oomd", "sysext"]
 
-        unrelated.extend(["oomd", "sysext"])
-        if Version(self.version) < "261":
+        if Version(self.version) < "262":
             unrelated.append("nscd")
+        else:
+            # Removed options since 262: https://github.com/systemd/systemd/blob/v262.2/NEWS#L41
+            unrelated.remove("libidn")
+            unrelated.remove("libiptc")
+
         unrelated.append("link-boot-shared")
         unrelated.append("link-journalctl-shared")
         if Version(self.version) < "254.7":
@@ -151,9 +155,6 @@ class LibsystemdConan(ConanFile):
 
         for opt in unrelated:
             tc.project_options[opt] = "false"
-        if Version(self.version) >= "261":
-            tc.project_options["libidn"] = "disabled"
-            tc.project_options["libiptc"] = "disabled"
 
         if Version(self.version) < "255":
             # 'rootprefix' is unused during libsystemd packaging but systemd > v247
@@ -186,7 +187,7 @@ class LibsystemdConan(ConanFile):
         meson.configure()
         target = ("systemd:shared_library" if self.options.shared
                   else "systemd:static_library")
-        version = "version.h" if Version(self.version) < "261" else "version"
+        version = "version.h" if Version(self.version) < "262" else "version"
         meson.build(target=f"{version} {target}")
 
     def package(self):
