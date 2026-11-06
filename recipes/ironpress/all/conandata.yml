@@ -1,0 +1,8 @@
+sources:
+  "1.6.0":
+    archive:
+      url: "https://github.com/gastongouron/ironpress/archive/refs/tags/v1.6.0.tar.gz"
+      sha256: "380f174720f813d16d69cfd14f5a2af7657b0c2b58c33ec42dad612d7dcb974b"
+    cargo_lock:
+      url: "https://raw.githubusercontent.com/gastongouron/ironpress/11256bdeed794c8721777d8c52d420dd6ec433e0/Cargo.lock"
+      sha256: "6322f2d67285c66de3f3062fa8eccbeb1bffbbe7e7bb55d50ff44ea7084a4e93"
