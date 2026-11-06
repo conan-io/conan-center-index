@@ -1,0 +1,23 @@
+# Ignore source files downloaded by conan
+src/
+*.tar.gz
+*.zip
+
+# Ignore OpenCOLLADA source subdirectories
+COLLADAMax/
+COLLADAMaya/
+COLLADAValidator/
+COLLADASaxFrameworkLoader/
+COLLADAStreamWriter/
+COLLADAFramework/
+COLLADABaseUtils/
+GeneratedSaxParser/
+common/
+Externals/
+Makefile
+OpenCOLLADAConfig.cmake.in
+README*
+.doxygen/
+xsd2cppsax/
+dae2ogre/
+htdocs/
