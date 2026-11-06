@@ -61,6 +61,7 @@ class QtConan(ConanFile):
         "with_dbus": [True, False],
         "with_libalsa": [True, False],
         "with_openal": [True, False],
+        "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
         "with_pulseaudio": [True, False],
         "with_gssapi": [True, False],
@@ -103,6 +104,7 @@ class QtConan(ConanFile):
         "with_dbus": False,
         "with_libalsa": False,
         "with_openal": True,
+        "with_ffmpeg": True,
         "with_gstreamer": False,
         "with_pulseaudio": False,
         "with_gssapi": False,
@@ -244,8 +246,14 @@ class QtConan(ConanFile):
         if not self.options.get_safe("qtmultimedia"):
             self.options.rm_safe("with_libalsa")
             del self.options.with_openal
+            del self.options.with_ffmpeg
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
+
+        if self.settings.os == "Android" and self.options.get_safe("with_ffmpeg"):
+            # The FFmpeg plugin gives FFmpeg the Java VM when it loads, and decodes video with MediaCodec
+            self.options["ffmpeg"].with_jni = True
+            self.options["ffmpeg"].with_mediacodec = True
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.get_safe("qtwebengine"):
@@ -336,6 +344,15 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
 
+        if self.options.get_safe("with_ffmpeg", False):
+            ffmpeg_options = self.dependencies["ffmpeg"].options
+            missing = [lib for lib in ("avcodec", "avformat", "swresample", "swscale") if not ffmpeg_options.get_safe(lib)]
+            if missing:
+                raise ConanInvalidConfiguration(f"qtmultimedia's FFmpeg backend needs these ffmpeg options enabled: {', '.join(missing)}")
+            if self.settings.os == "Android" and not ffmpeg_options.get_safe("with_jni"):
+                # Without it, the plugin's JNI_OnLoad fails and the application stops at startup
+                raise ConanInvalidConfiguration("qtmultimedia's FFmpeg backend on Android needs ffmpeg/*:with_jni=True")
+
         if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
             raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
 
@@ -413,6 +430,9 @@ class QtConan(ConanFile):
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
             self.requires("libdrm/2.4.119")
+        if self.options.get_safe("with_ffmpeg", False):
+            # FFmpeg 4.4 is the minimum Qt 6 supports; Qt's CI tests the newest
+            self.requires("ffmpeg/[>=4.4 <10]")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gstreamer/1.19.2")
             self.requires("gst-plugins-base/1.19.2")
@@ -459,6 +479,12 @@ class QtConan(ConanFile):
         tc.set_property("wayland::wayland-server", "cmake_target_name", "Wayland::Server")
         tc.set_property("wayland::wayland-cursor", "cmake_target_name", "Wayland::Cursor")
         tc.set_property("wayland::wayland-egl", "cmake_target_name", "Wayland::Egl")
+
+        # replace https://github.com/qt/qtmultimedia/blob/dev/cmake/FindFFmpeg.cmake, which cannot find
+        # the system libraries of a static FFmpeg because the ffmpeg package has no .pc files
+        tc.set_property("ffmpeg", "cmake_file_name", "FFmpeg")
+        for component in ("avcodec", "avformat", "avutil", "swresample", "swscale"):
+            tc.set_property(f"ffmpeg::{component}", "cmake_target_name", f"FFmpeg::{component}")
 
         # override https://github.com/qt/qtbase/blob/dev/cmake/3rdparty/extra-cmake-modules/find-modules/FindEGL.cmake
         tc.set_property("egl", "cmake_file_name", "EGL")
@@ -556,6 +582,7 @@ class QtConan(ConanFile):
                               ("with_brotli", "brotli"),
                               ("with_gssapi", "gssapi"),
                               ("with_egl", "egl"),
+                              ("with_ffmpeg", "ffmpeg"),
                               ("with_gstreamer", "gstreamer")]:
             tc.variables[f"FEATURE_{conf_arg}"] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
@@ -1449,6 +1476,14 @@ class QtConan(ConanFile):
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and qt_quick_enabled:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
+            if self.options.with_ffmpeg:
+                ffmpeg_reqs = ["ffmpeg::avformat", "ffmpeg::avcodec", "ffmpeg::swresample", "ffmpeg::swscale", "ffmpeg::avutil"]
+                if self.options.shared:
+                    _create_plugin("QFFmpegMediaPlugin", "ffmpegmediaplugin", "multimedia", ["Multimedia"] + ffmpeg_reqs)
+                else:
+                    # the plugin links a static helper library, Qt6FFmpegMediaPluginImpl
+                    _create_module("FFmpegMediaPluginImplPrivate", ["Multimedia", "Network", "Gui"] + ffmpeg_reqs, has_include_dir=False)
+                    _create_plugin("QFFmpegMediaPlugin", "ffmpegmediaplugin", "multimedia", ["FFmpegMediaPluginImplPrivate"])
             if self.options.with_gstreamer:
                 _create_plugin("QGstreamerMediaPlugin", "gstreamermediaplugin", "multimedia", [
                     "gstreamer::gstreamer",
