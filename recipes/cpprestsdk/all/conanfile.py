@@ -15,7 +15,7 @@ class CppRestSDKConan(ConanFile):
     description = "A project for cloud-based client-server communication in native code using a modern asynchronous " \
                   "C++ API design"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/Microsoft/cpprestsdk"
+    homepage = "https://github.com/cpprest-lts/cpprestsdk"
     topics = ("rest", "client", "http", "https")
     license = "MIT"
     package_type = "library"
@@ -58,12 +58,18 @@ class CppRestSDKConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0", transitive_headers=True)
+        if Version(self.version) >= "2.10.20":
+            self.requires("boost/1.91.0", transitive_headers=True)
+        else:
+            self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
         if self.options.with_compression:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_websockets:
-            self.requires("websocketpp/0.8.2")
+            if Version(self.version) >= "2.10.20":
+                self.requires("websocketpp/0.8.4+cpprest-lts")
+            else:
+                self.requires("websocketpp/0.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -97,7 +103,8 @@ class CppRestSDKConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        self._patch_clang_libcxx()
+        if Version(self.version) < "2.10.20":
+            self._patch_clang_libcxx()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -117,7 +124,9 @@ class CppRestSDKConan(ConanFile):
         self.cpp_info.components["cpprestsdk_boost_internal"].includedirs = []
         ## List of Boost components cpprestsdk depends on:
         ## see https://github.com/microsoft/cpprestsdk/blob/v2.10.19/Release/cmake/cpprest_find_boost.cmake#L77-L106
-        self.cpp_info.components["cpprestsdk_boost_internal"].requires = ["boost::headers", "boost::system"]
+        self.cpp_info.components["cpprestsdk_boost_internal"].requires = ["boost::headers"]
+        if Version(self.dependencies["boost"].ref.version) < "1.89.0":
+            self.cpp_info.components["cpprestsdk_boost_internal"].requires.append("boost::system")
         if self.settings.os != "Windows":
             self.cpp_info.components["cpprestsdk_boost_internal"].requires.extend(["boost::random", "boost::thread", "boost::filesystem", "boost::chrono", "boost::atomic"])
         if self.settings.os != "Android":
