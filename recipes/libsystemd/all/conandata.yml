@@ -18,8 +18,6 @@ sources:
     url: "https://github.com/systemd/systemd-stable/archive/v253.6.tar.gz"
     sha256: "a0aebcfaa2e001a4d846691631d1722c4cfa1a175e4ea62db6edca0ea3cf1e3e"
 patches:
-  "262.2":
-    - patch_file: "patches/262.2/0001-Remove-dependency-from-coreutils.patch"
   "255.10":
     - patch_file: "patches/251.18/0001-Remove-dependency-from-coreutils.patch"
   "255.2":
