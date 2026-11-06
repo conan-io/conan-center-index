@@ -10,6 +10,7 @@ from conan.tools.scm import Version
 
 import fnmatch
 import os
+import re
 import textwrap
 
 required_conan_version = ">=1.57.0"
@@ -90,6 +91,11 @@ class OpenSSLConan(ConanFile):
         "openssldir": [None, "ANY"],
         "tls_security_level": [None, 0, 1, 2, 3, 4, 5],
         "fips_module_version": [None, "ANY"],
+        # An option (not a conf) on purpose: a variant build yields a distinct,
+        # non-interchangeable artifact (different SONAME and versioned library
+        # file name / symbol versions), so it must affect the package_id to get
+        # its own binary and correct rebuild/propagation behaviour.
+        "shlib_variant": [None, "ANY"],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
@@ -97,6 +103,7 @@ class OpenSSLConan(ConanFile):
     default_options["openssldir"] = None
     default_options["tls_security_level"] = None
     default_options["fips_module_version"] = None
+    default_options["shlib_variant"] = None
 
     @property
     def _is_clang_cl(self):
@@ -118,6 +125,21 @@ class OpenSSLConan(ConanFile):
     @property
     def _uses_external_fips_module(self):
         return self._fips_module_version not in (None, self.version)
+
+    @property
+    def _shlib_variant(self):
+        # OpenSSL inserts the "shlib variant" identifier into the versioned
+        # shared library file name and its SONAME (e.g. libssl.so.3 ->
+        # libssl-abc.so.3 on unixy platforms, libssl-3.dll -> libssl-3-abc.dll on
+        # MSVC), see Configurations/README.md. It applies to *shared* builds on
+        # unixy platforms (Linux, *BSD, Solaris, macOS) and on MSVC / clang-cl;
+        # MinGW/Cygwin ignore it and static archives are never renamed. Note the
+        # development symlink (libssl.so) and the MSVC import library keep the
+        # base name, so this must NOT reach cpp_info.libs (see package_info).
+        variant = self.options.get_safe("shlib_variant")
+        if variant and self.options.shared and not self._is_mingw:
+            return str(variant)
+        return None
 
     def config_options(self):
         if self.settings.os != "Windows":
@@ -158,6 +180,14 @@ class OpenSSLConan(ConanFile):
             raise ConanInvalidConfiguration("fips_module_version cannot be greater than the current OpenSSL version")
         if self._fips_module_version and self.options.no_fips:
             raise ConanInvalidConfiguration("fips_module_version requires no_fips to be set to False")
+        shlib_variant = self.options.get_safe("shlib_variant")
+        if shlib_variant and not re.fullmatch(r"[A-Za-z0-9_-]+", str(shlib_variant)):
+            # OpenSSL derives a symbol-version macro from the variant by
+            # uppercasing letters and mapping non-alphanumerics to '_', so
+            # restrict it to a safe character set to avoid a malformed name.
+            raise ConanInvalidConfiguration(
+                "shlib_variant may only contain letters, digits, '-' and '_'"
+            )
 
     def build_requirements(self):
         if self.settings_build.os == "Windows":
@@ -433,7 +463,7 @@ class OpenSSLConan(ConanFile):
             ])
 
         for option_name in self.default_options.keys():
-            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2", "fips_module_version"):
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2", "fips_module_version", "shlib_variant"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
@@ -467,6 +497,7 @@ class OpenSSLConan(ConanFile):
                     {shared_target}
                     {shared_cflag}
                     {shared_extension}
+                    {shlib_variant}
                     {perlasm_scheme}
                 }},
             );
@@ -475,6 +506,10 @@ class OpenSSLConan(ConanFile):
         perlasm_scheme = ""
         if self._perlasm_scheme:
             perlasm_scheme = f'perlasm_scheme => "{self._perlasm_scheme}",'
+
+        shlib_variant = ""
+        if self._shlib_variant:
+            shlib_variant = f'shlib_variant => "{self._shlib_variant}",'
 
         defines = '", "'.join(defines)
         defines = 'defines => add("%s"),' % defines if defines else ""
@@ -509,6 +544,7 @@ class OpenSSLConan(ConanFile):
             shared_target=shared_target,
             shared_extension=shared_extension,
             shared_cflag=shared_cflag,
+            shlib_variant=shlib_variant,
             lflags=" ".join(ldflags)
         )
         self.output.info(f"using target: {self._target} -> {self._ancestor_target}")
@@ -671,6 +707,12 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.components["crypto"].builddirs.append(self._module_subfolder)
         self.cpp_info.components["crypto"].set_property("cmake_build_modules", [self._module_file_rel_path])
 
+        # The link name is intentionally NOT suffixed with the shlib variant.
+        # OpenSSL applies the variant only to the *versioned* shared object and
+        # its SONAME (libssl-abc.so.3); the development symlink that is actually
+        # linked against keeps the base name (libssl.so -> libssl-abc.so.3).
+        # Likewise on Windows only the DLL is renamed, not the import library.
+        # So consumers link with -lssl as usual and pick up the variant SONAME.
         if self._use_nmake:
             self.cpp_info.components["ssl"].libs = ["libssl"]
             self.cpp_info.components["crypto"].libs = ["libcrypto"]
