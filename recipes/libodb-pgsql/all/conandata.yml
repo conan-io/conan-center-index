@@ -1,0 +1,8 @@
+sources:
+  "2.5.0":
+    libodb_pgsql:
+      url: "https://www.codesynthesis.com/download/odb/2.5.0/libodb-pgsql-2.5.0.tar.gz"
+      sha256: "f6e63db4a2f77604f48115f64c74a5854ca20f03f208568966693e95712a3e17"
+    build2_toolchain:
+      url: "https://download.build2.org/0.18.1/build2-toolchain-0.18.1.tar.gz"
+      sha256: "23b1719f1d8d1ef1957c2b28bc12177aa70d23d73de79889c2f5041d293692bc"
