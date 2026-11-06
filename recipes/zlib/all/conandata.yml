@@ -7,5 +7,3 @@ sources:
 patches:
   "1.4":
     - patch_file: "patches/1.4-0001-keep-previous-filenames.patch"
-      patch_description: "Keep zlib1.dll/zdll.lib/zlib.lib filenames on Windows for binary compatibility"
-      patch_type: "conan"
