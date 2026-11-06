@@ -1,0 +1,4 @@
+sources:
+  "3.0-rc12":
+    url: "https://github.com/kunitoki/LuaBridge3/archive/refs/tags/3.0-rc12.tar.gz"
+    sha256: "0c15204d5ca2eefa760aa2a8b6543e6ec47231723ee9ed2819c9c9a9cb319e69"
