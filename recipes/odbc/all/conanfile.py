@@ -23,11 +23,13 @@ class OdbcConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_libiconv": [True, False],
+        "with_system_iconv": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_libiconv": True,
+        "with_system_iconv": False,
     }
 
     def export_sources(self):
@@ -50,6 +52,8 @@ class OdbcConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("odbc is a system lib on Windows")
+        if self.options.with_libiconv and self.options.with_system_iconv:
+            raise ConanInvalidConfiguration("with_libiconv and with_system_iconv are mutually exclusive")
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
@@ -66,7 +70,7 @@ class OdbcConan(ConanFile):
             f"--with-ltdl-include={libtool_cppinfo.includedirs[0]}",
             f"--with-ltdl-lib={libtool_cppinfo.libdirs[0]}",
             "--disable-ltdl-install",
-            f"--enable-iconv={yes_no(self.options.with_libiconv)}",
+            f"--enable-iconv={yes_no(self.options.with_libiconv or self.options.with_system_iconv)}",
             "--sysconfdir=/etc",
         ])
         if is_apple_os(self):
@@ -146,6 +150,9 @@ class OdbcConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_odbc"].system_libs = ["pthread"]
             self.cpp_info.components["odbcinst"].system_libs = ["pthread"]
+        if self.options.with_system_iconv and is_apple_os(self):
+            # glibc provides iconv in libc; macOS provides it in libiconv
+            self.cpp_info.components["_odbc"].system_libs.append("iconv")
 
         # TODO: to remove in conan v2
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
