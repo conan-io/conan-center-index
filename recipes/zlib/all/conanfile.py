@@ -82,3 +82,6 @@ class ZlibConan(ConanFile):
         else:
             libname = "z"
         self.cpp_info.libs = [libname]
+
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("ZLIB_DLL")
