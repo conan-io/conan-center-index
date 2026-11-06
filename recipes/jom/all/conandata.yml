@@ -1,4 +1,29 @@
 sources:
+  "1.1.7":
+    x86_64:
+      url:
+        - "http://download.qt.io/official_releases/jom/jom_1_1_7.zip"
+        - "https://qt-mirror.dannhauer.de/official_releases/jom/jom_1_1_7.zip"
+        - "https://mirror.netcologne.de/qtproject/official_releases/jom/jom_1_1_7.zip"
+        - "https://ftp.fau.de/qtproject/official_releases/jom/jom_1_1_7.zip"
+        - "https://ftp.nluug.nl/languages/qt/official_releases/jom/jom_1_1_7.zip"
+        - "https://mirrors.dotsrc.org/qtproject/official_releases/jom/jom_1_1_7.zip"
+        - "https://mirrors.20i.com/pub/qt.io/official_releases/jom/jom_1_1_7.zip"
+        - "https://mirrors.ukfast.co.uk/sites/qt.io/official_releases/jom/jom_1_1_7.zip"
+        - "https://ftp.acc.umu.se/mirror/qt.io/qtproject/official_releases/jom/jom_1_1_7.zip"
+        - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/official_releases/jom/jom_1_1_7.zip"
+        - "https://qt.mirror.constant.com/official_releases/jom/jom_1_1_7.zip"
+        - "https://mirrors.cloud.tencent.com/qt/official_releases/jom/jom_1_1_7.zip"
+        - "https://mirror.bjtu.edu.cn/qt/official_releases/jom/jom_1_1_7.zip"
+        - "https://mirrors.ustc.edu.cn/qtproject/official_releases/jom/jom_1_1_7.zip"
+        - "https://ftp.jaist.ac.jp/pub/qtproject/official_releases/jom/jom_1_1_7.zip"
+        - "https://mirror.aarnet.edu.au/pub/qtproject/official_releases/jom/jom_1_1_7.zip"
+      sha256: "4c8af345586a9a08fbfd2f613fcac748226d91a75627aa3581b297dd513046fe"
+    license:
+      url:
+        - "https://code.qt.io/cgit/qt-labs/jom.git/plain/LICENSE.GPL?h=v1.1.7"
+        - "https://raw.githubusercontent.com/qt-labs/jom/refs/tags/v1.1.7/LICENSE.GPL"
+      sha256: "d3d9052b838761dbe00067168ed9ebc437734d53ebf71dea1c8e9f7532a5333b"
   "1.1.4":
     x86_64:
       url:

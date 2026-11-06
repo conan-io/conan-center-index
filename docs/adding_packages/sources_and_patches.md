@@ -8,7 +8,6 @@ These are a very important aspects and it helps us to establish the quality of t
 
   * [Picking the Sources](#picking-the-sources)
     * [Source immutability](#source-immutability)
-    * [Sources not accessible](#sources-not-accessible)
   * [Supported Versions](#supported-versions)
     * [Removing old versions](#removing-old-versions)
     * [Adding old versions](#adding-old-versions)
@@ -32,17 +31,6 @@ Downloaded source code must have a deterministic results where the exact same ar
 
 The sources stored under `self.source_folder` should not apply patches or modifications in the `source()` method conditional to options or settings.
 Patches should be applied in the `source()` method - taking special care that the patches are platform agnostic. Patches in the `build()` method can be considered where this is not possible, provided that `no_copy_source` is **not** set to `True`.
-
-### Sources not accessible
-
-Library sources that are not publicly available will not be allowed in this repository even if the license allows their redistribution. See
-our [closed source FAQ answer for more](../faqs.md#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries).
-If library sources cannot be downloaded from their official origin or cannot be consumed directly due to their
-format, the recommendation is to contact the publisher and ask them to provide the sources in a way/format that can be consumed
-programmatically.
-
-As a final option, in case you need to use those binaries as a "build require" for some library, we will consider adding it
-as a system recipe (`<build_require>/system`) and making those binaries available in the CI machines (if the license allows it).
 
 ## Supported Versions
 

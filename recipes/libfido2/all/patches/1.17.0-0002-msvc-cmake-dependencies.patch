@@ -1,0 +1,38 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -171,27 +171,19 @@ endif()
+ 
+ 
+ if(MSVC)
+-	if((NOT CBOR_INCLUDE_DIRS) OR (NOT CBOR_LIBRARY_DIRS) OR
+-	   (NOT CRYPTO_INCLUDE_DIRS) OR (NOT CRYPTO_LIBRARY_DIRS) OR
+-	   (NOT ZLIB_INCLUDE_DIRS) OR (NOT ZLIB_LIBRARY_DIRS))
+-		message(FATAL_ERROR "please define "
+-		   "{CBOR,CRYPTO,ZLIB}_{INCLUDE,LIBRARY}_DIRS when "
+-		   "building under msvc")
+-	endif()
++	find_package(libcbor CONFIG REQUIRED)
++	find_package(ZLIB CONFIG REQUIRED)
++	find_package(OpenSSL CONFIG REQUIRED)
++
++	set(CBOR_LIBRARIES libcbor::libcbor)
++	set(ZLIB_LIBRARIES ZLIB::ZLIB)
++	set(CRYPTO_LIBRARIES OpenSSL::Crypto)
++
+ 	if(BUILD_TESTS AND BUILD_SHARED_LIBS AND
+ 	   ((NOT CBOR_BIN_DIRS) OR (NOT ZLIB_BIN_DIRS) OR (NOT CRYPTO_BIN_DIRS)))
+ 		message(FATAL_ERROR "please define {CBOR,CRYPTO,ZLIB}_BIN_DIRS "
+ 		   "when building tests")
+ 	endif()
+-	if(NOT CBOR_LIBRARIES)
+-		set(CBOR_LIBRARIES cbor)
+-	endif()
+-	if(NOT ZLIB_LIBRARIES)
+-		set(ZLIB_LIBRARIES zlib1)
+-	endif()
+-	if(NOT CRYPTO_LIBRARIES)
+-		set(CRYPTO_LIBRARIES crypto)
+-	endif()
+ 	if(NOT CRYPTO_DLL)
+ 		set(CRYPTO_DLL crypto)
+ 	endif()

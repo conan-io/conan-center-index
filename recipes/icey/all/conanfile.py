@@ -49,7 +49,7 @@ class IceyConan(ConanFile):
         self.requires("nlohmann_json/[~3.11]", transitive_headers=True)
         if self.options.with_ffmpeg:
             # icy/av/ffmpeg.h:24 #include <libavcodec/avcodec.h>
-            self.requires("ffmpeg/[>=5.0 <8]", transitive_headers=True)
+            self.requires("ffmpeg/[>=5.0 <9]", transitive_headers=True)
         if self.options.with_opencv:
             self.requires("opencv/[>=4.5 <5]")
 

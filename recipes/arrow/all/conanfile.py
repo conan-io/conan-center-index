@@ -114,7 +114,6 @@ class ArrowConan(ConanFile):
         "with_zlib": True,
         "with_zstd": False,
     }
-    short_paths = True
 
     @property
     def _min_cppstd(self):
@@ -149,12 +148,22 @@ class ArrowConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def _requires_rapidjson(self):
+        if Version(self.version) >= "26.0.0":
+            # Parquet (and its encryption) moved to simdjson, rapidjson is only used by the JSON module
+            return self.options.with_json
         return (self.options.with_json or self.options.encryption or
                 (Version(self.version) >= "21.0.0" and self.options.parquet))
 
+    def _requires_simdjson(self):
+        return Version(self.version) >= "26.0.0" and (self.options.with_json or self.options.parquet)
+
     def requirements(self):
         if self.options.with_thrift:
-            self.requires("thrift/[>=0.20.0 <=0.21.0]")
+            # Older thrift vrsions are not usable with newer apple-clang
+            # it fails to compile with:
+            # __tree:1126:17: error: invalid operands to binary expression
+            # ('apache::thrift::TEnumIterator' and 'apache::thrift::TEnumIterator')
+            self.requires("thrift/[>=0.20.0 <0.27.0]")
         if self.options.with_grpc:
             self.requires("grpc/[>=1.50.0 <2]")
         if self.options.with_protobuf:
@@ -207,6 +216,10 @@ class ArrowConan(ConanFile):
             self.requires("libbacktrace/cci.20210118")
         if self.options.with_orc:
             self.requires("orc/2.0.0")
+        if Version(self.version) >= "26.0.0":
+            self.requires("uriparser/0.9.8")
+        if self._requires_simdjson():
+            self.requires("simdjson/[>=4.6 <5]")
 
     def validate(self):
         # Do not allow options with 'auto' value
@@ -259,6 +272,12 @@ class ArrowConan(ConanFile):
 
         if self.options.parquet and not self.options.with_thrift:
             raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
+
+        if self.options.encryption and not self.options.parquet:
+            raise ConanInvalidConfiguration("arrow:encryption requires arrow:parquet")
+
+        if self.options.encryption and not self.options.with_openssl:
+            raise ConanInvalidConfiguration("arrow:encryption requires arrow:with_openssl")
 
     def build_requirements(self):
         if self.options.with_protobuf:
@@ -440,6 +459,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libparquet"].requires = ["libarrow"]
             if not self.options.shared:
                 self.cpp_info.components["libparquet"].defines = ["PARQUET_STATIC"]
+            if self._requires_simdjson():
+                self.cpp_info.components["libparquet"].requires.append("simdjson::simdjson")
 
         if self.options.get_safe("substrait"):
             self.cpp_info.components["libarrow_substrait"].set_property("pkg_config_name", "arrow_substrait")
@@ -538,7 +559,17 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("rapidjson::rapidjson")
         if self.options.with_s3:
             # https://github.com/apache/arrow/blob/6b268f62a8a172249ef35f093009c740c32e1f36/cpp/src/arrow/CMakeLists.txt#L98
-            self.cpp_info.components["libarrow"].requires.extend([f"aws-sdk-cpp::{x}" for x in ["cognito-identity", "core", "identity-management", "s3", "sts"]])
+            aws_components = [f"aws-sdk-cpp::{x}" for x in ["cognito-identity", "core", "identity-management", "s3", "sts"]]
+            if Version(self.version) >= "26.0.0":
+                # The S3 filesystem was split out of libarrow into its own library (arrow_s3)
+                self.cpp_info.components["libarrow_s3"].set_property("pkg_config_name", "arrow-s3")
+                self.cpp_info.components["libarrow_s3"].set_property("cmake_target_name", f"ArrowS3::arrow_s3_{cmake_suffix}")
+                self.cpp_info.components["libarrow_s3"].libs = [f"arrow_s3{suffix}"]
+                self.cpp_info.components["libarrow_s3"].requires = ["libarrow"] + aws_components
+                if not self.options.shared:
+                    self.cpp_info.components["libarrow_s3"].defines = ["ARROW_S3_STATIC"]
+            else:
+                self.cpp_info.components["libarrow"].requires.extend(aws_components)
         if self.options.get_safe("with_gcs"):
             self.cpp_info.components["libarrow"].requires.append("google-cloud-cpp::storage")
         if self.options.with_orc:
@@ -563,3 +594,7 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("grpc::grpc")
         if self.options.with_flight_rpc:
             self.cpp_info.components["libarrow_flight"].requires.append("protobuf::protobuf")
+        if Version(self.version) >= "26.0.0":
+            self.cpp_info.components["libarrow"].requires.append("uriparser::uriparser")
+        if self._requires_simdjson():
+            self.cpp_info.components["libarrow"].requires.append("simdjson::simdjson")

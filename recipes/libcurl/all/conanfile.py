@@ -24,7 +24,7 @@ class LibcurlConan(ConanFile):
     homepage = "https://curl.se"
     topics = ("curl", "data-transfer",
             "ftp", "gopher", "http", "imap", "ldap", "mqtt", "pop3", "rtmp", "rtsp",
-            "scp", "sftp", "smb", "smtp", "telnet", "tftp")
+            "scp", "sftp", "smtp", "telnet", "tftp")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -42,7 +42,6 @@ class LibcurlConan(ConanFile):
         "with_tftp": [True, False],
         "with_pop3": [True, False],
         "with_imap": [True, False],
-        "with_smb": [True, False],
         "with_smtp": [True, False],
         "with_gopher": [True, False],
         "with_mqtt": [True, False],
@@ -90,7 +89,6 @@ class LibcurlConan(ConanFile):
         "with_mqtt": True,
         "with_pop3": True,
         "with_rtsp": True,
-        "with_smb": False,
         "with_smtp": True,
         "with_telnet": True,
         "with_tftp": True,
@@ -178,7 +176,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_brotli:
-            self.requires("brotli/1.1.0")
+            self.requires("brotli/[>=1.1.1 <2]")
         if self.options.with_zstd:
             self.requires("zstd/[~1.5]")
         if self.options.with_c_ares:
@@ -220,8 +218,9 @@ class LibcurlConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
-        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2025-11-04.pem"
-        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "8ac40bdd3d3e151a6b4078d2b2029796e8f843e3f86fbf2adbc4dd9f05e79def"
+        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or self.conan_data["cacert"][self.version]["url"]
+        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or self.conan_data["cacert"][self.version]["sha256"]
+        self.output.info(f"Using CA certificate store: {cert_url} (sha256: {cert_sha256})")
         download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
         replace_in_file(self, "CMakeLists.txt", "find_package(NGHTTP2 MODULE)", "find_package(NGHTTP2 CONFIG REQUIRED)")
         replace_in_file(self, "CMakeLists.txt", "find_package(Cares MODULE REQUIRED)", "find_package(Cares CONFIG REQUIRED)")
@@ -333,7 +332,6 @@ class LibcurlConan(ConanFile):
             f"--enable-mqtt={self._yes_no(self.options.with_mqtt)}",
             f"--enable-pop3={self._yes_no(self.options.with_pop3)}",
             f"--enable-rtsp={self._yes_no(self.options.with_rtsp)}",
-            f"--enable-smb={self._yes_no(self.options.with_smb)}",
             f"--enable-smtp={self._yes_no(self.options.with_smtp)}",
             f"--enable-telnet={self._yes_no(self.options.with_telnet)}",
             f"--enable-tftp={self._yes_no(self.options.with_tftp)}",
@@ -522,7 +520,6 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_USE_LIBPSL"] = self.options.with_libpsl
         tc.variables["CURL_USE_LIBSSH2"] = self.options.with_libssh2
         tc.variables["ENABLE_ARES"] = self.options.with_c_ares
-        tc.variables["CURL_ENABLE_SMB"] = self.options.with_smb
         if not self.options.with_c_ares:
             tc.variables["ENABLE_THREADED_RESOLVER"] = self.options.with_threaded_resolver
         tc.variables["CURL_DISABLE_PROXY"] = not self.options.with_proxy
@@ -535,8 +532,6 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
         tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
         tc.variables["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
-        if self.options.with_ssl == "libressl":
-            tc.variables["CURL_DISABLE_SRP"] = True
         if "with_form_api" in self.options:
             tc.variables["CURL_DISABLE_FORM_API"] = not self.options.with_form_api
         if "with_websockets" in self.options:
@@ -560,7 +555,6 @@ class LibcurlConan(ConanFile):
         # TODO: refactor this and consider `CMAKE_TRY_COMPILE_CONFIGURATION` for all platforms
         #       see https://github.com/conan-io/conan/issues/12180
         tc.variables["HAVE_SSL_SET0_WBIO"] = False
-        tc.variables["HAVE_OPENSSL_SRP"] = True
         tc.variables["HAVE_SSL_CTX_SET_QUIC_METHOD"] = True
 
         if is_msvc(self):

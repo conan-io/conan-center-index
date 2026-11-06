@@ -1,0 +1,40 @@
+--- a/third-party/rsutils/src/control-c-handler.cpp
++++ b/third-party/rsutils/src/control-c-handler.cpp
+@@ -7,2 +7,3 @@
+ #include <signal.h>
+ #include <atomic>
++#include <stdexcept>
+--- a/third-party/rsutils/src/special-folder.cpp
++++ b/third-party/rsutils/src/special-folder.cpp
+@@ -4,3 +4,4 @@
+ #include <rsutils/os/special-folder.h>
+ #include <rsutils/easylogging/easyloggingpp.h>
+ #include <locale.h>
++#include <stdexcept>
+--- a/third-party/rsutils/src/network-adapter-watcher.cpp
++++ b/third-party/rsutils/src/network-adapter-watcher.cpp
+@@ -23,3 +23,4 @@
+ #include <errno.h>
+ #include <poll.h>
+ #include <thread>
++#include <cstring>
+--- a/src/librealsense-exception.h
++++ b/src/librealsense-exception.h
+@@ -10,2 +10,3 @@
+ #include <exception>
+ #include <string>
++#include <cstring>
+--- a/src/platform/platform-utils.cpp
++++ b/src/platform/platform-utils.cpp
+@@ -8,3 +8,4 @@
+ #include <src/librealsense-exception.h>
+ #include <rsutils/version.h>
+ #include <fstream>
++#include <algorithm>
+--- a/src/types.cpp
++++ b/src/types.cpp
+@@ -6,3 +6,4 @@
+ #include "librealsense-exception.h"
+ #include <librealsense2/hpp/rs_processing.hpp>
+ #include <ostream>
++#include <cmath>

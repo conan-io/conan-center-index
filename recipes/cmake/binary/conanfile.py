@@ -1,12 +1,12 @@
 import os
 
 from conan import ConanFile
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, trim_conandata
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.2"
 
 class CMakeConan(ConanFile):
     name = "cmake"
@@ -29,6 +29,11 @@ class CMakeConan(ConanFile):
     @property
     def _unzipped_folder(self):
         return os.path.join(self.build_folder, "unzipped")
+
+    def export(self):
+        # this will ensure locally-exported recipes match the recipe revision from
+        # the Conan Center remote
+        trim_conandata(self)
         
     def build(self):
         arch = str(self.settings.arch) if self.settings.os != "Macos" else "universal"

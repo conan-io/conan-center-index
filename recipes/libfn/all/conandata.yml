@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/libfn/functional/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "acdead379a4e5d0dfad39ece8eebe99c001ab93f338dcf3a69ece4e15b2af387"

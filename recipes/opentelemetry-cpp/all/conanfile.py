@@ -127,7 +127,7 @@ class OpenTelemetryCppConan(ConanFile):
             if not self.dependencies["grpc"].options.cpp_plugin:
                 raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
 
-        if self.dependencies["protobuf"].package_type == "static-library" and self.package_type != "static-library":
+        if self._needs_proto and self.dependencies["protobuf"].package_type == "static-library" and self.package_type != "static-library":
             # https://github.com/open-telemetry/opentelemetry-cpp/blame/2d80af1b1d26e300d9c0f7f51fa360f22c773523/cmake/opentelemetry-proto.cmake#L189-L193
             raise ConanInvalidConfiguration(f"opentelemetry-cpp should be built as a static library when using static protobuf")
 
@@ -343,6 +343,9 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.options.with_otlp_http or self.options.with_otlp_grpc:
             self.cpp_info.components["opentelemetry_proto"].requires.append("protobuf::protobuf")
+            if Version(self.version) >= "1.25":
+                # https://github.com/open-telemetry/opentelemetry-cpp/issues/4182
+                self.cpp_info.components["opentelemetry_proto"].defines.append("OPENTELEMETRY_PROTO_API=")
             self.cpp_info.components["opentelemetry_otlp_recordable"].requires.extend([
                 "opentelemetry_proto",
                 "opentelemetry_resources",

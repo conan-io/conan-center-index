@@ -93,6 +93,11 @@ class PCRE2Conan(ConanFile):
         tc.variables["PCRE2_BUILD_PCRE2GREP"] = self.options.build_pcre2grep
         tc.variables["PCRE2_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
         tc.variables["PCRE2_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
+        # libedit and libreadline are used only for testing (pcre2test executable)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Editline"] = True
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Readline"] = True
+        tc.variables["PCRE2_SUPPORT_LIBEDIT"] = False
+        tc.variables["PCRE2_SUPPORT_LIBREADLINE"] = False
         tc.variables["PCRE2_BUILD_TESTS"] = False
         if is_msvc(self):
             tc.variables["PCRE2_STATIC_RUNTIME"] = is_msvc_static_runtime(self)

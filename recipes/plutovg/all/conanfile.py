@@ -75,6 +75,6 @@ class PlutoVGConan(ConanFile):
         self.cpp_info.includedirs = ["include", os.path.join("include", "plutovg")]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
-        if is_msvc(self) and not self.options.shared:
+        if not self.options.shared:
             self.cpp_info.defines.append("PLUTOVG_BUILD_STATIC")
 

@@ -157,7 +157,16 @@ class GrpcConan(ConanFile):
             self.tool_requires(f"grpc/{self.version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        sources = self.conan_data["sources"][self.version]
+        get(self, **sources["source"], strip_root=True)
+        if "grpc-proto" in sources:
+            get(
+                self,
+                **sources["grpc-proto"],
+                destination=os.path.join(self.source_folder, "third_party", "grpc-proto"),
+                filename="grpc-proto.tar.gz",
+                strip_root=True,
+            )
         apply_conandata_patches(self)
         
         # Let Conan define CMAKE_MSVC_RUNTIME_LIBRARY

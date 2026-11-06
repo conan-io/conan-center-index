@@ -4,6 +4,7 @@ from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
+from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
@@ -91,8 +92,6 @@ class ArmadilloConan(ConanFile):
             # Macos will default to Accelerate framework
             self.options.use_blas = "framework_accelerate"
             self.options.use_lapack = "framework_accelerate"
-        if Version(self.version) < "14":
-            del self.options.header_only
 
     def configure(self):
         if self.options.get_safe("header_only"):
@@ -114,6 +113,9 @@ class ArmadilloConan(ConanFile):
             )
 
     def validate(self):
+        if Version(self.version) < "14" and self.options.header_only:
+            raise ConanInvalidConfiguration("header_only is only supported by armadillo 14 and newer")
+
         check_min_cppstd(self, 14 if Version(self.version) >= "15" else 11)
 
         if self.settings.os != "Macos" and (
@@ -167,6 +169,10 @@ class ArmadilloConan(ConanFile):
         if not self.options.get_safe("header_only"):
             if not self.options.shared and self.options.use_wrapper:
                 raise ConanInvalidConfiguration("Building the armadillo run-time wrapper library requires armadillo/*:shared=True")
+
+        if is_msvc(self) and Version(self.version) >= "14.0.0" and self.options.get_safe("shared"):
+            # https://gitlab.com/armadillo-lib/armadillo-code/-/blob/15.6.2/CMakeLists.txt?ref_type=tags#L236
+            raise ConanInvalidConfiguration("It does not support shared builds for MSVC. Build with -o &:shared=False")
 
     def requirements(self):
         # Optional requirements

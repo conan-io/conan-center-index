@@ -1,4 +1,7 @@
 sources:
+  "15.6.2":
+    url: "https://sourceforge.net/projects/arma/files/armadillo-15.6.2.tar.xz"
+    sha256: "63ee9351b54994dff7b4e2094a86ace48cfb41354cb65893a9dab7c8a16382c4"
   "15.2.6":
     url: "https://sourceforge.net/projects/arma/files/armadillo-15.2.6.tar.xz"
     sha256: "97cb8ef708541f632e861d005a462dd0367240f81ff96f8e63ebbdd75c8ce55f"

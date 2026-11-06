@@ -2,13 +2,12 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rm, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 import os
-import shutil
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.10.0"
 
 
 class MongoCxxConan(ConanFile):
@@ -48,7 +47,10 @@ class MongoCxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mongo-c-driver/1.29.0")
+        if Version(self.version) >= "4.6.0":
+            self.requires("mongo-c-driver/[>=2.5 <3.0.0]")
+        else:
+            self.requires("mongo-c-driver/[>=1.30 <2.0.0]")
         if self.options.polyfill == "boost":
             self.requires("boost/[>=1.86.0 <=1.90.0]", transitive_headers=True)
 
@@ -119,6 +121,7 @@ class MongoCxxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_PROJECT_MONGO_CXX_DRIVER_INCLUDE"] = os.path.join(self.generators_folder, "conan_cmake_project_include.cmake")
         tc.variables["BSONCXX_POLY_USE_MNMLSTC"] = self.options.polyfill == "mnmlstc"
         tc.variables["BSONCXX_POLY_USE_STD"] = self.options.polyfill == "std"
         tc.variables["BSONCXX_POLY_USE_STD_EXPERIMENTAL"] = self.options.polyfill == "experimental"
@@ -135,16 +138,14 @@ class MongoCxxConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("mongo-c-driver", "cmake_file_name", "mongoc")
+        mongo_variant = "shared" if self.dependencies["mongo-c-driver"].package_type == "shared-library" else "static"
+        deps.set_property("mongo-c-driver::mongoc", "cmake_target_name", f"mongoc_{mongo_variant}")
+        deps.set_property("mongo-c-driver::bson", "cmake_target_name", f"bson_{mongo_variant}")
         deps.generate()
-        # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
-        # but it can't be modeled right now.
-        # Fix should happen in mongo-c-driver recipe
-        mongoc_config_file = os.path.join(self.generators_folder, "mongoc-1.0-config.cmake")
-        bson_config_file = os.path.join(self.generators_folder, "bson-1.0-config.cmake")
-        if not os.path.exists(bson_config_file):
-            self.output.info("Copying mongoc config file to bson")
-            shutil.copy(src=mongoc_config_file, dst=bson_config_file)
 
+        # early load mongoc dependency to bypass calls to find_package for mongoc and bson
+        save(self, os.path.join(self.generators_folder, "conan_cmake_project_include.cmake"), "find_package(mongoc REQUIRED)")
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
@@ -169,11 +170,13 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "mongocxx")
         self.cpp_info.set_property("cmake_target_name", f"mongo::{mongocxx_target}")
 
+        abitag = "1" if Version(self.version) >= "4.6" else ""
+
         # mongocxx
         self.cpp_info.components["mongocxx"].set_property("cmake_target_name", f"mongo::{mongocxx_target}")
         self.cpp_info.components["mongocxx"].set_property("pkg_config_name", "libmongocxx" if self.options.shared else "libmongocxx-static")
 
-        self.cpp_info.components["mongocxx"].libs = ["mongocxx" if self.options.shared else "mongocxx-static"]
+        self.cpp_info.components["mongocxx"].libs = [f"mongocxx{abitag}" if self.options.shared else f"mongocxx{abitag}-static"]
         if not self.options.shared:
             self.cpp_info.components["mongocxx"].defines.append("MONGOCXX_STATIC")
         self.cpp_info.components["mongocxx"].requires = ["mongo-c-driver::mongoc", "bsoncxx"]
@@ -184,7 +187,7 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.components["bsoncxx"].set_property("cmake_target_name", f"mongo::{bsoncxx_target}")
         self.cpp_info.components["bsoncxx"].set_property("pkg_config_name", "libbsoncxx" if self.options.shared else "libbsoncxx-static")
 
-        self.cpp_info.components["bsoncxx"].libs = ["bsoncxx" if self.options.shared else "bsoncxx-static"]
+        self.cpp_info.components["bsoncxx"].libs = [f"bsoncxx{abitag}" if self.options.shared else f"bsoncxx{abitag}-static"]
         if not self.options.shared:
             self.cpp_info.components["bsoncxx"].defines = ["BSONCXX_STATIC"]
         self.cpp_info.components["bsoncxx"].requires = ["mongo-c-driver::bson"]

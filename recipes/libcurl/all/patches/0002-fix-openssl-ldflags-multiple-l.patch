@@ -4,7 +4,7 @@ This patch fixes that by replacing all `-L` entries with a colon-separated list 
 
 --- a/m4/curl-openssl.m4
 +++ b/m4/curl-openssl.m4
-@@ -126,7 +126,7 @@
+@@ -125,7 +125,7 @@
        AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])
        AC_MSG_NOTICE([pkg-config: SSL_LDFLAGS: "$SSL_LDFLAGS"])
        AC_MSG_NOTICE([pkg-config: SSL_CPPFLAGS: "$SSL_CPPFLAGS"])

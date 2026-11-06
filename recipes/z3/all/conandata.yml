@@ -5,6 +5,14 @@ sources:
   "4.14.1":
     url: "https://github.com/Z3Prover/z3/archive/z3-4.14.1.tar.gz"
     sha256: "81a02c2c64c64d6c3df233f59186b95627990ada0c4c2fc901c9c25a7072672a"
+  "4.13.4":
+    url: "https://github.com/Z3Prover/z3/archive/z3-4.13.4.tar.gz"
+    sha256: "4071977e66e9f3d239b7b098ceddfe62ffdf3c71e345e9524a4a5001d1f4adf3"
   "4.13.0":
     url: "https://github.com/Z3Prover/z3/archive/z3-4.13.0.tar.gz"
     sha256: "01bcc61c8362e37bb89fd2430f7e3385e86df7915019bd2ce45de9d9bd934502"
+
+patches:
+  "4.13.0":
+    - patch_file: "patches/4.13.0-0001-column_info-fix-m_low_bound.patch"
+    - patch_file: "patches/4.13.0-0002-static_matrix-gcc15-two-phase-lookup.patch"

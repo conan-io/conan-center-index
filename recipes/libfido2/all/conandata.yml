@@ -1,0 +1,12 @@
+sources:
+  "1.17.0":
+    url: "https://developers.yubico.com/libfido2/Releases/libfido2-1.17.0.tar.gz"
+    sha256: "c1012c8871d71b65872fd5ff1a9d6b0838a55683a03e85ba97479ce57129c736"
+patches:
+  "1.17.0":
+    - patch_file: "patches/1.17.0-0001-msvc-disabled-warnings-after-sdl.patch"
+      patch_description: "MSVC: re-append the disabled warnings (-wd4996, ...) after /sdl, which otherwise turns C4996 into an error with Ninja"
+      patch_type: "portability"
+    - patch_file: "patches/1.17.0-0002-msvc-cmake-dependencies.patch"
+      patch_description: "MSVC: use CMake imported targets"
+      patch_type: "conan"
