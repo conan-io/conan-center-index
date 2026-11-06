@@ -130,7 +130,7 @@ class QtConan(ConanFile):
     @property
     def _apple_embedded(self):
         # UIKit platforms: no host tools, no QProcess
-        return self.settings.os in ["iOS", "tvOS", "watchOS", "visionOS"]
+        return is_apple_os(self) and self.settings.os != "Macos"
 
     @property
     def _get_module_tree(self):
