@@ -1,0 +1,23 @@
+diff --git a/src/cci/cfg/cci_param_untyped_handle.h b/src/cci/cfg/cci_param_untyped_handle.h
+index d621a861..864f9e81 100644
+--- a/src/cci/cfg/cci_param_untyped_handle.h
++++ b/src/cci/cfg/cci_param_untyped_handle.h
+@@ -64,17 +64,17 @@ public:
+     /// Move constructor
+     cci_param_untyped_handle(cci_param_untyped_handle&& that);
+     /// Move assignment - update handle to refer to a new parameter
+     cci_param_untyped_handle&
+     operator=(cci_param_untyped_handle&& that);
+ #endif // CCI_HAS_CXX_RVALUE_REFS
+ 
+     /// Destructor.
+-    ~cci_param_untyped_handle();
++    virtual ~cci_param_untyped_handle();
+ 
+     //@}
+ 
+     ///@name Description and metadata
+     ///@{
+ 
+     /// @copydoc cci_param_untyped::get_description
+     std::string get_description() const;
