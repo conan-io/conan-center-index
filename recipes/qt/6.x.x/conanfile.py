@@ -842,6 +842,10 @@ class QtConan(ConanFile):
     def _cmake_qt6_private_file(self, module):
         return os.path.join("lib", "cmake", f"Qt6{module}", f"conan_qt_qt6_{module.lower()}private.cmake")
 
+    @property
+    def _cmake_qt6_test_dirs_file(self):
+        return os.path.join("lib", "cmake", "Qt6Test", "conan_qt_qt6_test_dirs.cmake")
+
     def package(self):
         if self.settings.os == "Macos":
             save(self, ".qmake.stash", "")
@@ -975,6 +979,15 @@ class QtConan(ConanFile):
             save(self, os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
 
         _create_private_module("Core", ["Core"])
+
+        # Qt6TestTargets.cmake, replaced by CMakeDeps, gives tests QT_TESTCASE_BUILDDIR and QT_TESTCASE_SOURCEDIR
+        # (QFINDTESTDATA and tests that read files next to their sources need them)
+        save(self, os.path.join(self.package_folder, self._cmake_qt6_test_dirs_file), textwrap.dedent("""\
+            if(TARGET Qt6::Test)
+                set_property(TARGET Qt6::Test APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS
+                    "$<$<NOT:$<BOOL:$<TARGET_PROPERTY:QT_SKIP_DEFAULT_TESTCASE_DIRS>>>:QT_TESTCASE_BUILDDIR=\\"$<IF:$<BOOL:$<TARGET_PROPERTY:QT_TESTCASE_BUILDDIR>>,$<TARGET_PROPERTY:QT_TESTCASE_BUILDDIR>,$<TARGET_PROPERTY:BINARY_DIR>>\\"$<SEMICOLON>QT_TESTCASE_SOURCEDIR=\\"$<TARGET_PROPERTY:SOURCE_DIR>\\">")
+            endif()
+            """))
 
         if self.options.gui:
             _create_private_module("Gui", ["CorePrivate", "Gui"])
@@ -1297,6 +1310,7 @@ class QtConan(ConanFile):
         _create_module("Network", networkReqs)
         _create_module("Sql", [])
         _create_module("Test", [])
+        _add_build_module("qtTest", self._cmake_qt6_test_dirs_file)
         if self.options.widgets:
             _create_module("Widgets", ["Gui"])
             _add_build_module("qtWidgets", self._cmake_qt6_private_file("Widgets"))
