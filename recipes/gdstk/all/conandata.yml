@@ -1,0 +1,10 @@
+sources:
+  "1.0.0":
+    url: 
+      - "https://github.com/heitzmann/gdstk/archive/refs/tags/v1.0.0.zip"
+    sha256: "25cf54e09b3f2ad829ef3987167388b18d2df69684c922df139eed56617f8d4d"
+patches:
+  "1.0.0":
+    - patch_file: "patches/1.0.0-001-fix-msvc-qhull.patch"
+      patch_description: "Fix remove external build"
+      patch_type: "portability"
