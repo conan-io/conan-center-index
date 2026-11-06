@@ -1,4 +1,7 @@
 sources:
+  "3.6.1":
+    url: "https://github.com/nholthaus/units/archive/v3.6.1.tar.gz"
+    sha256: "e65f61448dddd655d6449cf995566fe79407425e55dd3818cc44e1d8a6b1d63c"
   "2.3.3":
     url: "https://github.com/nholthaus/units/archive/v2.3.3.tar.gz"
     sha256: "b1f3c1dd11afa2710a179563845ce79f13ebf0c8c090d6aa68465b18bd8bd5fc"
