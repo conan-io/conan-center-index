@@ -1,4 +1,7 @@
 sources:
+  "262.2":
+    url: "https://github.com/systemd/systemd/archive/refs/tags/v262.2.tar.gz"
+    sha256: "116432ee9dce9bfef4c7da7963c6de41899ab44197f2876ee99545707a5c7c1f"
   "255.10":
     url: "https://github.com/systemd/systemd-stable/archive/v255.10.tar.gz"
     sha256: "1747b848e68223597abb90ca2758b25230ac4c19e252e9ec77c8518750f621ed"
