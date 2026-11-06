@@ -70,6 +70,9 @@ class LibvplConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
+        # Remove MS runtime files
+        for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+            rm(self, pattern=dll_pattern_to_remove, folder=os.path.join(self.package_folder, "bin"), recursive=True)
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "VPL")
         self.cpp_info.set_property("pkg_config_name", "vpl")
