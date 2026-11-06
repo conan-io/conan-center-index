@@ -1,0 +1,12 @@
+diff --git a/backend/device/include/device/handle.hpp b/backend/device/include/device/handle.hpp
+index ca2524e..e4928ce 100644
+--- a/backend/device/include/device/handle.hpp
++++ b/backend/device/include/device/handle.hpp
+@@ -32,6 +32,7 @@
+ 
+ #include <device/api.hpp>
+ 
++#include <cstdint>
+ #include <memory>
+ 
+ namespace hwcpipe {
