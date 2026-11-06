@@ -2,3 +2,8 @@ sources:
   "1.57.0":
     url: "https://download.gnome.org/sources/pango/1.57/pango-1.57.0.tar.xz"
     sha256: "890640c841dae77d3ae3d8fe8953784b930fa241b17423e6120c7bfdf8b891e7"
+patches:
+  "1.57.0":
+    - patch_file: "patches/1.57.0-0001-fix-coretext-incompatible-pointer-types.patch"
+      patch_description: "Fix incompatible pointer type assignment rejected by newer Clang"
+      patch_type: "portability"

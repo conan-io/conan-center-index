@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -46,6 +46,9 @@ class PangoConan(ConanFile):
         "with_fontconfig": True,
         "with_introspection": False,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -154,6 +157,7 @@ class PangoConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         meson_build = os.path.join(self.source_folder, "meson.build")
         replace_in_file(self, meson_build, "subdir('tests')", "")
         replace_in_file(self, meson_build, "subdir('tools')", "")
