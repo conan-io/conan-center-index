@@ -29,12 +29,14 @@ class ResiprocateConan(ConanFile):
         "fPIC": [True, False],
         "with_cares": [True, False],
         "with_ssl": [True, False],
+        "with_random": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_cares": True,
         "with_ssl": True,
+        "with_random": True
     }
     implements = ["auto_shared_fpic"]
 
@@ -83,7 +85,7 @@ class ResiprocateConan(ConanFile):
         tc.variables["VERSIONED_SONAME"] = False
         tc.variables["WITH_C_ARES"] = self.options.with_cares
         tc.variables["WITH_SSL"] = self.options.with_ssl
-        if self.settings.os in ["Linux"]:
+        if self.settings.os in ["Linux"] and self.options.with_random:
             tc.preprocessor_definitions["RESIP_RANDOM_THREAD_LOCAL"] = True
         if cross_building(self):
             tc.cache_variables["HAVE_CLOCK_GETTIME_MONOTONIC"] = not self.settings.os in ["Windows"]
