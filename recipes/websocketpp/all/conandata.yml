@@ -1,4 +1,7 @@
 sources:
+  "0.8.4+cpprest-lts":
+    url: "https://github.com/cpprest-lts/websocketpp/archive/refs/tags/0.8.4+cpprest-lts.tar.gz"
+    sha256: "ebb7c81427216247b7fdfeca47512d2a3f7ee6165cc4d3b28045533da6236251"
   "0.8.2":
     url: "https://github.com/zaphoyd/websocketpp/archive/0.8.2.tar.gz"
     sha256: "6ce889d85ecdc2d8fa07408d6787e7352510750daa66b5ad44aacb47bea76755"
