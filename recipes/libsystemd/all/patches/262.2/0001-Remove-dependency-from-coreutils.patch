@@ -1,3 +1,5 @@
+Custom CCI: allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable
+
 diff --git a/meson.build b/meson.build
 index 438ce4f..b6e23aa 100644
 --- a/meson.build
