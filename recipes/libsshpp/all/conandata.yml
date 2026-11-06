@@ -1,0 +1,4 @@
+sources:
+  "0.1.6":
+    url: "https://github.com/slightlabs/libsshpp/archive/refs/tags/v0.1.6.tar.gz"
+    sha256: "1e9ab71a2868055edc228afd560ae3e9584a9215c5d9d23d07bbf20931dcbdc7"
