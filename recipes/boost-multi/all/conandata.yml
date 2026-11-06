@@ -1,0 +1,4 @@
+sources:
+  "0.90.0":
+    url: "https://github.com/correaa/boost-multi/archive/refs/tags/v0.90.0.tar.gz"
+    sha256: "b616e219a4f6da31dfabd215505fdc12e24cb555ca98c92e618c48b08108be99"
