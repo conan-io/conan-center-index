@@ -40,7 +40,7 @@ class QtConan(ConanFile):
 
     options = {
         "shared": [True, False],
-        "opengl": ["no", "desktop", "dynamic"],
+        "opengl": ["no", "desktop", "dynamic", "es2"],
         "with_vulkan": [True, False],
         "openssl": [True, False],
         "with_pcre2": [True, False],
@@ -173,6 +173,9 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
             del self.options.with_gssapi
+        elif self.settings.os in ["Android", "iOS"]:
+            # These platforms have OpenGL ES only
+            self.options.opengl = "es2"
         if self.settings.os != "Linux":
             self.options.qtwayland = False
 
