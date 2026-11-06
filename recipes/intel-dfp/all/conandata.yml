@@ -1,0 +1,9 @@
+sources:
+  "2.3":
+    url: "https://www.netlib.org/misc/intel/IntelRDFPMathLib20U3.tar.gz"
+    sha256: "13f6924b2ed71df9b137a7df98706a0dcc3b43c283a0e32f8b6eadca4305136a"
+patches:
+  "2.3":
+    - patch_file: "patches/2.3-0001-fix-readtest.patch"
+      patch_description: "make unit test return meaningful exit code"
+      patch_type: conan
