@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, copy, get, rmdir
 
@@ -50,17 +51,21 @@ class UvgRTPConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # This library requires C++17
-        self.settings.compiler.cppstd = "17"
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, "17")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["UVGRTP_BUILD_SHARED"] = self.options.shared
         tc.variables["UVGRTP_DISABLE_CRYPTO"] = not self.options.with_crypto
         tc.variables["UVGRTP_DISABLE_PRINTS"] = self.options.disable_logging
         tc.variables["UVGRTP_DISABLE_TESTS"] = True
         tc.variables["UVGRTP_DISABLE_EXAMPLES"] = True
         tc.variables["UVGRTP_RELEASE_COMMIT"] = True
+        # Crypto++ is found by the patch; upstream's pkg-config metadata is discarded.
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_PkgConfig"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -85,9 +90,6 @@ class UvgRTPConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "uvgrtp")
 
         self.cpp_info.libs = ["uvgrtp"]
-
-        if self.options.with_crypto:
-            self.cpp_info.requires = ["cryptopp::cryptopp"]
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["wsock32", "ws2_32"])

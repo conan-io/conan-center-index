@@ -1,0 +1,15 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -57,6 +57,12 @@
+ add_library(${PROJECT_NAME} ${UVGRTP_LIB_TYPE})
+ set_target_properties(${PROJECT_NAME} PROPERTIES
+         SOVERSION "${PROJECT_VERSION_MAJOR}"
+         VERSION "${LIBRARY_VERSION}"
+         )
++if (NOT UVGRTP_DISABLE_CRYPTO)
++    find_package(cryptopp REQUIRED CONFIG)
++    target_link_libraries(${PROJECT_NAME} PRIVATE cryptopp::cryptopp)
++    set(CRYPTOPP_FOUND TRUE)
++endif()
++
+ set(UVGRTP_CXX_FLAGS "")

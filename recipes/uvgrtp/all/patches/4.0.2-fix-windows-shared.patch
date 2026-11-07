@@ -1,0 +1,25 @@
+--- a/cmake/Versioning.cmake
++++ b/cmake/Versioning.cmake
+@@ -43,2 +43,6 @@
++if (UVGRTP_BUILD_SHARED)
++    target_compile_definitions(${PROJECT_NAME}_version PRIVATE uvgrtp_EXPORTS)
++endif()
++
+ if (UVGRTP_RELEASE_COMMIT)
+     target_compile_definitions(${PROJECT_NAME}_version PRIVATE RTP_RELEASE_COMMIT)
+--- a/include/uvgrtp/version.hh
++++ b/include/uvgrtp/version.hh
+@@ -39,5 +39,5 @@
+      * \return Pointer to a null-terminated version string (lifetime: static)
+      */
+-    const char* UVGRTP_EXPORT get_version_cstr();
++    UVGRTP_EXPORT const char* get_version_cstr();
+ 
+     /**
+@@ -46,5 +46,5 @@
+      * \return Pointer to a null-terminated git-hash string (lifetime: static)
+      */
+-    const char* UVGRTP_EXPORT get_git_hash_cstr();
++    UVGRTP_EXPORT const char* get_git_hash_cstr();
+ 
+     /** @} */

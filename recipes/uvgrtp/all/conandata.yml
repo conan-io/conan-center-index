@@ -1,10 +1,13 @@
 sources:
-  "3.1.6":
-    url: "https://github.com/ultravideo/uvgRTP/archive/refs/tags/v3.1.6.tar.gz"
-    sha256: "3A8B175AE280A26EB6249DB879DA99E80D39DF2443062CCE9E3047FC05DB5CA2"
+  "4.0.2":
+    url: "https://github.com/ultravideo/uvgRTP/archive/refs/tags/v4.0.2.tar.gz"
+    sha256: "5d80f39441b196e29d0b2d007fa417798b6da27f034b6b2878d7e63d862f033d"
 
 patches:
-  "3.1.6":
-    - patch_file: "patches/3.1.6-add-cryptopp-find-package.patch"
-      patch_description: "Add find_package for Cryptopp when crypto is enabled"
+  "4.0.2":
+    - patch_file: "patches/4.0.2-find-cryptopp.patch"
+      patch_description: "Link Crypto++ using its CMake imported target"
+      patch_type: "portability"
+    - patch_file: "patches/4.0.2-fix-windows-shared.patch"
+      patch_description: "Fix version API exports in Windows shared builds"
       patch_type: "portability"
