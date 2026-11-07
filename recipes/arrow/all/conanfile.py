@@ -525,8 +525,7 @@ class ArrowConan(ConanFile):
                 self.cpp_info.components["libgandiva"].requires.append("boost::boost")
             if self.options.parquet and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < Version("4.9"):
                 self.cpp_info.components["libparquet"].requires.append("boost::boost")
-            # FIXME: only headers components is used
-            self.cpp_info.components["libarrow"].requires.append("boost::boost")
+            self.cpp_info.components["libarrow"].requires.append("boost::headers")
         if self.options.with_openssl:
             self.cpp_info.components["libarrow"].requires.append("openssl::openssl")
         if self.options.with_gflags:
