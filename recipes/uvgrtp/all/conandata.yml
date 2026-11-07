@@ -11,3 +11,6 @@ patches:
     - patch_file: "patches/4.0.2-fix-windows-shared.patch"
       patch_description: "Fix version API exports in Windows shared builds"
       patch_type: "portability"
+    - patch_file: "patches/4.0.2-missing-algorithm.patch"
+      patch_description: "Include algorithm for std::find_if when crypto is disabled"
+      patch_type: "portability"
