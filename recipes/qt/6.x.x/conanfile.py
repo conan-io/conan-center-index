@@ -549,6 +549,8 @@ class QtConan(ConanFile):
             tc.variables["INPUT_dbus"] = "linked"
         else:
             tc.variables["FEATURE_dbus"] = "OFF"
+            # qtbase looks for DBus even with the feature off, and would find the build machine's
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapDBus1"] = "ON"
         tc.variables["CMAKE_FIND_DEBUG_MODE"] = "FALSE"
 
         if not self.options.with_zstd:
