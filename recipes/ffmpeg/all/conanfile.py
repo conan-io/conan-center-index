@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import (
-    chdir, copy, get, rename,
+    apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename,
     replace_in_file, rm, rmdir, save, load
 )
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
@@ -261,6 +261,9 @@ class FFMpegConan(ConanFile):
             "with_whisper": ["avfilter"],
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -439,6 +442,7 @@ class FFMpegConan(ConanFile):
         }.get(str(self.settings.os), "none")
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         if self.options.with_ssl == "openssl":
                 # https://trac.ffmpeg.org/ticket/5675
             if Version(self.version) >= "8.1":
