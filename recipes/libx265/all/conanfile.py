@@ -116,8 +116,8 @@ class Libx265Conan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         if self.settings.os == "Linux":
             tc.variables["PLATFORM_LIBS"] = "dl"
-        if self.settings.os == "Linux" and self.settings.arch == "armv8" and cross_building(self):
-            tc.variables["CROSS_COMPILE_ARM64"] = True
+        if self.settings.arch in ("armv8", "armv8.3"):
+            tc.variables["CROSS_COMPILE_ARM64"] = cross_building(self)
         elif "arm" in self.settings.arch:
             tc.variables["CROSS_COMPILE_ARM"] = cross_building(self)
         tc.generate()
