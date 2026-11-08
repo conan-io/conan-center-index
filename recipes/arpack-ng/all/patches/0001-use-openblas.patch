@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6cc4e25..be0741d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -281,7 +281,9 @@ endif()
+ # Find BLAS
+ 
+ if (NOT TARGET BLAS::BLAS) # Search only if not already found by upper CMakeLists.txt
+-    find_package(BLAS REQUIRED)
++    # Conan: BLAS and LAPACK are both provided by OpenBLAS
++    find_package(OpenBLAS REQUIRED CONFIG)
++    set(BLAS_LIBRARIES OpenBLAS::OpenBLAS)
+ 
+     # BLAS::BLAS target was already created at this point by FindBLAS.cmake if cmake version >= 3.18
+     if (NOT TARGET BLAS::BLAS) # Create target "at hand" to ensure compatibility if cmake version < 3.18
+@@ -293,7 +295,7 @@ endif()
+ # Find LAPACK
+ 
+ if (NOT TARGET LAPACK::LAPACK) # Search only if not already found by upper CMakeLists.txt
+-    find_package(LAPACK REQUIRED)
++    set(LAPACK_LIBRARIES OpenBLAS::OpenBLAS)
+ 
+     # LAPACK::LAPACK target was already created at this point by FindLAPACK.cmake if cmake version >= 3.18
+     if (NOT TARGET LAPACK::LAPACK) # Create target "at hand" to ensure compatibility if cmake version < 3.18
