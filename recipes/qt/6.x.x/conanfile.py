@@ -5,7 +5,7 @@ import platform
 import re
 import textwrap
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
@@ -1139,7 +1139,14 @@ class QtConan(ConanFile):
         self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
         self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
 
-        self.buildenv_info.define("QT_HOST_PATH", self.package_folder)
+        if not self._is_mobile:
+            # A mobile Qt has no tools, so it is never a host Qt: its consumers take the tools
+            # from a qt tool_requires, which tells them where it is
+            self.buildenv_info.define("QT_HOST_PATH", self.package_folder)
+            if conan_version >= "2.4":
+                # Also when CMake runs outside the Conan build environment
+                self.conf_info.update("tools.cmake.cmaketoolchain:extra_variables",
+                                      {"QT_HOST_PATH": self.package_folder.replace("\\", "/")})
 
         build_modules = {}
         def _add_build_module(component, module):
