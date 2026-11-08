@@ -165,7 +165,7 @@ class QtConan(ConanFile):
 
     def config_options(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
-            # There Qt's FFmpeg backend needs an audio backend, and with_pulseaudio is off by default
+            # There Qt's FFmpeg backend needs an audio backend, and with_pulseaudio is not supported yet
             self.options.with_ffmpeg = False
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_icu
@@ -350,8 +350,8 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_ffmpeg", False) and self.settings.os in ["Linux", "FreeBSD"] \
                 and not self.options.get_safe("with_pulseaudio", False):
             # https://github.com/qt/qtmultimedia/blob/v6.12.0/src/multimedia/configure.cmake (feature "ffmpeg")
-            raise ConanInvalidConfiguration("qtmultimedia's FFmpeg backend on Linux and FreeBSD needs an audio backend: "
-                                            "set qt/*:with_pulseaudio=True")
+            raise ConanInvalidConfiguration("qtmultimedia's FFmpeg backend on Linux and FreeBSD needs an audio backend "
+                                            "(PulseAudio or PipeWire), which this recipe cannot build yet")
 
         if self.options.get_safe("with_ffmpeg", False):
             ffmpeg_options = self.dependencies["ffmpeg"].options
