@@ -87,6 +87,7 @@ class SuiteSparseConan(ConanFile):
 
         tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.cache_variables["GRAPHBLAS_BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.cache_variables["GRAPHBLAS_USE_JIT"] = False
         tc.cache_variables["SUITESPARSE_USE_CUDA"] = False
         tc.cache_variables["SUITESPARSE_USE_PYTHON"] = False
         tc.cache_variables["SUITESPARSE_USE_FORTRAN"] = False

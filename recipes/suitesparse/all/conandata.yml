@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/0001-use-config-packages-for-gmp-mpfr-openblas.patch"
       patch_description: "Use find_package(CONFIG) for gmp, mpfr and OpenBLAS"
       patch_type: "conan"
+    - patch_file: "patches/0002-guard-mongoose-executables.patch"
+      patch_description: "Build the Mongoose and demo executables only when SUITESPARSE_DEMOS is ON"
+      patch_type: "conan"
