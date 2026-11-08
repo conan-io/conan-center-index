@@ -1,0 +1,112 @@
+--- a/SPEX/CMakeLists.txt
++++ b/SPEX/CMakeLists.txt
+@@ -93,8 +93,8 @@
+     endif ( )
+ endif ( )
+ 
+-find_package ( GMP 6.1.2 REQUIRED )     # from SPEX/cmake_modules
+-find_package ( MPFR 4.0.2 REQUIRED )    # from SPEX/cmake_modules
++find_package ( gmp 6.1.2 CONFIG REQUIRED )
++find_package ( mpfr 4.0.2 CONFIG REQUIRED )
+ 
+ #-------------------------------------------------------------------------------
+ # configure files
+@@ -115,7 +115,6 @@
+     SPEX_Backslash/Source SPEX_Cholesky/Source SPEX_LU/Source
+     SPEX_Utilities/Source
+     ${SUITESPARSE_CONFIG_INCLUDE_DIR}
+-    ${GMP_INCLUDE_DIR} ${MPFR_INCLUDE_DIR}
+     ${AMD_INCLUDE_DIR} ${COLAMD_INCLUDE_DIR} )
+ 
+ #-------------------------------------------------------------------------------
+@@ -214,27 +213,12 @@
+     endif ( )
+ endif ( )
+ 
+-# MPFR:
++# MPFR and GMP:
+ if ( BUILD_SHARED_LIBS )
+-    target_link_libraries ( SPEX PRIVATE ${MPFR_LIBRARIES} )
+-    target_include_directories ( SPEX SYSTEM AFTER PUBLIC ${MPFR_INCLUDE_DIR} )
++    target_link_libraries ( SPEX PUBLIC mpfr::mpfr gmp::gmp )
+ endif ( )
+ if ( BUILD_STATIC_LIBS )
+-    list ( APPEND SPEX_STATIC_LIBS ${MPFR_STATIC} )
+-    target_link_libraries ( SPEX_static PUBLIC ${MPFR_STATIC} )
+-    target_include_directories ( SPEX_static SYSTEM AFTER PUBLIC ${MPFR_INCLUDE_DIR} )
+-endif ( )
+-
+-# GMP:
+-# must occur after MPFR
+-if ( BUILD_SHARED_LIBS )
+-    target_link_libraries ( SPEX PRIVATE ${GMP_LIBRARIES} )
+-    target_include_directories ( SPEX SYSTEM AFTER PUBLIC ${GMP_INCLUDE_DIR} )
+-endif ( )
+-if ( BUILD_STATIC_LIBS )
+-    list ( APPEND SPEX_STATIC_LIBS ${GMP_STATIC} )
+-    target_link_libraries ( SPEX_static PUBLIC ${GMP_STATIC} )
+-    target_include_directories ( SPEX_static SYSTEM AFTER PUBLIC ${GMP_INCLUDE_DIR} )
++    target_link_libraries ( SPEX_static PUBLIC mpfr::mpfr gmp::gmp )
+ endif ( )
+ 
+ # OpenMP:
+@@ -459,11 +443,11 @@
+         WINDOWS_EXPORT_ALL_SYMBOLS ON )
+ 
+     # MPFR:
+-    target_link_libraries ( spexpython PRIVATE ${MPFR_LIBRARIES} )
++    target_link_libraries ( spexpython PRIVATE mpfr::mpfr )
+ 
+     # GMP:
+     # must occur after MPFR
+-    target_link_libraries ( spexpython PRIVATE ${GMP_LIBRARIES} )
++    target_link_libraries ( spexpython PRIVATE gmp::gmp )
+ 
+     target_link_libraries ( spexpython PRIVATE SuiteSparse::COLAMD )
+     target_link_libraries ( spexpython PRIVATE SuiteSparse::AMD )
+@@ -509,16 +493,16 @@
+ 
+     # Libraries required for Demo programs
+     if ( BUILD_SHARED_LIBS )
+-        target_link_libraries ( spex_demo_backslash         PUBLIC SPEX SuiteSparse::SuiteSparseConfig ${MPFR_LIBRARIES} ${GMP_LIBRARIES} SuiteSparse::AMD SuiteSparse::COLAMD )
+-        target_link_libraries ( spex_demo_cholesky_extended PUBLIC SPEX SuiteSparse::SuiteSparseConfig ${MPFR_LIBRARIES} ${GMP_LIBRARIES} SuiteSparse::AMD SuiteSparse::COLAMD )
+-        target_link_libraries ( spex_demo_cholesky_simple   PUBLIC SPEX SuiteSparse::SuiteSparseConfig ${MPFR_LIBRARIES} ${GMP_LIBRARIES} SuiteSparse::AMD SuiteSparse::COLAMD )
+-        target_link_libraries ( spex_demo_ldl_extended      PUBLIC SPEX SuiteSparse::SuiteSparseConfig ${MPFR_LIBRARIES} ${GMP_LIBRARIES} SuiteSparse::AMD SuiteSparse::COLAMD )
+-        target_link_libraries ( spex_demo_ldl_simple        PUBLIC SPEX SuiteSparse::SuiteSparseConfig ${MPFR_LIBRARIES} ${GMP_LIBRARIES} SuiteSparse::AMD SuiteSparse::COLAMD )
+-        target_link_libraries ( spex_demo_lu_doub           PUBLIC SPEX SuiteSparse::SuiteSparseConfig ${MPFR_LIBRARIES} ${GMP_LIBRARIES} SuiteSparse::AMD SuiteSparse::COLAMD )
+-        target_link_libraries ( spex_demo_lu_extended       PUBLIC SPEX SuiteSparse::SuiteSparseConfig ${MPFR_LIBRARIES} ${GMP_LIBRARIES} SuiteSparse::AMD SuiteSparse::COLAMD )
+-        target_link_libraries ( spex_demo_lu_simple1        PUBLIC SPEX SuiteSparse::SuiteSparseConfig ${MPFR_LIBRARIES} ${GMP_LIBRARIES} SuiteSparse::AMD SuiteSparse::COLAMD )
+-        target_link_libraries ( spex_demo_lu_simple2        PUBLIC SPEX SuiteSparse::SuiteSparseConfig ${MPFR_LIBRARIES} ${GMP_LIBRARIES} SuiteSparse::AMD SuiteSparse::COLAMD )
+-        target_link_libraries ( spex_demo_threaded          PUBLIC SPEX SuiteSparse::SuiteSparseConfig ${MPFR_LIBRARIES} ${GMP_LIBRARIES} SuiteSparse::AMD SuiteSparse::COLAMD )
++        target_link_libraries ( spex_demo_backslash         PUBLIC SPEX SuiteSparse::SuiteSparseConfig mpfr::mpfr gmp::gmp SuiteSparse::AMD SuiteSparse::COLAMD )
++        target_link_libraries ( spex_demo_cholesky_extended PUBLIC SPEX SuiteSparse::SuiteSparseConfig mpfr::mpfr gmp::gmp SuiteSparse::AMD SuiteSparse::COLAMD )
++        target_link_libraries ( spex_demo_cholesky_simple   PUBLIC SPEX SuiteSparse::SuiteSparseConfig mpfr::mpfr gmp::gmp SuiteSparse::AMD SuiteSparse::COLAMD )
++        target_link_libraries ( spex_demo_ldl_extended      PUBLIC SPEX SuiteSparse::SuiteSparseConfig mpfr::mpfr gmp::gmp SuiteSparse::AMD SuiteSparse::COLAMD )
++        target_link_libraries ( spex_demo_ldl_simple        PUBLIC SPEX SuiteSparse::SuiteSparseConfig mpfr::mpfr gmp::gmp SuiteSparse::AMD SuiteSparse::COLAMD )
++        target_link_libraries ( spex_demo_lu_doub           PUBLIC SPEX SuiteSparse::SuiteSparseConfig mpfr::mpfr gmp::gmp SuiteSparse::AMD SuiteSparse::COLAMD )
++        target_link_libraries ( spex_demo_lu_extended       PUBLIC SPEX SuiteSparse::SuiteSparseConfig mpfr::mpfr gmp::gmp SuiteSparse::AMD SuiteSparse::COLAMD )
++        target_link_libraries ( spex_demo_lu_simple1        PUBLIC SPEX SuiteSparse::SuiteSparseConfig mpfr::mpfr gmp::gmp SuiteSparse::AMD SuiteSparse::COLAMD )
++        target_link_libraries ( spex_demo_lu_simple2        PUBLIC SPEX SuiteSparse::SuiteSparseConfig mpfr::mpfr gmp::gmp SuiteSparse::AMD SuiteSparse::COLAMD )
++        target_link_libraries ( spex_demo_threaded          PUBLIC SPEX SuiteSparse::SuiteSparseConfig mpfr::mpfr gmp::gmp SuiteSparse::AMD SuiteSparse::COLAMD )
+     else ( )
+         target_link_libraries ( spex_demo_backslash         PUBLIC SPEX_static SuiteSparse::AMD_static SuiteSparse::COLAMD_static )
+         target_link_libraries ( spex_demo_cholesky_extended PUBLIC SPEX_static SuiteSparse::AMD_static SuiteSparse::COLAMD_static )
+--- a/SuiteSparse_config/cmake_modules/SuiteSparseBLAS.cmake
++++ b/SuiteSparse_config/cmake_modules/SuiteSparseBLAS.cmake
+@@ -60,6 +60,16 @@
+ # dynamic/static linking with BLAS
+ option ( BLA_STATIC
+     "OFF (default): dynamic linking of BLAS.  ON: static linking of BLAS" OFF )
++
++if ( BLA_VENDOR STREQUAL "OpenBLAS" AND NOT DEFINED BLAS_LIBRARIES )
++    find_package ( OpenBLAS CONFIG REQUIRED )
++    set ( BLAS_LIBRARIES OpenBLAS::OpenBLAS )
++    set ( BLAS_INCLUDE_DIRS ${OpenBLAS_INCLUDE_DIRS} )
++    set ( LAPACK_LIBRARIES OpenBLAS::OpenBLAS )
++    if ( CMAKE_BUILD_TYPE )
++        set ( CMAKE_TRY_COMPILE_CONFIGURATION ${CMAKE_BUILD_TYPE} )
++    endif ( )
++endif ( )
+ 
+ if ( DEFINED BLAS_LIBRARIES OR DEFINED BLAS_INCLUDE_DIRS )
+     # User supplied variables for libraries and/or include directories.

@@ -1,0 +1,9 @@
+sources:
+  "7.14.1":
+    url: "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v7.14.1.tar.gz"
+    sha256: "81e560e1f74546df139edb765b3f5bc865866da23062312ffe8fd821063c8397"
+patches:
+  "7.14.1":
+    - patch_file: "patches/0001-use-config-packages-for-gmp-mpfr-openblas.patch"
+      patch_description: "Use find_package(CONFIG) for gmp, mpfr and OpenBLAS"
+      patch_type: "conan"
