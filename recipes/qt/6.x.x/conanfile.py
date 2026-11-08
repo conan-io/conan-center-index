@@ -1003,7 +1003,7 @@ class QtConan(ConanFile):
                     file(TO_CMAKE_PATH "$ENV{QT_HOST_PATH}" QT_HOST_PATH)
                 endif()
                 if(NOT QT_HOST_PATH)
-                    message(FATAL_ERROR "Qt for this platform runs the host Qt's tools: add a qt tool_requires, or set QT_HOST_PATH.")
+                    message(FATAL_ERROR "Qt for this platform runs the host Qt's tools: add qt/<host_version> to your tool_requires, or set QT_HOST_PATH.")
                 endif()
                 """)
             filecontents += f'include("${{QT_HOST_PATH}}/{self._cmake_executables_file.replace(os.sep, "/")}")\n'
