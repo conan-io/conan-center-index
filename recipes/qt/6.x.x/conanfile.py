@@ -164,6 +164,9 @@ class QtConan(ConanFile):
         copy(self, f"qtmodules{self.version}.conf", self.recipe_folder, self.export_folder)
 
     def config_options(self):
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            # There Qt's FFmpeg backend needs an audio backend, and with_pulseaudio is off by default
+            self.options.with_ffmpeg = False
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_icu
             del self.options.with_fontconfig
@@ -343,6 +346,12 @@ class QtConan(ConanFile):
 
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
+
+        if self.options.get_safe("with_ffmpeg", False) and self.settings.os in ["Linux", "FreeBSD"] \
+                and not self.options.get_safe("with_pulseaudio", False):
+            # https://github.com/qt/qtmultimedia/blob/v6.12.0/src/multimedia/configure.cmake (feature "ffmpeg")
+            raise ConanInvalidConfiguration("qtmultimedia's FFmpeg backend on Linux and FreeBSD needs an audio backend: "
+                                            "set qt/*:with_pulseaudio=True")
 
         if self.options.get_safe("with_ffmpeg", False):
             ffmpeg_options = self.dependencies["ffmpeg"].options
