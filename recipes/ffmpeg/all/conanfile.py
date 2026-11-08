@@ -650,7 +650,8 @@ class FFMpegConan(ConanFile):
         if self.settings.build_type == "Debug":
             args.extend([
                 "--disable-optimizations",
-                "--disable-mmx",
+                # No --disable-mmx: it turns off all x86 SIMD, so no NASM file is built, while MSVC at -Od keeps the
+                # references behind EXTERNAL_*() guards and the link fails with unresolved ff_*_sse2/ssse3 symbols.
                 "--disable-stripping",
                 "--enable-debug",
             ])
