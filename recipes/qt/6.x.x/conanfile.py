@@ -142,6 +142,11 @@ class QtConan(ConanFile):
         return self.settings.os == "Android" or self._apple_embedded
 
     @property
+    def _android_egl(self):
+        # Qt's egl feature needs OpenGL
+        return self.settings.os == "Android" and self.options.get_safe("opengl", "no") != "no"
+
+    @property
     def _get_module_tree(self):
         if self._submodules_tree:
             return self._submodules_tree
@@ -590,9 +595,9 @@ class QtConan(ConanFile):
                               ("with_egl", "egl"),
                               ("with_gstreamer", "gstreamer")]:
             tc.variables[f"FEATURE_{conf_arg}"] = ("ON" if self.options.get_safe(opt, False) else "OFF")
-        if self.settings.os == "Android":
-            # Android has no with_egl option, but its windows are EGL surfaces; without EGL the
-            # Android platform plugin cannot create a window
+        if self._android_egl:
+            # Android has no with_egl option, but its OpenGL windows are EGL surfaces; without EGL the
+            # Android platform plugin cannot create them
             tc.variables["FEATURE_egl"] = "ON"
 
 
@@ -700,7 +705,7 @@ class QtConan(ConanFile):
         tc.variables["FEATURE_wayland"] = with_wayland
 
         # Android has no with_egl option, but its OpenGL ES windows need the NDK's EGL
-        with_egl = self.options.get_safe("with_egl", False) or self.settings.os == "Android"
+        with_egl = self.options.get_safe("with_egl", False) or self._android_egl
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_EGL"] = not with_egl
 
         tc.generate()
