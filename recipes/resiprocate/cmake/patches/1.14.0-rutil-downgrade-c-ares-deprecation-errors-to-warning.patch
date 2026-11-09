@@ -1,5 +1,8 @@
+Backport https://github.com/resiprocate/resiprocate/pull/475
+Fixes compilation errors due to c-ares deprecation warnings being treated as errors on MSVC due to `/SDL`
+
 From 80b9a654cac1f35c13fc818b1568c3f705d8686a Mon Sep 17 00:00:00 2001
-From: Gregor Jasny <gjasny@googlemail.com>
+From: Gregor Jasny
 Date: Fri, 3 Jul 2026 13:44:13 +0200
 Subject: [PATCH] rutil: downgrade c-ares deprecation errors to warnings
 

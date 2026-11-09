@@ -1,5 +1,12 @@
+Backport https://github.com/resiprocate/resiprocate/pull/474
+Fixes compilation errors on macOS and BSD-derived systems
+
+/.conan2/p/b/resipa920b19f73b58/b/src/resip/stack/InternalTransport.cxx:83:71: error: use of undeclared identifier 'SOCK_CLOEXEC'
+   83 |          fd = ::socket(ipVer == V4 ? PF_INET : PF_INET6, SOCK_DGRAM | SOCK_CLOEXEC, IPPROTO_UDP);
+      |                                                                       ^~~~~~~~~~~~
+
 From 067fe453da0845e2179f408ebc6b8d288e03951d Mon Sep 17 00:00:00 2001
-From: Gregor Jasny <gjasny@googlemail.com>
+From: Gregor Jasny
 Date: Mon, 29 Jun 2026 17:30:51 +0200
 Subject: [PATCH] Properly set close on exec for BSDs
 

@@ -1,5 +1,11 @@
+Backported from https://github.com/resiprocate/resiprocate/commit/fe7d6307100ba251691ccf6bc98b5d6351420522
+Fix for the following error:
+
+/.conan2/p/b/resip68267f5786f60/b/src/rutil/compat.hxx:247:10: error: cannot initialize a variable of type 'char *' with an rvalue of type 'int'
+  247 |    char* res = strerror_r(err, buf, sizeof(buf));
+
 From fe7d6307100ba251691ccf6bc98b5d6351420522 Mon Sep 17 00:00:00 2001
-From: Scott Godin <sgodin@sipspectrum.com>
+From: Scott Godin
 Date: Fri, 19 Jun 2026 13:20:19 -0400
 Subject: [PATCH] Fix POSIX build error:
 
