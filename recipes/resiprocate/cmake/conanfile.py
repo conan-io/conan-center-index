@@ -9,7 +9,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.1"
 
 
 class ResiprocateConan(ConanFile):
@@ -71,6 +71,7 @@ class ResiprocateConan(ConanFile):
         tc.variables["BUILD_RECON"] = False
         tc.variables["BUILD_REFLOW"] = False
         tc.variables["BUILD_REND"] = False
+        tc.variables["BUILD_MEDIA"] = False
         tc.variables["BUILD_REPRO"] = False
         tc.variables["BUILD_RETURN"] = False
         tc.variables["BUILD_TESTING"] = False
