@@ -1,0 +1,26 @@
+--- a/meson.build
++++ b/meson.build
+@@ -44,14 +44,6 @@
+ builtin_cjson = get_option('builtin_cjson')
+ builtin_mbedtls = get_option('builtin_mbedtls')
+ 
+-if (host_machine.system() == 'darwin'
+-    and not meson.is_cross_build()
+-    and find_program('brew', required : false).found()
+-    and (not builtin_cjson or not builtin_mbedtls))
+-	r = run_command('brew', '--prefix', check: true)
+-	brewoutput = r.stdout().strip()
+-	inc += include_directories(brewoutput + '/include')
+-endif
+ use_mbedtls = get_option('use_mbedtls')
+ use_nettle = get_option('use_nettle')
+ use_gnutls = get_option('use_gnutls')
+@@ -206,7 +198,7 @@
+ 
+ sock_un_h = cc.has_header('sys/un.h')
+ cdata.set10('HAVE_SOCK_UN_H', sock_un_h)
+-microhttpd = dependency('libmicrohttpd', required: false)
++microhttpd = dependency('', required: false)
+ cdata.set10('HAVE_LIBMICROHTTPD', microhttpd.found())
+ if microhttpd.found()
+ 	code = '''
