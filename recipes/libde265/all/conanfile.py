@@ -72,6 +72,7 @@ class Libde265Conan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.variables["ENABLE_SDL"] = False
+        tc.variables["ENABLE_DECODER"] = False
         tc.variables["ENABLE_SIMD"] = bool(self.options.simd)
         tc.variables["ENABLE_AVX2"] = bool(self.options.get_safe("avx2", False))
         tc.variables["ENABLE_AVX512"] = bool(self.options.get_safe("avx512", False))
