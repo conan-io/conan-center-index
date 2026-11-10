@@ -1,0 +1,25 @@
+Fix: CMake configure fails when SQLite3 is found but GDAL_USE_SQLITE3=OFF
+https://github.com/OSGeo/gdal/issues/15403
+https://github.com/OSGeo/gdal/pull/15404
+
+diff --git a/cmake/helpers/CheckDependentLibraries.cmake b/cmake/helpers/CheckDependentLibraries.cmake
+index b448c5a..ca98904 100644
+--- a/cmake/helpers/CheckDependentLibraries.cmake
++++ b/cmake/helpers/CheckDependentLibraries.cmake
+@@ -525,14 +525,14 @@ endif ()
+ 
+ gdal_check_package(SQLite3 "Enable SQLite3 support (used by SQLite/Spatialite, GPKG, Rasterlite, MBTiles, etc.)"
+                    CAN_DISABLE RECOMMENDED)
+-if (SQLite3_FOUND)
++if (SQLite3_FOUND AND GDAL_USE_SQLITE3)
+   if (NOT DEFINED SQLite3_HAS_COLUMN_METADATA)
+     message(FATAL_ERROR "missing SQLite3_HAS_COLUMN_METADATA")
+   endif ()
+   if (NOT DEFINED SQLite3_HAS_MUTEX_ALLOC)
+     message(FATAL_ERROR "missing SQLite3_HAS_MUTEX_ALLOC")
+   endif ()
+-  if (GDAL_USE_SQLITE3 AND NOT SQLite3_HAS_MUTEX_ALLOC)
++  if (NOT SQLite3_HAS_MUTEX_ALLOC)
+     if (NOT ACCEPT_MISSING_SQLITE3_MUTEX_ALLOC)
+       message(
+         FATAL_ERROR
