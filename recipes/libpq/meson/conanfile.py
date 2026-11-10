@@ -124,6 +124,8 @@ class LibpqConan(ConanFile):
         tc.project_options["tap_tests"] = "disabled"
         tc.project_options["plpython"] = "disabled"
         tc.project_options["docs"] = "disabled"
+        # PostgreSQL embeds prefix/libdir as RUNPATH by default
+        tc.project_options["rpath"] = not self.options.disable_rpath
 
         if is_msvc(self) and cross_building(self):
             tc.project_options['ZIC'] = os.path.join(self.dependencies.build['libpq'].package_folder, "bin", "_zic", "zic.exe")
