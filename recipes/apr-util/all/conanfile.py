@@ -38,6 +38,7 @@ class AprUtilConan(ConanFile):
         "with_sqlite3": [True, False],
         "with_lber": [True, False],
         "with_ldap": [True, False],
+        "with_libiconv": [True, False],
     }
     default_options = {
         "shared": False,
@@ -52,6 +53,11 @@ class AprUtilConan(ConanFile):
         "with_sqlite3": False,
         "with_lber": False,
         "with_ldap": False,
+        "with_libiconv": True,
+    }
+    options_description = {
+        "with_libiconv": "Use GNU libiconv for apr_xlate (non-Windows). When False, configure finds the "
+                         "C library's iconv instead and libiconv is not required",
     }
 
     def export_sources(self):
@@ -60,6 +66,7 @@ class AprUtilConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.with_libiconv
 
     def configure(self):
         if self.options.shared:
@@ -76,7 +83,7 @@ class AprUtilConan(ConanFile):
 
     def requirements(self):
         self.requires("apr/1.7.4", transitive_headers=True)
-        if self.settings.os != "Windows":
+        if self.settings.os != "Windows" and self.options.with_libiconv:
             #cmake build doesn't allow injection of iconv yet
             # https://github.com/conan-io/conan-center-index/pull/16142#issuecomment-1494282164
             # transitive_libs needs to be set because some sys-frameworks on the old mac images for c3i
@@ -142,7 +149,6 @@ class AprUtilConan(ConanFile):
             tc.configure_args.extend([
                 f"--with-apr={rootpath_no(True, 'apr')}",
                 f"--with-crypto={yes_no(self._with_crypto)}",
-                f"--with-iconv={rootpath_no(True, 'libiconv')}",
                 f"--with-openssl={rootpath_no(self.options.with_openssl, 'openssl')}",
                 f"--with-expat={rootpath_no(self.options.with_expat, 'expat')}",
                 f"--with-mysql={rootpath_no(self.options.with_mysql, 'libmysqlclient')}",
@@ -153,6 +159,8 @@ class AprUtilConan(ConanFile):
                 f"--with-gdbm={rootpath_no(self.options.dbm == 'gdbm', 'gdbm')}",
                 f"--with-ndbm={rootpath_no(self.options.dbm == 'ndbm', 'ndbm')}",
             ])
+            if self.options.with_libiconv:
+                tc.configure_args.append(f"--with-iconv={self.dependencies['libiconv'].package_folder}")
             if self.options.dbm:
                 tc.configure_args.append(f"--with-dbm={self.options.dbm}")
             if self._with_crypto and self.settings.os in ["Linux", "FreeBSD"]:
