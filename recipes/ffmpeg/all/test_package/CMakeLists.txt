@@ -3,9 +3,6 @@ project(test_package LANGUAGES C)
 
 find_package(ffmpeg REQUIRED CONFIG)
 
-add_executable(test_avutil test_avutil.c)
-target_link_libraries(test_avutil PRIVATE ffmpeg::avutil)
-
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} PRIVATE ffmpeg::avutil)
 if (TARGET ffmpeg::avdevice)
