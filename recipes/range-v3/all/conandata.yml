@@ -1,4 +1,7 @@
 sources:
+  "cci.20261010":
+    url: https://github.com/ericniebler/range-v3/archive/5ba39112d2eafbb3c851a16a537f29b445022998.tar.gz
+    sha256: d7bd65f13c7a2fe3d1fc7423835083f0bd2849525100a349a3faaab94461cf07
   "cci.20240905":
     url: https://github.com/ericniebler/range-v3/archive/a33616bfdb642744acaa937a3f258fba384b7fd4.tar.gz
     sha256: d5cc3bf42825097c55c1c6a1f0158eb8fbceb0653935f2f7d2b5286c827dd834
