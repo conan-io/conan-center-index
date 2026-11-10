@@ -38,9 +38,6 @@ class DuckdbConan(ConanFile):
         "with_shell": [True, False],
         "with_threads": [True, False],
         "with_rdtsc": [True, False],
-        "with_extension_load": [True, False],
-        "with_httplib": [True, False],
-        "with_jemalloc": [True, False],
     }
     default_options = {
         "shared": False,
@@ -60,9 +57,6 @@ class DuckdbConan(ConanFile):
         "with_shell": False,
         "with_threads": True,
         "with_rdtsc": False,
-        "with_extension_load": True,
-        "with_httplib": True,
-        "with_jemalloc": True,
     }
     short_paths = True
 
@@ -73,17 +67,6 @@ class DuckdbConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "1.5.0":
-            del self.options.with_extension_load
-            del self.options.with_httplib
-        # From 1.5.0 jemalloc is an allocator switch, used on 64-bit Linux only
-        if Version(self.version) < "1.5.0" or self.settings.os != "Linux" or \
-                self.settings.arch not in ["x86_64", "armv8"]:
-            del self.options.with_jemalloc
-        if Version(self.version) >= "1.5.0":
-            # Out-of-tree extensions: CMake would git clone them during the build
-            for option in ["with_fts", "with_visualizer", "with_httpfs", "with_excel", "with_inet", "with_sqlsmith"]:
-                self.options.rm_safe(option)
 
     def configure(self):
         if self.options.shared:
@@ -93,7 +76,7 @@ class DuckdbConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("with_httpfs"):
+        if self.options.with_httpfs:
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
@@ -123,25 +106,21 @@ class DuckdbConan(ConanFile):
             build_extensions += ";tpch"
         if self.options.with_tpcds:
             build_extensions += ";tpcds"
-        if self.options.get_safe("with_fts"):
+        if self.options.with_fts:
             build_extensions += ";fts"
-        if self.options.get_safe("with_visualizer"):
+        if self.options.with_visualizer:
             build_extensions += ";visualizer"
-        if self.options.get_safe("with_httpfs"):
+        if self.options.with_httpfs:
             build_extensions += ";httpfs"
         if self.options.with_json:
             build_extensions += ";json"
-        if self.options.get_safe("with_excel"):
+        if self.options.with_excel:
             build_extensions += ";excel"
-        if self.options.get_safe("with_inet"):
+        if self.options.with_inet:
             build_extensions += ";inet"
-        if self.options.get_safe("with_sqlsmith"):
+        if self.options.with_sqlsmith:
             build_extensions += ";sqlsmith"
         tc.variables["BUILD_EXTENSIONS"] = build_extensions
-        if Version(self.version) >= "1.5.0":
-            tc.variables["DISABLE_EXTENSION_LOAD"] = not self.options.with_extension_load
-            tc.variables["DISABLE_BUILTIN_HTTPLIB"] = not self.options.with_httplib
-            tc.variables["ENABLE_JEMALLOC"] = bool(self.options.get_safe("with_jemalloc", False))
 
         tc.variables["FORCE_QUERY_LOG"] = self.options.with_query_log
         tc.variables["BUILD_SHELL"] = self.options.with_shell
@@ -169,7 +148,7 @@ class DuckdbConan(ConanFile):
 
     def build(self):
         if Version(self.version) >= "1.5.0":
-            # Upstream forces the static MSVC runtime; let the profile's compiler.runtime decide
+            # Upstream forces the static MSVC runtime, let the profile's compiler.runtime decide
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             'set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
                             "")
@@ -192,9 +171,8 @@ class DuckdbConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        if Version(self.version) >= "1.5.0":
-            # No-op LoadAllExtensions, must not be linked with duckdb_generated_extension_loader
-            rm(self, "*dummy_static_extension_loader*", os.path.join(self.package_folder, "lib"))
+        # No-op LoadAllExtensions, must not be linked together with duckdb_generated_extension_loader
+        rm(self, "*dummy_static_extension_loader*", os.path.join(self.package_folder, "lib"))
         if self.options.shared:
             rm(self, "duckdb_*.lib", os.path.join(self.package_folder, "lib"))
             for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
@@ -225,7 +203,6 @@ class DuckdbConan(ConanFile):
                 "duckdb_mbedtls",
             ]
             if Version(self.version) >= "1.5.0":
-                # ExtensionHelper::LoadAllExtensions, called from duckdb_static
                 self.cpp_info.libs.insert(1, "duckdb_generated_extension_loader")
             self.cpp_info.libs.append("duckdb_fsst")
             self.cpp_info.libs.append("core_functions_extension")
@@ -243,24 +220,21 @@ class DuckdbConan(ConanFile):
                 self.cpp_info.libs.append("tpch_extension")
             if self.options.with_tpcds:
                 self.cpp_info.libs.append("tpcds_extension")
-            if self.options.get_safe("with_fts"):
+            if self.options.with_fts:
                 self.cpp_info.libs.append("fts_extension")
-            if self.options.get_safe("with_visualizer"):
+            if self.options.with_visualizer:
                 self.cpp_info.libs.append("visualizer_extension")
-            if self.options.get_safe("with_httpfs"):
+            if self.options.with_httpfs:
                 self.cpp_info.libs.append("httpfs_extension")
-            if Version(self.version) < "1.5.0":
-                if self.settings.os == "Linux" and self.settings.arch == "x86_64":
-                    self.cpp_info.libs.append("jemalloc_extension")
-            elif self.options.get_safe("with_jemalloc"):
-                self.cpp_info.libs.append("duckdb_jemalloc")
+            if self.settings.os == "Linux" and self.settings.arch == "x86_64":
+                self.cpp_info.libs.append("jemalloc_extension" if Version(self.version) < "1.5.0" else "duckdb_jemalloc")
             if self.options.with_json:
                 self.cpp_info.libs.append("json_extension")
-            if self.options.get_safe("with_excel"):
+            if self.options.with_excel:
                 self.cpp_info.libs.append("excel_extension")
-            if self.options.get_safe("with_inet"):
+            if self.options.with_inet:
                 self.cpp_info.libs.append("inet_extension")
-            if self.options.get_safe("with_sqlsmith"):
+            if self.options.with_sqlsmith:
                 self.cpp_info.libs.append("sqlsmith_extension")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
