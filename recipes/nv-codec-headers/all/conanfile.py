@@ -1,11 +1,10 @@
 import os
 
 from conan import ConanFile
-from conan.tools.files import chdir, get, load, rmdir, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.files import copy, get, load, save
 from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0"
 
 
 class FFNvEncHeaders(ConanFile):
@@ -20,32 +19,14 @@ class FFNvEncHeaders(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows":
-            if "CONAN_MAKE_PROGRAM" not in os.environ:
-                self.build_requires("make/4.4")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def generate(self):
-        tc = AutotoolsToolchain(self)
-        tc.generate()
-
-    def build(self):
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.make()
 
     def _extract_license(self):
         # Extract the License/s from the header to a file
@@ -55,10 +36,7 @@ class FFNvEncHeaders(ConanFile):
 
     def package(self):
         self._extract_license()
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.install(args=["PREFIX=/"])
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
