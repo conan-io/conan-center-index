@@ -192,6 +192,9 @@ class DuckdbConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        if Version(self.version) >= "1.5.0":
+            # No-op LoadAllExtensions, must not be linked with duckdb_generated_extension_loader
+            rm(self, "*dummy_static_extension_loader*", os.path.join(self.package_folder, "lib"))
         if self.options.shared:
             rm(self, "duckdb_*.lib", os.path.join(self.package_folder, "lib"))
             for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
