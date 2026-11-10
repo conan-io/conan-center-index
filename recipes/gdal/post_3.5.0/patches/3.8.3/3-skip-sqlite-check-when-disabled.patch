@@ -19,7 +19,7 @@ index b448c5a..ca98904 100644
      message(FATAL_ERROR "missing SQLite3_HAS_MUTEX_ALLOC")
    endif ()
 -  if (GDAL_USE_SQLITE3 AND NOT SQLite3_HAS_MUTEX_ALLOC)
-+  if (SQLite3_HAS_MUTEX_ALLOC)
++  if (NOT SQLite3_HAS_MUTEX_ALLOC)
      if (NOT ACCEPT_MISSING_SQLITE3_MUTEX_ALLOC)
        message(
          FATAL_ERROR
