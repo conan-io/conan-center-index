@@ -1,4 +1,9 @@
 #include "mpg123.h"
+#ifdef _MSC_VER
+/* Older syn123.h headers use ssize_t, which MSVC lacks. */
+#include <stddef.h>
+typedef ptrdiff_t ssize_t;
+#endif
 #include "syn123.h"
 #include <stdio.h>
 
