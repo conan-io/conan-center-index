@@ -20,7 +20,7 @@ class OpenApiGeneratorConan(ConanFile):
         pass
 
     def requirements(self):
-        self.requires("openjdk/21.0.1")
+        self.requires("openjdk/[^21.0.1]")
 
     def package_id(self):
         del self.info.settings.arch
@@ -75,6 +75,3 @@ class OpenApiGeneratorConan(ConanFile):
         self.cpp_info.includedirs = []
         jar = os.path.join(self.package_folder, "res", "openapi-generator.jar")
         self.runenv_info.prepend_path("CLASSPATH", jar)
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.CLASSPATH.append(jar)
