@@ -147,11 +147,10 @@ class DuckdbConan(ConanFile):
         dpes.generate()
 
     def build(self):
-        if Version(self.version) >= "1.5.0":
-            # Upstream forces the static MSVC runtime, let the profile's compiler.runtime decide
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            'set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
-                            "")
+        # Upstream forces the static MSVC runtime, let the profile's compiler.runtime decide
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
+                        "")
         if is_msvc(self) and not self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb.h"),
                             f"#define DUCKDB_C_API __declspec(dllimport)",
@@ -193,6 +192,7 @@ class DuckdbConan(ConanFile):
         else:
             self.cpp_info.libs = [
                 "duckdb_static",
+                "duckdb_generated_extension_loader",
                 "duckdb_fmt",
                 "duckdb_pg_query",
                 "duckdb_re2",
@@ -202,8 +202,6 @@ class DuckdbConan(ConanFile):
                 "duckdb_fastpforlib",
                 "duckdb_mbedtls",
             ]
-            if Version(self.version) >= "1.5.0":
-                self.cpp_info.libs.insert(1, "duckdb_generated_extension_loader")
             self.cpp_info.libs.append("duckdb_fsst")
             self.cpp_info.libs.append("core_functions_extension")
             self.cpp_info.libs.append("duckdb_zstd")
@@ -227,7 +225,7 @@ class DuckdbConan(ConanFile):
             if self.options.with_httpfs:
                 self.cpp_info.libs.append("httpfs_extension")
             if self.settings.os == "Linux" and self.settings.arch == "x86_64":
-                self.cpp_info.libs.append("jemalloc_extension" if Version(self.version) < "1.5.0" else "duckdb_jemalloc")
+                self.cpp_info.libs.append("duckdb_jemalloc")
             if self.options.with_json:
                 self.cpp_info.libs.append("json_extension")
             if self.options.with_excel:
