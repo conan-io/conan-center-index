@@ -104,7 +104,7 @@ class CPythonConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "3.11" and not is_msvc(self) and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
@@ -134,7 +134,7 @@ class CPythonConan(ConanFile):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.45.2")
+            self.requires("sqlite3/[>=3.44.2 <4]")
         if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
@@ -142,7 +142,7 @@ class CPythonConan(ConanFile):
             # https://github.com/python/cpython/blob/v3.10.13/Include/py_curses.h#L34
             self.requires("ncurses/6.4", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_lzma", False):
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
 
     def package_id(self):
         del self.info.options.env_vars
@@ -341,7 +341,9 @@ class CPythonConan(ConanFile):
                         "<AdditionalIncludeDirectories>")
         # Remove XML_STATIC, this should conditionally be set by the expat library.
         # TODO: Why HAVE_EXPAT_H? (It is at least removed in later versions)
-        replace_in_file(self, self._msvc_project_path("pyexpat"), ("HAVE_EXPAT_H;" if Version(self.version) < "3.11" else "") + "XML_STATIC;", "")
+        if Version(self.version) < "3.11":
+            replace_in_file(self, self._msvc_project_path("pyexpat"), "HAVE_EXPAT_H;", "")
+        replace_in_file(self, self._msvc_project_path("pyexpat"), "XML_STATIC;", "")
         self._regex_replace_in_file(self._msvc_project_path("pyexpat"), r'.*Include=\"\.\.\\Modules\\expat\\.*" />', "")
 
         # Don't include vendored expat headers
@@ -382,10 +384,11 @@ class CPythonConan(ConanFile):
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"$(Configuration) == 'Debug' or $(Configuration) == 'Release'\"",
                             "<Target Name=\"RebuildImportLib\" AfterTargets=\"AfterBuild\" Condition=\"False\"")
 
-        # Remove vendored openssl file
-        replace_in_file(self, self._msvc_project_path("_ssl"),
-                        r'<ClCompile Include="$(opensslIncludeDir)\applink.c">',
-                        r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
+        # Older sources reference a vendored OpenSSL file.
+        applink = r'<ClCompile Include="$(opensslIncludeDir)\applink.c">'
+        if applink in load(self, self._msvc_project_path("_ssl")):
+            replace_in_file(self, self._msvc_project_path("_ssl"), applink,
+                            r'<ClCompile Include="$(opensslIncludeDir)\applink.c" Condition="False">')
 
         self._inject_conan_props_file("_bz2", "bzip2", self.options.get_safe("with_bz2"))
         self._inject_conan_props_file("_elementtree", "expat", self._supports_modules)
