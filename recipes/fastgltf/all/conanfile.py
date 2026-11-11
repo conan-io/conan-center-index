@@ -10,25 +10,21 @@ required_conan_version = ">2.0"
 
 class fastgltf(ConanFile):
     name = "fastgltf"
-    description = "A modern C++17 glTF 2.0 library focused on speed, correctness, and usability"
+    description = "A modern C++20 glTF 2.0 library focused on speed, correctness, and usability"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/spnda/fastgltf"
-    topics = ("gltf", "simd", "cpp17")
+    topics = ("gltf", "simd", "cpp20")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_small_vector": [True, False],
-        "disable_custom_memory_pool": [True, False],
         "use_64bit_float": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_small_vector": False,
-        "disable_custom_memory_pool": False,
         "use_64bit_float": False,
     }
 
@@ -44,24 +40,23 @@ class fastgltf(ConanFile):
         cmake_layout(self, src_folder='src')
 
     def requirements(self):
-        self.requires("simdjson/[>=3.11.5 <5]")
+        self.requires("simdjson/[>=5 <6]")
+        self.requires("simdutf/[>=9 <10]")
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        check_min_cppstd(self, 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.options.enable_small_vector:
-            tc.variables["FASTGLTF_USE_CUSTOM_SMALLVECTOR"] = True
-        if self.options.get_safe("disable_custom_memory_pool"):
-            tc.variables["FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL"] = True
-        if self.options.get_safe("use_64bit_float"):
-            tc.variables["FASTGLTF_USE_64BIT_FLOAT"] = True
 
-        tc.variables["FASTGLTF_COMPILE_AS_CPP20"] = "20" in str(self.settings.get_safe("compiler.cppstd"))
+        tc.cache_variables["FASTGLTF_USE_64BIT_FLOAT"] = self.options.use_64bit_float
+        # Never fetch dependencies at build time, use the Conan ones
+        tc.cache_variables["FASTGLTF_DOWNLOAD_SIMDJSON"] = False
+        tc.cache_variables["FASTGLTF_DOWNLOAD_SIMDUTF"] = False
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -79,5 +74,6 @@ class fastgltf(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["fastgltf"]
-        if "20" in str(self.settings.get_safe("compiler.cppstd")):
-            self.cpp_info.defines.append("FASTGLTF_CPP_20")
+
+        if self.options.use_64bit_float:
+            self.cpp_info.defines.append("FASTGLTF_USE_64BIT_FLOAT=1")
