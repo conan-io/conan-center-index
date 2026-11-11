@@ -31,8 +31,7 @@ class LibpqConan(ConanFile):
         "with_libxml2": [True, False],
         "with_lz4": [True, False],
         "with_xslt": [True, False],
-        "with_readline": [True, False],
-        "disable_rpath": [True, False],
+        "with_readline": [True, False]
     }
     default_options = {
         "shared": False,
@@ -46,8 +45,7 @@ class LibpqConan(ConanFile):
         "with_libxml2": False,
         "with_lz4": True,
         "with_xslt": False,
-        "with_readline": False,
-        "disable_rpath": False,
+        "with_readline": False
     }
 
     languages = "C"
@@ -124,8 +122,7 @@ class LibpqConan(ConanFile):
         tc.project_options["tap_tests"] = "disabled"
         tc.project_options["plpython"] = "disabled"
         tc.project_options["docs"] = "disabled"
-        # PostgreSQL embeds prefix/libdir as RUNPATH by default
-        tc.project_options["rpath"] = not self.options.disable_rpath
+        tc.project_options["rpath"] = False
 
         if is_msvc(self) and cross_building(self):
             tc.project_options['ZIC'] = os.path.join(self.dependencies.build['libpq'].package_folder, "bin", "_zic", "zic.exe")
