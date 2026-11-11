@@ -50,6 +50,9 @@ class OpenEXRConan(ConanFile):
         if Version(self.version) >= "3.4":
             self.requires("openjph/[>=0.23.1 <1]")
 
+        if Version(self.version) >= "3.5":
+            self.requires("zstd/[>=1.5 <1.6]")
+
     def validate(self):
         check_min_cppstd(self, 11)
 
@@ -145,6 +148,8 @@ class OpenEXRConan(ConanFile):
         OpenEXRCore.requires.append("libdeflate::libdeflate")
         if Version(self.version) >= "3.4":
             OpenEXRCore.requires.append("openjph::openjph")
+        if Version(self.version) >= "3.5":
+            OpenEXRCore.requires.append("zstd::zstdlib")
         if self.settings.os in ["Linux", "FreeBSD"]:
             OpenEXRCore.system_libs = ["m"]
 
