@@ -1,7 +1,7 @@
 sources:
-  "3.14.0":
-    url: "https://github.com/randombit/botan/archive/3.14.0.tar.gz"
-    sha256: "1c129721621920ffa33b8e150090dd32b850463b98f5b0e034d7ae17c5813669"
+  "3.14.1":
+    url: "https://github.com/randombit/botan/archive/3.14.1.tar.gz"
+    sha256: "d1046b8f5b18b80197cd1d62cf66743edfc0a54ab91bf8e5d916a99212ffc5e0"
   "3.13.0":
     url: "https://github.com/randombit/botan/archive/3.13.0.tar.gz"
     sha256: "9fbff1cd4fe7caff9bc146304dabf551e05a8beefdf03062b63d02cbb61f2e22"
