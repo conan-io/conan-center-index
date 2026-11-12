@@ -47,7 +47,9 @@ class OpenEXRConan(ConanFile):
         self.requires("imath/[>=3.1.9 <4]", transitive_headers=True)
         self.requires("libdeflate/[>=1.19 <2]")
 
-        if Version(self.version) >= "3.4":
+        if Version(self.version) >= "3.5":
+            self.requires("openjph/[>=0.32.0 <1]")
+        elif Version(self.version) >= "3.4":
             self.requires("openjph/[>=0.23.1 <1]")
 
         if Version(self.version) >= "3.5":
