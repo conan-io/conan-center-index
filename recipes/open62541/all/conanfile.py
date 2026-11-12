@@ -66,9 +66,9 @@ class Open62541Conan(ConanFile):
         # False: UA_ENABLE_DISCOVERY=Off
         # True: UA_ENABLE_DISCOVERY=On
         # With Multicast: Deprecated. Use 'multicast' instead
-        # multicast: UA_ENABLE_DISCOVERY_MULTICAST=On
+        # multicast: UA_ENABLE_DISCOVERY_MULTICAST=On (<1.5.0) / UA_ENABLE_DISCOVERY_MULTICAST=MDNSD (>=1.5.0)
         # semaphore: UA_ENABLE_DISCOVERY_SEMAPHORE=On
-        # multicast,semaphore: UA_ENABLE_DISCOVERY_MULTICAST=On and UA_ENABLE_DISCOVERY_SEMAPHORE=On
+        # multicast,semaphore: UA_ENABLE_DISCOVERY_MULTICAST=On/MDNSD and UA_ENABLE_DISCOVERY_SEMAPHORE=On
         "discovery": [True, False, "With Multicast", "multicast", "semaphore", "multicast,semaphore"],
         # Deprecated. Use discovery=semaphore instead
         "discovery_semaphore": [True, False],
@@ -129,7 +129,7 @@ class Open62541Conan(ConanFile):
         "discovery_semaphore": True,
         "query": False,
         "encryption": False,
-        "json_support": False,
+        "json_support": True,
         "pub_sub": False,
         "pub_sub_encryption": False,
         "data_access": True,
@@ -140,7 +140,7 @@ class Open62541Conan(ConanFile):
         "hardening": True,
         "cpp_compatible": False,
         "readable_statuscodes": True,
-        "parsing": False,
+        "parsing": True,
         "nodeset_loader": False,
     }
 
@@ -158,7 +158,7 @@ class Open62541Conan(ConanFile):
         del self.options.embedded_profile
 
         # NodesetLoader has only rudimentary Windows support --> disabling for now. This might change in the future.
-        if Version(self.version) < "1.4.11.1" or self.settings.os != "Linux":
+        if self.settings.os != "Linux":
             del self.options.nodeset_loader
 
     def configure(self):
@@ -188,11 +188,12 @@ class Open62541Conan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.web_socket:
             self.requires("libwebsockets/4.3.2")
-        if self.options.discovery == "With Multicast" or "multicast" in str(self.options.discovery):
-            self.requires("pro-mdnsd/0.8.4")
         if self.options.get_safe("nodeset_loader"):
-            # version 1.4.11.1 with libxml2 2.14.x doesnt work because open62541 uses deprecated/remove APIs
-            self.requires("libxml2/[>=2.12.5 <=2.13.8]")
+            if Version(self.version) >= "1.5.0":
+                self.requires("libxml2/[>=2.12.5 <3]")
+            else:
+                # version 1.4.11.1 with libxml2 2.14.x doesnt work because open62541 uses deprecated/remove APIs
+                self.requires("libxml2/[>=2.12.5 <=2.13.8]")
 
     def validate(self):
         if not self.options.subscription:
@@ -217,8 +218,8 @@ class Open62541Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
 
-        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with Windows + shared
-        if self.settings.os == "Windows" and self.options.shared:
+        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with Windows + shared for old versions
+        if Version(self.version) < "1.5.0" and self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(
                 f"{self.ref} doesn't properly support shared lib on Windows")
 
@@ -231,8 +232,8 @@ class Open62541Conan(ConanFile):
             # NodesetLoader requires parsing to be enabled
             raise ConanInvalidConfiguration("When nodeset_loader is enabled, then parsing has to be enabled too.")
 
-        if self.options.get_safe("nodeset_loader") and Version(self.version) >= "1.4.13":
-            raise ConanInvalidConfiguration("nodeset_loader option does not work properly with this version - contributions welcome")
+        if self.options.get_safe("nodeset_loader") and Version(self.version) < "1.5.0":
+            raise ConanInvalidConfiguration("nodeset_loader option does not work properly with this version - fixed in 1.5.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -306,9 +307,15 @@ class Open62541Conan(ConanFile):
         tc.variables["UA_ENABLE_DISCOVERY"] = self.options.discovery != False
 
         if self.options.discovery != False:
-            tc.variables["UA_ENABLE_DISCOVERY_MULTICAST"] = \
-                self.options.discovery == "With Multicast" or "multicast" in str(
-                    self.options.discovery)
+            multicast_enabled = self.options.discovery == "With Multicast" or "multicast" in str(
+                self.options.discovery)
+            # For >=1.5.0 UA_ENABLE_DISCOVERY_MULTICAST is an enum (OFF/MDNSD/AVAHI); the
+            # UA_ENABLE_DISCOVERY_MULTICAST_MDNSD boolean is derived from it and cannot be
+            # set directly. For <1.5.0 the variable is a plain ON/OFF boolean.
+            if version < "1.5.0":
+                tc.variables["UA_ENABLE_DISCOVERY_MULTICAST"] = multicast_enabled
+            else:
+                tc.variables["UA_ENABLE_DISCOVERY_MULTICAST"] = "MDNSD" if multicast_enabled else "OFF"
             tc.variables["UA_ENABLE_DISCOVERY_SEMAPHORE"] = \
                 self.options.discovery_semaphore or "semaphore" in str(
                     self.options.discovery)
@@ -351,8 +358,7 @@ class Open62541Conan(ConanFile):
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
-        if version >= "1.4.11.1":
-            tc.cache_variables["UA_ENABLE_NODESETLOADER"] = self.options.nodeset_loader if self.settings.os == "Linux" else False
+        tc.cache_variables["UA_ENABLE_NODESETLOADER"] = self.options.get_safe("nodeset_loader", False)
 
         tc.generate()
         tc = CMakeDeps(self)
@@ -362,9 +368,8 @@ class Open62541Conan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
-        if Version(self.version) >= "1.4.11.1":
-            replace_in_file(self, os.path.join(self.source_folder, "deps", "nodesetLoader", "CMakeLists.txt"),
-                        "find_package(LibXml2 REQUIRED QUIET)", "find_package(LibXml2 REQUIRED GLOBAL)")
+        replace_in_file(self, os.path.join(self.source_folder, "deps", "nodesetLoader", "CMakeLists.txt"),
+                    "find_package(LibXml2 REQUIRED QUIET)", "find_package(LibXml2 REQUIRED GLOBAL)")
 
     def build(self):
         cmake = CMake(self)
@@ -424,18 +429,10 @@ class Open62541Conan(ConanFile):
         else:
             self.cpp_info.includedirs.append(
                 os.path.join("include", "open62541", "plugin"))
-            if Version(self.version) < "1.4.0":
-                if self.settings.os == "Windows":
-                    self.cpp_info.includedirs.append(
-                        os.path.join("include", "open62541", "win32"))
-                else:
-                    self.cpp_info.includedirs.append(
-                        os.path.join("include", "open62541", "posix"))
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
-            if Version(self.version) >= "1.4.6":
-                self.cpp_info.system_libs.append("iphlpapi")
+            self.cpp_info.system_libs.append("iphlpapi")
         elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
         elif self.settings.os == "Neutrino":

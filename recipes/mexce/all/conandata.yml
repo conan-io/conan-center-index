@@ -1,0 +1,4 @@
+sources:
+  "1.2.2":
+    url: "https://github.com/imakris/mexce/archive/refs/tags/1.2.2.tar.gz"
+    sha256: "634866540159f524bfd6e5eb496a51f46732dc7a81492a9abf1a926e6114a5b0"

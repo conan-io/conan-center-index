@@ -4,13 +4,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.6"
+required_conan_version = ">=2.1"
 
 
 class PackageConan(ConanFile):
@@ -41,9 +41,6 @@ class PackageConan(ConanFile):
     @property
     def _has_build_profile(self):
         return hasattr(self, "settings_build")
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os != "Windows":
@@ -106,7 +103,6 @@ class PackageConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         if self.options.get_safe("with_wayland") and self._has_build_profile:
             # Patch the build system to use the pkg-config files generated for the build context.
             meson_build_file = os.path.join(self.source_folder, "meson.build")

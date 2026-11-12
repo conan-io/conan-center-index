@@ -7,6 +7,7 @@ from conan.tools.cmake import CMakeDeps
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.files import get, replace_in_file, rmdir, copy
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 
 
@@ -38,8 +39,8 @@ class DbusCXX(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("The recipe only supports Linux.")
         check_min_cppstd(self, 17)
-        # FIXME: Next release will likely be able to use static/shared mode.
-        if self.options.get_safe("with_uv") and not self.dependencies["libuv"].options.shared:
+        if (Version(self.version) < "2.6.0" and self.options.get_safe("with_uv")
+                and not self.dependencies["libuv"].options.shared):
             raise ConanInvalidConfiguration(f"libuv needs to be shared for "
                                             f"{self.name}/{self.version}: \"libuv/*:shared=True\"")
 
@@ -54,13 +55,14 @@ class DbusCXX(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # Version 2.5.2
-        replace_in_file(self, os.path.join(self.source_folder, "dbus-cxx-uv", "CMakeLists.txt"),
-                        "pkg_search_module( LIBUV REQUIRED libuv )",
-                        "pkg_search_module( LIBUV IMPORTED_TARGET libuv )")
-        replace_in_file(self, os.path.join(self.source_folder, "dbus-cxx-uv", "CMakeLists.txt"),
-                        "target_link_libraries( dbus-cxx-uv PUBLIC ${LIBUV_LIBRARIES} )",
-                        "target_link_libraries( dbus-cxx-uv PUBLIC PkgConfig::LIBUV )")
+        if Version(self.version) < "2.6.0":
+            # Version 2.5.2 or earlier
+            replace_in_file(self, os.path.join(self.source_folder, "dbus-cxx-uv", "CMakeLists.txt"),
+                            "pkg_search_module( LIBUV REQUIRED libuv )",
+                            "pkg_search_module( LIBUV IMPORTED_TARGET libuv )")
+            replace_in_file(self, os.path.join(self.source_folder, "dbus-cxx-uv", "CMakeLists.txt"),
+                            "target_link_libraries( dbus-cxx-uv PUBLIC ${LIBUV_LIBRARIES} )",
+                            "target_link_libraries( dbus-cxx-uv PUBLIC PkgConfig::LIBUV )")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -75,9 +77,9 @@ class DbusCXX(ConanFile):
         tc.cache_variables["ENABLE_GLIB_SUPPORT"] = self.options.with_glib
         tc.cache_variables["ENABLE_QT_SUPPORT"] = self.options.with_qt
         tc.cache_variables["ENABLE_UV_SUPPORT"] = self.options.with_uv
-        # FIXME: libuv: Next release will likely use these lines
-        # if self.options.with_uv and not self.dependencies["libuv"].options.shared:
-        #     tc.cache_variables["UV_STATIC"] = True
+        if (Version(self.version) >= "2.6.0" and self.options.with_uv
+                and not self.dependencies["libuv"].options.shared):
+            tc.cache_variables["UV_STATIC"] = True
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()

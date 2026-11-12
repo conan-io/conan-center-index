@@ -1,7 +1,10 @@
 sources:
-  "3.4.90-unstable+git.2025.08.15":
-    url: "https://gitlab.com/libeigen/eigen/-/archive/c487a4fe9eab5836330246b992fe7c17c06d6726/eigen-c487a4fe9eab5836330246b992fe7c17c06d6726.tar.bz2"
-    sha256: "4d55fafe1fed15437a7ffc02fb695728fce9d1ec6915b6d1fde2dd66644dfe0a"
+  "5.0.1":
+    url: "https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.bz2"
+    sha256: "e4de6b08f33fd8b8985d2f204381408c660bffa6170ac65b68ae1bd3cd575c0a"
+  "3.4.1":
+    url: "https://gitlab.com/libeigen/eigen/-/archive/3.4.1/eigen-3.4.1.tar.bz2"
+    sha256: "8bb7280b7551bf06418d11a9671fdf998cb927830cf21589b394382d26779821"
   "3.4.0":
     url: "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2"
     sha256: "b4c198460eba6f28d34894e3a5710998818515104d6e74e5cc331ce31e46e626"

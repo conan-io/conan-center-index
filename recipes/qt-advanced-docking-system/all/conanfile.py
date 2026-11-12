@@ -1,12 +1,13 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.4"
 
 
 class QtADS(ConanFile):
@@ -34,17 +35,6 @@ class QtADS(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    @property
-    def _qt_major(self):
-        return Version(self.dependencies["qt"].ref.version).major
-
-    @property
-    def _min_cppstd(self):
-        if self._qt_major >= 6:
-            return 17
-        else:
-            return 14
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -53,27 +43,44 @@ class QtADS(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("qt/<host_version>")
-        self.tool_requires("cmake/[>=3.27 <4]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
+        self.tool_requires("cmake/[>=3.27]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
+
+    @property
+    def _qt_major(self):
+        return Version(self.dependencies["qt"].ref.version).major
 
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        # Qt 6 needs C++17; upstream pins CXX_STANDARD 14 for Qt 5 (4.5.0 and 5.1.1 alike)
+        check_min_cppstd(self, 17 if self._qt_major >= 6 else 14)
+
+        qt_options = self.dependencies["qt"].options
+        if not (qt_options.gui and qt_options.widgets):
+            raise ConanInvalidConfiguration(f"{self.ref} requires qt:gui=True and qt:widgets=True")
+        # ads_globals.h includes <xcb/xcb.h> on every Unix but macOS, and xcb only reaches us through Qt's xorg dependency
+        if self.settings.os in ["Linux", "FreeBSD"] and not qt_options.get_safe("with_x11"):
+            raise ConanInvalidConfiguration(f"{self.ref} requires qt:with_x11=True on {self.settings.os}")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["ADS_VERSION"] = self.version
         tc.cache_variables["BUILD_EXAMPLES"] = "OFF"
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
-        # https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/blob/a16d17a8bf375127847ac8f40af1ebcdb841b13c/src/CMakeLists.txt#L12
-        # TODO: the upstream Qt recipe should expose this variable
-        qt_version = str(self.dependencies["qt"].ref.version)
-        qt_include_root = self.dependencies["qt"].cpp_info.includedirs[0]
-        tc.cache_variables[f"Qt{self._qt_major}Gui_PRIVATE_INCLUDE_DIRS"] = os.path.join(qt_include_root, "QtGui", qt_version, "QtGui")
+        if Version(self.version) < "5.1.0":
+            tc.cache_variables["ADS_VERSION"] = self.version
+            # Supplying ADS_VERSION skips upstream's CMAKE_MODULE_PATH setup.
+            tc.cache_variables["CMAKE_MODULE_PATH"] = os.path.join(self.source_folder, "cmake", "modules").replace("\\", "/")
+
         qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
-        tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
-        tc.cache_variables["CMAKE_AUTORCC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "rcc.exe" if self.settings_build.os == "Windows" else "rcc")
+        if qt_tools_rootdir:
+            tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
+            tc.cache_variables["CMAKE_AUTORCC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "rcc.exe" if self.settings_build.os == "Windows" else "rcc")
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -89,21 +96,22 @@ class QtADS(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "gnu-lgpl-v2.1.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "license"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        if Version(self.version) >= 4:
-            name = f"qt{self._qt_major}advanceddocking"
-            self.cpp_info.includedirs.append(os.path.join("include", name))
-            lib_name = f"{name}d" if self.settings.build_type == "Debug" else name
+        base_name = f"qtadvanceddocking-qt{self._qt_major}"
+        self.cpp_info.includedirs.append(os.path.join("include", base_name))
+        cmake_name = base_name if Version(self.version) >= "5.1.0" else f"qt{self._qt_major}advanceddocking"
+        debug_suffix = "d" if self.settings.build_type == "Debug" else ""
+        static_suffix = "" if self.options.shared else "_static"
+        if Version(self.version) >= "5.1.0":
+            self.cpp_info.libs = [f"{base_name}{static_suffix}{debug_suffix}"]
         else:
-            lib_name = "qtadvanceddocking"
+            self.cpp_info.libs = [f"{base_name}{debug_suffix}{static_suffix}"]
 
-        self.cpp_info.set_property("cmake_file_name", lib_name)
-        self.cpp_info.set_property("cmake_target_name", f"ads::{lib_name}")
+        self.cpp_info.set_property("cmake_file_name", cmake_name)
+        self.cpp_info.set_property("cmake_target_name", f"ads::{cmake_name}")
 
-        if self.options.shared:
-            self.cpp_info.libs = [lib_name]
-        else:
+        if not self.options.shared:
             self.cpp_info.defines.append("ADS_STATIC")
-            self.cpp_info.libs = [f"{lib_name}_static"]

@@ -1,4 +1,7 @@
 sources:
+  "1.3.1":
+    url: "https://github.com/andreiavrammsd/cpp-channel/archive/refs/tags/v1.3.1.tar.gz"
+    sha256: "65899b67746f0c789e2d84fd37123bf569e4db6550802ced18e80d4790ab6720"
   "0.8.3":
     url: "https://github.com/andreiavrammsd/cpp-channel/archive/refs/tags/v0.8.3.tar.gz"
     sha256: "49539a9e387797bd91d1713588f7c88beef98d69919bfb7b0712ed060527567a"

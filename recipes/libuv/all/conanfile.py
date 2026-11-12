@@ -77,7 +77,7 @@ class LibuvConan(ConanFile):
     def _target_name(self):
         if Version(self.version) < "1.45.0":
             return "uv" if self.options.shared else "uv_a"
-        return "uv"
+        return "libuv::uv" if self.options.shared else "libuv::uv_a"
 
     @property
     def _lib_name(self):
@@ -100,3 +100,5 @@ class LibuvConan(ConanFile):
             self.cpp_info.system_libs = ["iphlpapi", "psapi", "userenv", "ws2_32"]
             if Version(self.version) >= "1.45.0":
                 self.cpp_info.system_libs.append("dbghelp")
+            if Version(self.version) >= "1.53.0":
+                self.cpp_info.system_libs.append("synchronization")

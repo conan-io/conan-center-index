@@ -34,8 +34,8 @@ class KeychainConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Linux":
-            self.requires("libsecret/0.20.5")
-            self.requires("glib/2.78.3")
+            self.requires("libsecret/[>=0.20.5 <0.22]")
+            self.requires("glib/[>=2.78.3 <3]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -43,7 +43,7 @@ class KeychainConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Linux":
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/[>=2.0.3 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

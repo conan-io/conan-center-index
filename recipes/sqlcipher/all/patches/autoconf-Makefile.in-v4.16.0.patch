@@ -1,0 +1,80 @@
+# Rename libsqlite3 to libsqlcipher in the autoconf Makefile template.
+
+--- a/autoconf/Makefile.in
++++ b/autoconf/Makefile.in
+@@ -134,15 +134,15 @@
+   $(LDFLAGS.zlib) $(LDFLAGS.icu) \
+   $(LDFLAGS.rt) $(LDFLAGS.configure)
+ CFLAGS.libsqlite3 = -I. $(CFLAGS.core) $(CFLAGS.icu) $(OPT_FEATURE_FLAGS)
+ 
+ sqlite3.o: $(TOP)/sqlite3.h $(TOP)/sqlite3.c
+ 	$(CC) -c $(TOP)/sqlite3.c -o $@ $(CFLAGS) $(CFLAGS.libsqlite3)
+ 
+-libsqlite3.LIB = libsqlite3$(T.lib)
++libsqlite3.LIB = libsqlcipher$(T.lib)
+ libsqlite3.DLL.basename = @SQLITE_DLL_BASENAME@
+ libsqlite3.out.implib = @SQLITE_OUT_IMPLIB@
+ libsqlite3.DLL = $(libsqlite3.DLL.basename)$(T.dll)
+ libsqlite3.DLL.install-rules = @SQLITE_DLL_INSTALL_RULES@
+ 
+ $(libsqlite3.DLL): sqlite3.o
+ 	$(CC) -o $@  sqlite3.o $(LDFLAGS.shlib) \
+@@ -196,20 +196,20 @@
+ install-dll-mingw:  install-dll-msys
+ install-dll-cygwin: install-dll-msys
+ 
+ install-dll-darwin: $(install-dir.lib) $(libsqlite3.DLL)
+ 	$(INSTALL) $(libsqlite3.DLL) "$(install-dir.lib)"
+ 	@echo "Setting up $(libsqlite3.DLL) version symlinks..."; \
+ 	cd "$(install-dir.lib)" || exit $$?; \
+-	rm -f libsqlite3.0$(T.dll) libsqlite3.$(PACKAGE_VERSION)$(T.dll) || exit $$?; \
+-	dllname=libsqlite3.$(PACKAGE_VERSION)$(T.dll); \
++	rm -f libsqlcipher.0$(T.dll) libsqlcipher.$(PACKAGE_VERSION)$(T.dll) || exit $$?; \
++	dllname=libsqlcipher.$(PACKAGE_VERSION)$(T.dll); \
+ 	mv $(libsqlite3.DLL) $$dllname || exit $$?; \
+ 	ln -s $$dllname $(libsqlite3.DLL) || exit $$?; \
+-	ln -s $$dllname libsqlite3.0$(T.dll) || exit $$?; \
+-	ls -la $$dllname $(libsqlite3.DLL) libsqlite3.0$(T.dll)
++	ln -s $$dllname libsqlcipher.0$(T.dll) || exit $$?; \
++	ls -la $$dllname $(libsqlite3.DLL) libsqlcipher.0$(T.dll)
+ 
+ install-dll-1: install-dll-$(libsqlite3.DLL.install-rules)
+ install-dll-0 install-dll-:
+ install-dll: install-dll-$(ENABLE_LIB_SHARED)
+ install: install-dll
+ 
+ install-lib-1: $(install-dir.lib) $(libsqlite3.LIB)
+@@ -223,15 +223,15 @@
+ # (ENABLE_STATIC_SHELL==1) or libsqlite3.so (ENABLE_STATIC_SHELL==0).
+ #
+ # Maintenance reminder: placement of $(LDFLAGS) is more relevant for
+ # some platforms than others:
+ # https://sqlite.org/forum/forumpost/d80ecdaddd
+ ENABLE_STATIC_SHELL = @ENABLE_STATIC_SHELL@
+ sqlite3-shell-link-flags.1 = $(TOP)/sqlite3.c $(LDFLAGS) $(LDFLAGS.libsqlite3)
+-sqlite3-shell-link-flags.0 = $(LDFLAGS) -L. -lsqlite3 $(LDFLAGS.zlib) $(LDFLAGS.math)
++sqlite3-shell-link-flags.0 = $(LDFLAGS) -L. -lsqlcipher $(LDFLAGS.zlib) $(LDFLAGS.math)
+ sqlite3-shell-deps.1 = $(TOP)/sqlite3.c
+ sqlite3-shell-deps.0 = $(libsqlite3.DLL)
+ #
+ # STATIC_CLI_SHELL = 1 to statically link sqlite3$(T.exe), else
+ # 0. Requires static versions of all requisite libraries. Primarily
+ # intended for use with static-friendly environments like Alpine
+ # Linux.
+@@ -269,15 +269,15 @@
+ 
+ install-man1: $(TOP)/sqlite3.1 $(install-dir.man1)
+ 	$(INSTALL.noexec) $(TOP)/sqlite3.1 "$(install-dir.man1)"
+ install: install-man1
+ 
+ clean:
+ 	rm -f *.o sqlite3$(T.exe)
+-	rm -f $(libsqlite3.LIB) $(libsqlite3.DLL) libsqlite3$(T.dll).a
++	rm -f $(libsqlite3.LIB) $(libsqlite3.DLL) libsqlcipher$(T.dll).a
+ 
+ distclean: clean
+ 	rm -f jimsh0$(T.exe) config.* sqlite3.pc sqlite_cfg.h Makefile
+ 
+ DIST_FILES := \
+   README.txt VERSION \
+   auto.def autosetup configure tea \

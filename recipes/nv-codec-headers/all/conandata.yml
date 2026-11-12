@@ -1,13 +1,19 @@
 sources:
-  "12.1.14.0":
-    url: "https://github.com/FFmpeg/nv-codec-headers/archive/n12.1.14.0.tar.gz"
-    sha256: "2fefaa227d2a3b4170797796425a59d1dd2ed5fd231db9b4244468ba327acd0b"
-  "12.0.16.0":
-    url: "https://github.com/FFmpeg/nv-codec-headers/archive/n12.0.16.0.tar.gz"
-    sha256: "2a1533b65f55f9da52956faf0627ed3b74868ac0c7f269990edd21369113b48f"
-  "11.1.5.1":
-    url: "https://github.com/FFmpeg/nv-codec-headers/archive/n11.1.5.1.tar.gz"
-    sha256: "d095fbd56aa93772471a323be0ebe65504a0f43f06c76a30b6d25da77b06ae9c"
-  "9.1.23.2":
-    url: "https://github.com/FFmpeg/nv-codec-headers/releases/download/n9.1.23.2/nv-codec-headers-9.1.23.2.tar.gz"
-    sha256: "34c9d1aedf32dc4b9fb22e94dbb041de666b568ceb4bdb317e414b752a3f9a9a"
+  "13.1.15.0":
+    url: "https://github.com/FFmpeg/nv-codec-headers/archive/n13.1.15.0.tar.gz"
+    sha256: "2255bc74d038b95aa4be30f5f66322c2176acbdb90ada1851db6993536fbeaf7"
+  "13.0.19.1":
+    url: "https://github.com/FFmpeg/nv-codec-headers/archive/n13.0.19.1.tar.gz"
+    sha256: "c293161bd92dac53f2f8fab08abcd4f96773c3644a57b23c2260b4be2311ab2f"
+  "12.2.72.0":
+    url: "https://github.com/FFmpeg/nv-codec-headers/archive/n12.2.72.0.tar.gz"
+    sha256: "dbeaec433d93b850714760282f1d0992b1254fc3b5a6cb7d76fc1340a1e47563"
+  "12.1.14.1":
+    url: "https://github.com/FFmpeg/nv-codec-headers/archive/n12.1.14.1.tar.gz"
+    sha256: "f40c8a27417eb2688412da32985e382e811196311c4d103d1fcaafad2876cfc1"
+  "12.0.16.2":
+    url: "https://github.com/FFmpeg/nv-codec-headers/archive/n12.0.16.2.tar.gz"
+    sha256: "13b4d5d1f8781980629518977f15546c007d7331727b0c62e6be3b77f0e92297"
+  "11.1.5.4":
+    url: "https://github.com/FFmpeg/nv-codec-headers/archive/n11.1.5.4.tar.gz"
+    sha256: "cbad7c68365ae50b03fe4cfbea05975c94406bdcc0a995bd094a3ea355656ffb"

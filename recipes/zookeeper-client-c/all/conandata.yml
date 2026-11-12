@@ -1,4 +1,7 @@
 sources:
+  "3.9.5":
+    url: "https://archive.apache.org/dist/zookeeper/zookeeper-3.9.5/apache-zookeeper-3.9.5.tar.gz"
+    sha256: "0e2d7c487daeff75b38354b231a006caa14c4596ddc21fd37a840c078419357b"
   "3.9.3":
     url: "https://archive.apache.org/dist/zookeeper/zookeeper-3.9.3/apache-zookeeper-3.9.3.tar.gz"
     sha256: "8bf0b9f872b3c0a6e64f8bc55ffb44cbff6e2712f6467ee5164ca6847466b31b"
@@ -12,6 +15,10 @@ sources:
     url: "https://archive.apache.org/dist/zookeeper/zookeeper-3.8.1/apache-zookeeper-3.8.1.tar.gz"
     sha256: "ccc16850c8ab2553583583234d11c813061b5ea5f3b8ff1d740cde6c1fd1e219"
 patches:
+  "3.9.5":
+    - patch_file: "patches/3.9.5-0001-add-install.patch"
+      patch_description: "add installer, disable cli program"
+      patch_type: "conan"
   "3.9.3":
     - patch_file: "patches/3.8.1-0001-add-install.patch"
       patch_description: "add installer, disable cli program"

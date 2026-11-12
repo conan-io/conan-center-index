@@ -1,9 +1,10 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 
@@ -33,6 +34,7 @@ class DrogonConan(ConanFile):
         "with_mysql": [True, False],
         "with_sqlite": [True, False],
         "with_redis": [True, False],
+        "with_spdlog": [True, False],
     }
     default_options = {
         "shared": False,
@@ -48,6 +50,7 @@ class DrogonConan(ConanFile):
         "with_mysql": False,
         "with_sqlite": False,
         "with_redis": False,
+        "with_spdlog": False,
     }
 
     def export_sources(self):
@@ -61,6 +64,8 @@ class DrogonConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             self.options["trantor"].shared = True
+        if self.options.with_spdlog:
+            self.options["trantor"].with_spdlog = True
         if not self.options.with_orm:
             del self.options.with_postgres
             del self.options.with_postgres_batch
@@ -73,12 +78,11 @@ class DrogonConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        if self.options.with_spdlog and not self.dependencies["trantor"].options.with_spdlog:
+            raise ConanInvalidConfiguration(f"{self.ref} with_spdlog=True requires trantor/*:with_spdlog=True")
 
     def requirements(self):
-        if Version(self.version) < "1.9.7":
-            self.requires("trantor/1.5.19", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("trantor/1.5.21", transitive_headers=True, transitive_libs=True)
+        self.requires("trantor/[>=1.5.25 <2]", transitive_headers=True, transitive_libs=True)
         self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -89,53 +93,66 @@ class DrogonConan(ConanFile):
         if self.options.with_boost:
             self.requires("boost/1.83.0", transitive_headers=True)
         if self.options.with_brotli:
-            self.requires("brotli/1.1.0")
+            self.requires("brotli/[>=1.1.1 <2]")
         if self.options.get_safe("with_postgres"):
-            self.requires("libpq/15.4")
+            self.requires("libpq/[>=15.4 <18]")
         if self.options.get_safe("with_mysql"):
             self.requires("mariadb-connector-c/3.4.3")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.2.0")
         if self.options.get_safe("with_yaml_cpp", False):
             self.requires("yaml-cpp/0.8.0")
+        if self.options.with_spdlog:
+            self.requires("spdlog/[>=1.13 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_CTL"] = self.options.with_ctl
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_ORM"] = self.options.with_orm
-        tc.variables["COZ_PROFILING"] = self.options.with_profile
-        tc.variables["BUILD_DROGON_SHARED"] = self.options.shared
-        tc.variables["BUILD_DOC"] = False
-        tc.variables["BUILD_BROTLI"] = self.options.with_brotli
-        tc.variables["BUILD_YAML_CONFIG"] = self.options.get_safe("with_yaml_cpp", False)
-        tc.variables["BUILD_POSTGRESQL"] = self.options.get_safe("with_postgres", False)
-        tc.variables["BUILD_POSTGRESQL_BATCH"] = self.options.get_safe("with_postgres_batch", False)
-        tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
-        tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
-        tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
-        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        tc.cache_variables["BUILD_CTL"] = self.options.with_ctl
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_ORM"] = self.options.with_orm
+        tc.cache_variables["COZ_PROFILING"] = self.options.with_profile
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["BUILD_DOC"] = False
+        tc.cache_variables["BUILD_BROTLI"] = self.options.with_brotli
+        tc.cache_variables["BUILD_YAML_CONFIG"] = self.options.get_safe("with_yaml_cpp", False)
+        tc.cache_variables["BUILD_POSTGRESQL"] = self.options.get_safe("with_postgres", False)
+        tc.cache_variables["LIBPQ_BATCH_MODE"] = self.options.get_safe("with_postgres_batch", False)
+        tc.cache_variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
+        tc.cache_variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
+        tc.cache_variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         if is_msvc(self):
-            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
-        tc.variables["USE_SUBMODULE"] = False
+            tc.cache_variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
+        tc.cache_variables["USE_SUBMODULE"] = False
+        tc.cache_variables["USE_SPDLOG"] = self.options.with_spdlog
         tc.generate()
         deps = CMakeDeps(self)
         if self.options.get_safe("with_mysql"):
             deps.set_property("mariadb-connector-c", "cmake_file_name", "MySQL")
             deps.set_property("mariadb-connector-c", "cmake_target_name", "MySQL_lib")
+        if self.options.get_safe("with_brotli"):
+            deps.set_property("brotli", "cmake_file_name", "Brotli")
+            deps.set_property("brotli", "cmake_target_name", "Brotli_lib")
+        if self.options.get_safe("with_sqlite"):
+            deps.set_property("sqlite3", "cmake_target_name", "SQLite3_lib")
+        if self.options.get_safe("with_redis"):
+            deps.set_property("hiredis", "cmake_file_name", "Hiredis")
+            deps.set_property("hiredis", "cmake_target_name", "Hiredis_lib")
+        if self.options.get_safe("with_yaml_cpp"):
+            deps.set_property("yaml-cpp", "cmake_additional_variables_prefixes", ["YAML_CPP"])
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -144,10 +161,13 @@ class DrogonConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, "*", os.path.join(self.package_folder, "lib", "cmake"), recursive=True,
+            excludes=["DrogonUtilities.cmake", "ParseAndAddDrogonTests.cmake"])
 
     def package_info(self):
         self.cpp_info.libs = ["drogon"]
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "Drogon", "DrogonUtilities.cmake"),
+                                                           os.path.join("lib", "cmake", "Drogon", "ParseAndAddDrogonTests.cmake")])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["rpcrt4", "ws2_32", "crypt32", "advapi32"])
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":

@@ -21,7 +21,7 @@ jobs:
 
 
     steps:
-    - uses: actions/stale@v9
+    - uses: actions/stale@5f858e3efba33a5ca4407a664cc011ad407f2008 # v10.1.0
       with:
         # Do not make issues as stale
         days-before-issue-stale: -1
@@ -31,8 +31,8 @@ jobs:
 
         # Do not close issues automatically
         days-before-issue-close: -1
-        # Idle number of days before closing stale PRs
-        days-before-pr-close: 30
+        # Do not close pull requests automatically
+        days-before-pr-close: -1
 
         # process older PRs first
         ascending: true
@@ -51,8 +51,9 @@ jobs:
         # Comment on the staled PRs
         stale-pr-message: >
             This pull request has been automatically marked as stale because it has not had
-            recent activity. It will be closed if no further activity occurs. Thank you
-            for your contributions.
+            recent activity.
+            Maintainers please provide updates on the status of this PR.
+            Thank you for your contribution to Conan Center!
 
         # Comment on the staled PRs while closed
         close-pr-message: >

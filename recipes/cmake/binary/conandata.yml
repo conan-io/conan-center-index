@@ -1,39 +1,59 @@
 sources:
-  "4.1.1":
+  "4.4.4":
     Linux:
       armv8:
-        url: "https://cmake.org/files/v4.1/cmake-4.1.1-linux-aarch64.tar.gz"
-        sha256: "a34bc76b1ebe76ca0bbd6067f68d4614b93221912770dc08f466aec1923e9bef"
+        url:
+          - "https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-linux-aarch64.tar.gz"
+          - "https://cmake.org/files/v4.4/cmake-4.4.4-linux-aarch64.tar.gz"
+        sha256: "a1b6cc63636a0e55c63257cf3315a8a5f129e42fade25db1afea4ff8ab06f25e"
       x86_64:
-        url: "https://cmake.org/files/v4.1/cmake-4.1.1-linux-x86_64.tar.gz"
-        sha256: "5a6c61cb62b38e153148a2c8d4af7b3d387f0c8c32b6dbceb5eb4af113efd65a"
+        url:
+          - "https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-linux-x86_64.tar.gz"
+          - "https://cmake.org/files/v4.4/cmake-4.4.4-linux-x86_64.tar.gz"
+        sha256: "e5bb807f7728cb60cd8b27ebc97a2edb469b68655f21e844a600c3575b76f5bb"
     Macos:
       universal:
-        url: "https://cmake.org/files/v4.1/cmake-4.1.1-macos-universal.tar.gz"
-        sha256: "3cd1da5341618645bdc85a3b99e273f29c4d48db2f545925a658db992e61f6f9"
+        url:
+          - "https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-macos-universal.tar.gz"
+          - "https://cmake.org/files/v4.4/cmake-4.4.4-macos-universal.tar.gz"
+        sha256: "4b7b73704b1db9b374e5c9ab8e17ac6148b817b6396ee75cd94a852cbac9d305"
     Windows:
       armv8:
-        url: "https://cmake.org/files/v4.1/cmake-4.1.1-windows-arm64.zip"
-        sha256: "1d968879344bcdd29ddeaa3480ea6e7716db0de518b220743b82c7f1750b5c9b"
+        url:
+          - "https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-windows-arm64.zip"
+          - "https://cmake.org/files/v4.4/cmake-4.4.4-windows-arm64.zip"
+        sha256: "ed673bbc4eb7c1e59b0407fd52f1680fc0ae3229a46b9b7b3ea9133764f07f67"
       x86_64:
-        url: "https://cmake.org/files/v4.1/cmake-4.1.1-windows-x86_64.zip"
-        sha256: "6f531bd4ba31a7aa0c3511082b544d306df50e7aecfbeef8bdbc1dd770736993"
-  "3.31.8":
+        url:
+          - "https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-windows-x86_64.zip"
+          - "https://cmake.org/files/v4.4/cmake-4.4.4-windows-x86_64.zip"
+        sha256: "bace36e94b31c68ab6fa295f26dfa11219e0701cf7c94b0284a7d1cb13dac536"
+  "3.31.12":
     Linux:
       armv8:
-        url: "https://cmake.org/files/v3.31/cmake-3.31.8-linux-aarch64.tar.gz"
-        sha256: "609735983e3bdf24b6ab379d918458d64196fe72b98226f62dd5e9fe7b2997cc"
+        url:
+          - "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-linux-aarch64.tar.gz"
+          - "https://cmake.org/files/v3.31/cmake-3.31.12-linux-aarch64.tar.gz"
+        sha256: "83f8fd91d2038a56556e1400390fcfe42f79602940c494f6c6f1cdae7f9e7f40"
       x86_64:
-        url: "https://cmake.org/files/v3.31/cmake-3.31.8-linux-x86_64.tar.gz"
-        sha256: "630615d8e98ac33eba7fbe472626dff5c899c85af3c024585ae109166a6909d0"
+        url:
+          - "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-linux-x86_64.tar.gz"
+          - "https://cmake.org/files/v3.31/cmake-3.31.12-linux-x86_64.tar.gz"
+        sha256: "0dc2e9a6860f06bf10bd8fadc03e35d9eeb4df46e33763a7e480e987758f385c"
     Macos:
       universal:
-        url: "https://cmake.org/files/v3.31/cmake-3.31.8-macos10.10-universal.tar.gz"
-        sha256: "442f7247c35138d52ea1b27910b397b6b389f88bb8d6da3ff9175e93d6542f75"
+        url:
+          - "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-macos10.10-universal.tar.gz"
+          - "https://cmake.org/files/v3.31/cmake-3.31.12-macos10.10-universal.tar.gz"
+        sha256: "cf096d869d45b79f5ce82f3d6abffa44f983fc146fee13cfe59024911e6975af"
     Windows:
       armv8:
-        url: "https://cmake.org/files/v3.31/cmake-3.31.8-windows-arm64.zip"
-        sha256: "d37ca89ec60aece080664ee936f7aaffdfdbde0a201b165c45ecfaf68a4c1fa9"
+        url:
+          - "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-windows-arm64.zip"
+          - "https://cmake.org/files/v3.31/cmake-3.31.12-windows-arm64.zip"
+        sha256: "e4160c1842dea858ad376ff2ec17587104515b51714eca5963b8bdd798105553"
       x86_64:
-        url: "https://cmake.org/files/v3.31/cmake-3.31.8-windows-x86_64.zip"
-        sha256: "81aa9964dbabd71fe02e7ec50472fd3ad56138c49944515ece9001efbff8d719"
+        url:
+          - "https://github.com/Kitware/CMake/releases/download/v3.31.12/cmake-3.31.12-windows-x86_64.zip"
+          - "https://cmake.org/files/v3.31/cmake-3.31.12-windows-x86_64.zip"
+        sha256: "0c4baa40f28b3f8225eb3fdf6946c987b4fe901403b4eaf2fbbd9378100aaa0c"

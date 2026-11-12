@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
@@ -33,17 +32,17 @@ class AwsCrtCpp(ConanFile):
 
     def requirements(self):
         # Bump these in accordance with aws-sdk-cpp
-        self.requires("aws-c-common/0.12.3")
-        self.requires("aws-c-sdkutils/0.2.4")
-        self.requires("aws-c-io/0.21.0", transitive_headers=True)
-        self.requires("aws-c-cal/0.9.2")
-        self.requires("aws-c-compression/0.3.1")
-        self.requires("aws-c-http/0.10.2", transitive_headers=True)
-        self.requires("aws-c-auth/0.9.0", transitive_headers=True)
-        self.requires("aws-c-mqtt/0.13.2", transitive_headers=True)
-        self.requires("aws-checksums/0.2.6")
-        self.requires("aws-c-event-stream/0.5.5")
-        self.requires("aws-c-s3/0.8.3")
+        self.requires("aws-c-common/0.14.5", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-sdkutils/0.2.9")
+        self.requires("aws-c-io/0.27.6", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-cal/0.9.15")
+        self.requires("aws-c-compression/0.3.2")
+        self.requires("aws-c-http/0.11.0", transitive_headers=True)
+        self.requires("aws-c-auth/0.10.4", transitive_headers=True)
+        self.requires("aws-c-mqtt/0.16.1", transitive_headers=True)
+        self.requires("aws-checksums/0.2.10")
+        self.requires("aws-c-event-stream/0.7.1")
+        self.requires("aws-c-s3/0.13.5")
 
     def validate(self):
         check_min_cppstd(self, 11)
@@ -53,9 +52,8 @@ class AwsCrtCpp(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if is_msvc(self):
-            tc.variables["AWS_STATIC_MSVC_RUNTIME_LIBRARY"] = is_msvc_static_runtime(self)
         tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables['AWS_STATIC_MSVC_RUNTIME_LIBRARY'] = self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime") == "static"
         tc.cache_variables["BUILD_DEPS"] = False
         tc.generate()
 

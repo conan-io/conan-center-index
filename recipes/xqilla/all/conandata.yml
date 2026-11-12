@@ -5,5 +5,4 @@ sources:
 patches:
   "2.3.4":
     - patch_file: "patches/0001-honor-deps-ldflags.patch"
-      patch_description: "Honor LDFLAGS from dependencies"
-      patch_type: "conan"
+    - patch_file: "patches/0002-fix-gcc13-comparator-const.patch"

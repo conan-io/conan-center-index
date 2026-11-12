@@ -1,31 +1,28 @@
 from conan import ConanFile
-from conan.tools.build import build_jobs, can_run
+from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import chdir
+import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
-    test_type = "explicit"
+    generators = "CMakeDeps"
 
     def layout(self):
         cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        
+    @property
+    def _tested_poco_modules(self):
+        return ["crypto", "util", "net", "netssl", "data_sqlite", "encodings", "jwt", "prometheus"]
 
     def generate(self):
         tc = CMakeToolchain(self)
         poco_options = self.dependencies["poco"].options
-        tc.variables["TEST_CRYPTO"] = poco_options.enable_crypto
-        tc.variables["TEST_UTIL"] = poco_options.enable_util
-        tc.variables["TEST_NET"] = False
-        tc.variables["TEST_NETSSL"] = False
-        tc.variables["TEST_SQLITE"] = poco_options.enable_data_sqlite
-        tc.variables["TEST_ENCODINGS"] = poco_options.get_safe("enable_encodings", False)
-        tc.variables["TEST_JWT"] = poco_options.get_safe("enable_jwt", False)
-        tc.variables["TEST_PROMETHEUS"] = poco_options.get_safe("enable_prometheus", False)
+        for option in self._tested_poco_modules:
+            tc.cache_variables["TEST_{}".format(option.upper())] = poco_options.get_safe("enable_{}".format(option), False)
         tc.generate()
 
     def build(self):
@@ -35,5 +32,9 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            with chdir(self, self.build_folder):
-                self.run(f"ctest --output-on-failure -C {self.settings.build_type} -j {build_jobs(self)}", env="conanrun")
+            self.run(os.path.join(self.cpp.build.bindir, "core"), env="conanrun")
+            poco_options = self.dependencies["poco"].options
+            for option in self._tested_poco_modules:
+                if poco_options.get_safe("enable_{}".format(option), False):
+                    test_executable = os.path.join(self.cpp.build.bindir, option)
+                    self.run(test_executable, env="conanrun")

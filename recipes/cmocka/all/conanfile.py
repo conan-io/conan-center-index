@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import copy, get, rmdir, save
 from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class CmockaConan(ConanFile):
@@ -27,9 +27,6 @@ class CmockaConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -48,18 +45,17 @@ class CmockaConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_STATIC_LIB"] = not self.options.shared
         tc.variables["WITH_EXAMPLES"] = False
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -96,11 +92,6 @@ class CmockaConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "cmocka")
         self.cpp_info.set_property("pkg_config_name", "cmocka")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
-        lib_suffix = ""
-        if Version(self.version) < "1.1.7" and not self.options.shared:
-            lib_suffix = "-static"
-        self.cpp_info.libs = ["cmocka" + lib_suffix]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        self.cpp_info.libs = ["cmocka"]
+        if Version(self.version) >= "2.0.0" and not self.options.shared:
+            self.cpp_info.defines = ["CMOCKA_STATIC"]

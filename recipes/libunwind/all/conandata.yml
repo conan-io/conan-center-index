@@ -1,4 +1,7 @@
 sources:
+  "1.8.3":
+    url: "https://github.com/libunwind/libunwind/releases/download/v1.8.3/libunwind-1.8.3.tar.gz"
+    sha256: "be30d910e67f58d82e753231f1357f326a1a088acf126b21ff77e60aab19b90b"
   "1.8.1":
     url: "https://github.com/libunwind/libunwind/releases/download/v1.8.1/libunwind-1.8.1.tar.gz"
     sha256: "ddf0e32dd5fafe5283198d37e4bf9decf7ba1770b6e7e006c33e6df79e6a6157"

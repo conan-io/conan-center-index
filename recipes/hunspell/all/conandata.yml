@@ -1,10 +1,10 @@
 sources:
+  "1.7.5":
+    url: "https://github.com/hunspell/hunspell/archive/refs/tags/v1.7.5.tar.gz"
+    sha256: "833ee0cb129f7b933def265ea907f9ba4d0cfc5b52d838678eafceeec1adaa53"
   "1.7.2":
     sha256: "69fa312d3586c988789266eaf7ffc9861d9f6396c31fc930a014d551b59bbd6e"
     url: https://github.com/hunspell/hunspell/archive/refs/tags/v1.7.2.tar.gz
-  "1.7.0":
-    sha256: "57be4e03ae9dd62c3471f667a0d81a14513e314d4d92081292b90435944ff951"
-    url: https://github.com/hunspell/hunspell/files/2573619/hunspell-1.7.0.tar.gz
 patches:
   "1.7.2":
     - patch_file: "patches/0001-fix-basic-string.patch"

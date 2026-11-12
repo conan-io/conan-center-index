@@ -1,0 +1,19 @@
+Backport to fix Apple Clang + C++20 build errors:
+os.cc:215:29: error: call to consteval function 'fmt::basic_format_string<char, const char *>::basic_format_string<FMT_COMPILE_STRING, 0>' is not a constant expression
+
+Extracted from https://github.com/fmtlib/fmt/commit/6797f0c39a4ef13061cbc3bb850c35af7428fdc4
+Related to https://github.com/fmtlib/fmt/issues/4177 and https://github.com/fmtlib/fmt/issues/4740
+
+diff --git a/include/fmt/core.h b/include/fmt/core.h
+index bfdca5f..c0b4ee7 100644
+--- a/include/fmt/core.h
++++ b/include/fmt/core.h
+@@ -2739,7 +2739,7 @@ template <typename Char, typename... Args> class basic_format_string {
+                   detail::count_statically_named_args<Args...>()) {
+       using checker =
+           detail::format_string_checker<Char, remove_cvref_t<Args>...>;
+-      detail::parse_format_string<true>(str_, checker(s));
++      detail::parse_format_string<true>(str_, checker(str_));
+     }
+ #else
+     detail::check_format_string<Args...>(s);

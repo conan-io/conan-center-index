@@ -1,0 +1,87 @@
+Backport https://github.com/apache/arrow/pull/47779
+
+From 541cba859c3cdb4cc6cb3f456aaae79f67c7d57d Mon Sep 17 00:00:00 2001
+From: Jonathan Giannuzzi
+Date: Wed, 15 Oct 2025 18:18:00 +0300
+Subject: [PATCH] GH-47784: [C++] Patch vendored pcg library to enable msvc
+ arm64 intrinsics (#47779)
+
+### Rationale for this change
+
+This change enables building Arrow C++ for Windows ARM64 with MSVC when setting `ARROW_SIMD_LEVEL` to `NONE`. This is useful to be able to build Arrow with `vcpkg` and use it as a dependency.
+
+Setting `ARROW_SIMD_LEVEL` to `NONE` is done to disable the use of `xsimd`, which does not yet support msvc arm64 intrinsics, and is non-trivial to fix.
+
+### What changes are included in this PR?
+
+A patch to the vendored `pcg` library, based on https://github.com/imneme/pcg-cpp/pull/99. The upstream pcg library has not been updated in the past 3 years, so this may never get merged.
+
+### Are these changes tested?
+
+Yes, the changes have been tested in https://github.com/microsoft/vcpkg/pull/47750 (the same patch for `vcpkg`, which this change would alleviate) and in https://github.com/jgiannuzzi/ParquetSharp/actions/runs/18354286294 (a full run of the ParquetSharp CI, using this patch to build Arrow with `vcpkg`).
+
+### Are there any user-facing changes?
+
+Not really, unless you consider adding the ability to build Arrow on Windows ARM64 user-facing?
+* GitHub Issue: #47784
+
+Authored-by: Jonathan Giannuzzi <jonathan@giannuzzi.me>
+Signed-off-by: Antoine Pitrou <antoine@python.org>
+---
+ cpp/src/arrow/vendored/pcg/README.md       |  1 +
+ cpp/src/arrow/vendored/pcg/pcg_uint128.hpp | 15 ++++++++++++++-
+ 2 files changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/cpp/src/arrow/vendored/pcg/README.md b/cpp/src/arrow/vendored/pcg/README.md
+index b58504f3b37..7a949723dad 100644
+--- a/cpp/src/arrow/vendored/pcg/README.md
++++ b/cpp/src/arrow/vendored/pcg/README.md
+@@ -25,4 +25,5 @@ Sources are taken from git changeset ffd522e7188bef30a00c74dc7eb9de5faff90092
+ Changes:
+ - enclosed in `arrow_vendored` namespace
+ - remove `struct arbitrary_seed` definition because of https://github.com/apache/arrow/issues/35596
++- enable MSVC ARM64 intrinsics to allow building on Windows ARM64 with Visual Studio - see https://github.com/apache/arrow/pull/47779
+ 
+diff --git a/cpp/src/arrow/vendored/pcg/pcg_uint128.hpp b/cpp/src/arrow/vendored/pcg/pcg_uint128.hpp
+index 0181e69e4ef..012f3d66823 100644
+--- a/cpp/src/arrow/vendored/pcg/pcg_uint128.hpp
++++ b/cpp/src/arrow/vendored/pcg/pcg_uint128.hpp
+@@ -67,7 +67,7 @@
+         #define PCG_LITTLE_ENDIAN 1
+     #elif __BIG_ENDIAN__ || _BIG_ENDIAN
+         #define PCG_LITTLE_ENDIAN 0
+-    #elif __x86_64 || __x86_64__ || _M_X64 || __i386 || __i386__ || _M_IX86
++    #elif __x86_64 || __x86_64__ || _M_X64 || __i386 || __i386__ || _M_IX86 || _M_ARM64
+         #define PCG_LITTLE_ENDIAN 1
+     #elif __powerpc__ || __POWERPC__ || __ppc__ || __PPC__ \
+           || __m68k__ || __mc68000__
+@@ -734,7 +734,13 @@ uint_x4<UInt,UIntX2> operator*(const uint_x4<UInt,UIntX2>& a,
+ 
+ #if PCG_64BIT_SPECIALIZATIONS
+ #if defined(_MSC_VER)
++#if defined(_M_X64) || defined(_M_IX86)
+ #pragma intrinsic(_umul128)
++#elif defined(_M_ARM64)
++#pragma intrinsic(__umulh)
++#else
++#error Unsupported architecture
++#endif
+ #endif
+ 
+ #if defined(_MSC_VER) || __SIZEOF_INT128__
+@@ -743,8 +749,15 @@ uint_x4<UInt32,uint64_t> operator*(const uint_x4<UInt32,uint64_t>& a,
+ 				   const uint_x4<UInt32,uint64_t>& b)
+ {
+ #if defined(_MSC_VER)
++#if defined(_M_X64) || defined(_M_IX86)
+     uint64_t hi;
+     uint64_t lo = _umul128(a.d.v01, b.d.v01, &hi);
++#elif defined(_M_ARM64)
++    uint64_t lo = a.d.v01 * b.d.v01;
++    uint64_t hi = __umulh(a.d.v01, b.d.v01);
++#else
++#error Unsupported architecture
++#endif
+ #else
+     __uint128_t r = __uint128_t(a.d.v01) * __uint128_t(b.d.v01);
+     uint64_t lo = uint64_t(r);

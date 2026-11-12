@@ -1,7 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import get, replace_in_file, rm, rmdir, copy
+from conan.tools.files import (
+    get, replace_in_file, rm, rmdir, copy,
+    apply_conandata_patches, export_conandata_patches
+    )
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -90,6 +93,9 @@ class SDLConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def generate(self):
         self.define_toolchain()
         lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
@@ -145,17 +151,19 @@ class SDLConan(ConanFile):
         if self.options.get_safe("iconv", False):
             self.requires("libiconv/1.17")
         if self.settings.os == "Linux":
-            if self.options.alsa:
-                self.requires("libalsa/1.2.10")
             if self.options.pulse:
                 self.requires("pulseaudio/14.2")
+            if self.options.alsa:
+                # Version comes from pulseaudio
+                self.requires("libalsa/[>=1.2 <1.3]")
             if self.options.opengl:
                 self.requires("opengl/system")
             if self.options.nas:
                 self.requires("nas/1.9.5")
             if self.options.wayland:
-                self.requires("wayland/1.22.0")
                 self.requires("xkbcommon/1.6.0")
+                # Version comes from xkbcommon
+                self.requires("wayland/[^1.22]")
                 self.requires("egl/system")
             if self.options.libunwind:
                 self.requires("libunwind/1.8.0")
@@ -176,14 +184,15 @@ class SDLConan(ConanFile):
                 raise ConanInvalidConfiguration("Package for 'directfb' is not available (yet)")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>3.27 <4]")
+        self.tool_requires("cmake/[>=3.24]")
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.1.0 <3]")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
-            self.build_requires("wayland/1.22.0")  # Provides wayland-scanner
+            self.build_requires("wayland/<host_version>")  # Provides wayland-scanner
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def _patch_sources(self):
         # Ensure to find wayland-scanner from wayland recipe in build requirements (or requirements if 1 profile)

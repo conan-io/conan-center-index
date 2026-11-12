@@ -60,6 +60,8 @@ class BrotliConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BROTLI_BUNDLED_MODE"] = False
         tc.variables["BROTLI_DISABLE_TESTS"] = True
+        if Version(self.version) >= "1.2.0":
+            tc.variables["BROTLI_BUILD_TOOLS"] = False
         if self.options.get_safe("target_bits") == 32:
             tc.preprocessor_definitions["BROTLI_BUILD_32_BIT"] = 1
         elif self.options.get_safe("target_bits") == 64:
@@ -95,6 +97,8 @@ class BrotliConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if Version(self.version) >= "1.2.0":
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
 

@@ -2,10 +2,15 @@
 
 #include <seqan/align.h>
 #include <seqan/sequence.h>
+#include <seqan/version.h>
 
 #include <iostream>
 
+#if SEQAN_VERSION_MINOR >= 5
+using namespace seqan2;
+#else
 using namespace seqan;
+#endif
 
 int main()
 {

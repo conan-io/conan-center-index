@@ -1,4 +1,16 @@
 sources:
+  "1.0":
+    url:
+      - "https://ftpmirror.gnu.org/gnu/gettext/gettext-1.0.tar.gz"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gettext/gettext-1.0.tar.gz"
+      - "https://ftp.gnu.org/gnu/gettext/gettext-1.0.tar.gz"
+    sha256: "85d99b79c981a404874c02e0342176cf75c7698e2b51fe41031cf6526d974f1a"
+  "0.26":
+    url:
+    - "https://ftpmirror.gnu.org/gnu/gettext/gettext-0.26.tar.gz"
+    - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gettext/gettext-0.26.tar.gz"
+    - "https://ftp.gnu.org/gnu/gettext/gettext-0.26.tar.gz"
+    sha256: "39acf4b0371e9b110b60005562aace5b3631fed9b1bb9ecccfc7f56e58bb1d7f"
   "0.22":
     url:
     - "https://ftpmirror.gnu.org/gnu/gettext/gettext-0.22.tar.gz"

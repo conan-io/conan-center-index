@@ -80,7 +80,7 @@ class Hdf5Conan(ConanFile):
         elif self.options.szip_support == "with_szip":
             self.requires("szip/2.1.1")
         if self.options.parallel:
-            self.requires("openmpi/4.1.0")
+            self.requires("openmpi/[>=4.1.0 <5]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.parallel and not self.options.enable_unsupported:
@@ -96,7 +96,8 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("with_zlib and with_zlibng cannot be enabled at the same time")
         if self.options.get_safe("with_zlibng") and Version(self.version) < "1.14.5":
             raise ConanInvalidConfiguration("with_zlibng=True is incompatible with versions prior to v1.14.5")
-        check_min_cppstd(self, "11")
+        if self.options.enable_cxx:
+            check_min_cppstd(self, "11")
 
     def validate_build(self):
         if cross_building(self) and Version(self.version) < "1.14.4.3":
@@ -104,32 +105,24 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.26]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def _inject_stdlib_flag(self, tc):
-        if self.settings.os in ["Linux", "FreeBSD"] and self.settings.compiler == "clang":
-            cpp_stdlib = f" -stdlib={self.settings.compiler.libcxx}".rstrip("1")  # strip 11 from stdlibc++11
-            tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + cpp_stdlib
-        return tc
 
     def generate(self):
         cmakedeps = CMakeDeps(self)
         cmakedeps.generate()
 
         tc = CMakeToolchain(self)
-        if self.settings.get_safe("compiler.libcxx"):
-            tc = self._inject_stdlib_flag(tc)
         if self.options.szip_support == "with_libaec":
             tc.variables["USE_LIBAEC"] = True
         tc.variables["HDF5_EXTERNALLY_CONFIGURED"] = True
         tc.variables["HDF5_EXTERNAL_LIB_PREFIX"] = ""
         tc.variables["HDF5_USE_FOLDERS"] = False
         tc.variables["HDF5_NO_PACKAGES"] = True
-        tc.variables["ALLOW_UNSUPPORTED"] = False
-        tc.variables["ONLY_SHARED_LIBS"] = self.options.shared
+        tc.variables["ALLOW_UNSUPPORTED" if Version(self.version) < "2.0.0" else "HDF5_ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
+        tc.variables["ONLY_SHARED_LIBS" if Version(self.version) < "2.0.0" else "HDF5_ONLY_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["BUILD_STATIC_EXECS"] = False
         tc.variables["HDF5_ENABLE_COVERAGE"] = False
@@ -142,7 +135,7 @@ class Hdf5Conan(ConanFile):
         if self.settings.build_type == "Debug":
             tc.variables["HDF5_ENABLE_INSTRUMENT"] = False  # Option?
         tc.variables["HDF5_ENABLE_PARALLEL"] = self.options.parallel
-        tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
+        tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT" if Version(self.version) < "2.0.0" else "HDF5_ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
         tc.variables["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
         tc.variables["HDF5_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding", False)
         tc.variables["HDF5_USE_ZLIB_NG"] = self.options.get_safe("with_zlibng", False)
@@ -159,7 +152,6 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_BUILD_FORTRAN"] = False
         tc.variables["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         tc.variables["HDF5_BUILD_JAVA"] = False
-        tc.variables["ALLOW_UNSUPPORTED"] = self.options.enable_unsupported
         tc.generate()
 
     def build(self):
@@ -223,7 +215,7 @@ class Hdf5Conan(ConanFile):
                             f"conan-official-{self.name}-variables.cmake")
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING" if Version(self.version) < "2.0.0" else "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         cmake = CMake(self)
         cmake.install()
@@ -254,7 +246,7 @@ class Hdf5Conan(ConanFile):
             def _config_libname(lib):
                 if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
                     lib = "lib" + lib
-                if self.settings.build_type == "Debug":
+                if self.settings.build_type == "Debug" and Version(self.version) < "2.0.0":
                     debug_postfix = "_D" if self.settings.os == "Windows" else "_debug"
                     return lib + debug_postfix
                 # See config/cmake_ext_mod/HDFMacros.cmake

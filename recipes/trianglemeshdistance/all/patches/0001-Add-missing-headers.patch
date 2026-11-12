@@ -1,0 +1,23 @@
+Explicitly include <cstdint> and <limits> in TriangleMeshDistance.h.
+These are required for uint64_t and std::numeric_limits, fixing compilation errors on modern compilers like GCC 15.
+See: https://github.com/InteractiveComputerGraphics/TriangleMeshDistance/pull/7
+---
+ TriangleMeshDistance/include/tmd/TriangleMeshDistance.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/TriangleMeshDistance/include/tmd/TriangleMeshDistance.h b/TriangleMeshDistance/include/tmd/TriangleMeshDistance.h
+index a207935..2b1ee7c 100644
+--- a/TriangleMeshDistance/include/tmd/TriangleMeshDistance.h
++++ b/TriangleMeshDistance/include/tmd/TriangleMeshDistance.h
+@@ -28,6 +28,8 @@
+ #include <algorithm>
+ #include <unordered_map>
+ #include <cmath>
++#include <cstdint>
++#include <limits> 
+ 
+ namespace tmd
+ {
+-- 
+2.53.0
+

@@ -2,7 +2,7 @@ import glob
 import os
 
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, rename
@@ -98,6 +98,11 @@ class GetTextConan(ConanFile):
             "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
             f"--with-libiconv-prefix={unix_path(self, self.dependencies['libiconv'].package_folder)}",
         ]
+
+        if is_apple_os(self) and Version(self.version) >= "0.26":
+            # not guessed properly when cross-building
+            tc.configure_args.append("gl_cv_func_access_slash_works=yes")
+
         if is_msvc(self) or self._is_clang_cl:
             target = None
             if self.settings.arch == "x86_64":
@@ -210,6 +215,7 @@ class GetTextConan(ConanFile):
         copy(self, "*libgnuintl.h", self.build_folder, dest_include_dir, keep_path=False)
         rename(self, os.path.join(dest_include_dir, "libgnuintl.h"), os.path.join(dest_include_dir, "libintl.h"))
         fix_msvc_libname(self)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")

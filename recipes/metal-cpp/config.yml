@@ -1,4 +1,6 @@
 versions:
+  "26":
+    folder: all
   "15.2":
     folder: all
   "15":

@@ -53,15 +53,15 @@ class DevilConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>9e]")
         if self.options.with_tiff:
-            self.requires("libtiff/4.7.0")
+            self.requires("libtiff/[>4.7.0 <5]")
         if self.options.with_jasper:
-            self.requires("jasper/4.2.4")
+            self.requires("jasper/[>=4.2.4 <5]")
         if self.options.with_squish:
             self.requires("libsquish/1.15")
         if self.options.with_lcms:
-            self.requires("lcms/2.16")
+            self.requires("lcms/[>=2.16 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

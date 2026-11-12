@@ -1,4 +1,7 @@
 sources:
+  "0.8.4":
+    url: "https://github.com/Cyan4973/xxHash/archive/v0.8.4.tar.gz"
+    sha256: "5738270935e7c3d38a79b3adf7c9692566ce7895a25f67de43ad52ab504acd32"
   "0.8.3":
     url: "https://github.com/Cyan4973/xxHash/archive/v0.8.3.tar.gz"
     sha256: "aae608dfe8213dfd05d909a57718ef82f30722c392344583d3f39050c7f29a80"

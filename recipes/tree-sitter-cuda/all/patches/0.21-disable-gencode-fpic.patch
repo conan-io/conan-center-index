@@ -1,0 +1,27 @@
+--- CMakeLists.txt	2025-09-18 22:53:00.000000000 +0200
++++ CMakeLists2.txt	2025-09-25 16:10:07.000000000 +0200
+@@ -15,6 +15,7 @@
+     message(FATAL_ERROR "TREE_SITTER_ABI_VERSION must be an integer")
+ endif()
+ 
++if(0)
+ find_program(TREE_SITTER_CLI tree-sitter DOC "Tree-sitter CLI")
+ 
+ add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/src/parser.c"
+@@ -23,6 +24,7 @@
+                             --abi=${TREE_SITTER_ABI_VERSION}
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                    COMMENT "Generating parser.c")
++endif()
+ 
+ add_library(tree-sitter-cuda src/parser.c)
+ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/scanner.c)
+@@ -40,7 +42,7 @@
+ set_target_properties(tree-sitter-cuda
+                       PROPERTIES
+                       C_STANDARD 11
+-                      POSITION_INDEPENDENT_CODE ON
++                      # POSITION_INDEPENDENT_CODE ON
+                       SOVERSION "${TREE_SITTER_ABI_VERSION}.${PROJECT_VERSION_MAJOR}"
+                       DEFINE_SYMBOL "")
+ 

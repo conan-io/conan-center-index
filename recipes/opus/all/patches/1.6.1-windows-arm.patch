@@ -1,0 +1,19 @@
+Upstream PR: https://github.com/xiph/opus/pull/471
+- Only add the ARM DNN runtime-dispatch source when DNN sources are enabled.
+- Match the x86 CMake path and Autotools gating so non-DNN ARM builds do not compile arm_dnn_map.c.
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index aa7b1ae17..913768856 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -563,7 +563,9 @@ if(NOT OPUS_DISABLE_INTRINSICS)
+         target_compile_definitions(opus PRIVATE OPUS_HAVE_RTCD)
+         add_sources_group(opus celt ${celt_sources_arm_rtcd})
+         add_sources_group(opus silk ${silk_sources_arm_rtcd})
+-        add_sources_group(opus lpcnet ${dnn_sources_arm_rtcd})
++        if (OPUS_DNN)
++          add_sources_group(opus lpcnet ${dnn_sources_arm_rtcd})
++        endif()
+       else()
+         message(ERROR "Runtime cpu capability detection needed for MAY_HAVE_NEON")
+       endif()

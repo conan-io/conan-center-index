@@ -1,11 +1,9 @@
 versions:
-  "4.11":
+  "4.14.2":
     folder: all
-  "4.10.2":
+  "4.14.1":
     folder: all
-  "4.10":
+  "4.13.6":
     folder: all
-  "4.9.1":
-    folder: all
-  "4.8.3":
+  "4.12.3":
     folder: all

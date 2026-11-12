@@ -1,0 +1,405 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ce7890f..b4c80cf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -384,7 +384,7 @@ option(USE_MIMALLOC "Use mimalloc" OFF)
+ # on Windows.
+ option(USE_MIMALLOC_ON_MKL "Use mimalloc on MKL" OFF)
+ if(WIN32)
+-  set(USE_MIMALLOC ON)
++  # set(USE_MIMALLOC ON)
+ 
+   # Not enable USE_MIMALLOC_ON_MKL due to it caused issue:
+   # https://github.com/pytorch/pytorch/issues/138994
+@@ -427,8 +427,7 @@ if(WIN32)
+       libuv_tmp_LIBRARY
+       NAMES uv libuv
+       HINTS $ENV{CONDA_PREFIX}\\Library $ENV{PREFIX}\\Library
+-      PATH_SUFFIXES lib
+-      NO_DEFAULT_PATH)
++      PATH_SUFFIXES lib)
+     if(NOT libuv_tmp_LIBRARY)
+       set(USE_DISTRIBUTED OFF)
+       set(USE_GLOO OFF)
+@@ -796,9 +795,7 @@ if(NOT CMAKE_BUILD_TYPE)
+ endif()
+ 
+ # The below means we are cross compiling for arm64 or x86_64 on MacOSX
+-if(NOT IOS
+-   AND CMAKE_SYSTEM_NAME STREQUAL "Darwin"
+-   AND CMAKE_OSX_ARCHITECTURES MATCHES "^(x86_64|arm64)$")
++if(0)
+   set(CROSS_COMPILING_MACOSX TRUE)
+   # We need to compile a universal protoc to not fail protobuf build We set
+   # CMAKE_TRY_COMPILE_TARGET_TYPE to STATIC_LIBRARY (vs executable) to succeed
+@@ -828,7 +825,7 @@ if(NOT IOS
+   set(CAFFE2_CUSTOM_PROTOC_EXECUTABLE
+       "${PROJECT_SOURCE_DIR}/build_host_protoc/bin/protoc")
+ endif()
+-
++include(cmake/ProtoBuf.cmake)
+ # ---[ Misc checks to cope with various compiler modes
+ include(cmake/MiscCheck.cmake)
+ 
+@@ -1259,8 +1256,7 @@ if(USE_MIMALLOC)
+   set(MI_BUILD_OBJECT OFF)
+   set(MI_BUILD_TESTS OFF)
+   add_definitions(-DUSE_MIMALLOC)
+-  add_subdirectory(third_party/mimalloc)
+-  include_directories(third_party/mimalloc/include)
++  find_package(mimalloc CONFIG REQUIRED)
+ endif()
+ 
+ if(USE_MIMALLOC AND USE_MIMALLOC_ON_MKL)
+diff --git a/aten/src/ATen/CMakeLists.txt b/aten/src/ATen/CMakeLists.txt
+index 6c09568..0266a1f 100644
+--- a/aten/src/ATen/CMakeLists.txt
++++ b/aten/src/ATen/CMakeLists.txt
+@@ -647,15 +647,10 @@ if(NOT EMSCRIPTEN AND NOT INTERN_BUILD_MOBILE)
+     list(APPEND ATen_THIRD_PARTY_INCLUDE ${CMAKE_BINARY_DIR}/include)
+     link_directories(${CMAKE_BINARY_DIR}/sleef/lib)
+   else()
+-    add_library(sleef SHARED IMPORTED)
+-    find_library(SLEEF_LIBRARY sleef)
+-    if(NOT SLEEF_LIBRARY)
+-      message(FATAL_ERROR "Cannot find sleef")
+-    endif()
+-    message("Found sleef: ${SLEEF_LIBRARY}")
+-    set_target_properties(sleef PROPERTIES IMPORTED_LOCATION "${SLEEF_LIBRARY}")
++      find_package(sleef REQUIRED CONFIG GLOBAL) # Must be GLOBAL
+   endif()
+   list(APPEND ATen_CPU_DEPENDENCY_LIBS sleef)
++  list(APPEND ATen_CPU_INCLUDE ${sleef_INCLUDE_DIRS})
+ 
+   if(NOT MSVC)
+     set(CMAKE_C_FLAGS_DEBUG ${OLD_CMAKE_C_FLAGS_DEBUG})
+diff --git a/aten/src/ATen/native/quantized/cpu/qnnpack/CMakeLists.txt b/aten/src/ATen/native/quantized/cpu/qnnpack/CMakeLists.txt
+index 799ec5e..c1ed8d9 100644
+--- a/aten/src/ATen/native/quantized/cpu/qnnpack/CMakeLists.txt
++++ b/aten/src/ATen/native/quantized/cpu/qnnpack/CMakeLists.txt
+@@ -385,12 +385,7 @@ if(NOT TARGET fxdiv AND NOT USE_SYSTEM_FXDIV)
+     "${FXDIV_SOURCE_DIR}"
+     "${CONFU_DEPENDENCIES_BINARY_DIR}/fxdiv")
+ elseif(NOT TARGET fxdiv AND USE_SYSTEM_FXDIV)
+-  find_file(FXDIV_HDR fxdiv.h PATH_SUFFIXES include)
+-  if(NOT FXDIV_HDR)
+-    message(FATAL_ERROR "Cannot find fxdiv")
+-  endif()
+-  add_library(fxdiv STATIC "${FXDIV_HDR}")
+-  set_property(TARGET fxdiv PROPERTY LINKER_LANGUAGE C)
++  find_package(fxdiv REQUIRED CONFIG)
+ endif()
+ target_link_libraries(pytorch_qnnpack PRIVATE fxdiv)
+ 
+@@ -406,12 +401,7 @@ if(NOT TARGET psimd AND NOT USE_SYSTEM_PSIMD)
+     "${PSIMD_SOURCE_DIR}"
+     "${CONFU_DEPENDENCIES_BINARY_DIR}/psimd")
+ elseif(NOT TARGET psimd AND USE_SYSTEM_PSIMD)
+-  find_file(PSIMD_HDR psimd.h PATH_SUFFIXES include)
+-  if(NOT PSIMD_HDR)
+-    message(FATAL_ERROR "Cannot find psimd")
+-  endif()
+-  add_library(psimd STATIC "${PSIMD_HDR}")
+-  set_property(TARGET psimd PROPERTY LINKER_LANGUAGE C)
++  find_package(psimd REQUIRED CONFIG)
+ endif()
+ target_link_libraries(pytorch_qnnpack PRIVATE psimd)
+ 
+@@ -423,12 +413,7 @@ if(NOT TARGET fp16 AND NOT USE_SYSTEM_FP16)
+     "${FP16_SOURCE_DIR}"
+     "${CONFU_DEPENDENCIES_BINARY_DIR}/fp16")
+ elseif(NOT TARGET fp16 AND USE_SYSTEM_FP16)
+-  find_file(FP16_HDR fp16.h PATH_SUFFIXES include)
+-  if(NOT FP16_HDR)
+-    message(FATAL_ERROR "Cannot find fp16")
+-  endif()
+-  add_library(fp16 STATIC "${FP16_HDR}")
+-  set_target_properties(fp16 PROPERTIES LINKER_LANGUAGE C)
++  find_package(fp16 REQUIRED CONFIG)
+ endif()
+ target_link_libraries(pytorch_qnnpack PRIVATE fp16)
+ 
+diff --git a/caffe2/CMakeLists.txt b/caffe2/CMakeLists.txt
+index 6ab41b6..bb07522 100644
+--- a/caffe2/CMakeLists.txt
++++ b/caffe2/CMakeLists.txt
+@@ -1322,11 +1322,10 @@ if(USE_KINETO)
+     ${TORCH_ROOT}/third_party/kineto/libkineto/src)
+ endif()
+ 
+-target_include_directories(torch_cpu PRIVATE
+-  ${TORCH_ROOT}/third_party/cpp-httplib)
++find_package(httplib REQUIRED CONFIG)
++find_package(nlohmann_json REQUIRED CONFIG)
+ 
+-target_include_directories(torch_cpu PRIVATE
+-  ${TORCH_ROOT}/third_party/nlohmann/include)
++target_link_libraries(torch_cpu PRIVATE httplib nlohmann)
+ 
+ install(DIRECTORY
+   "${TORCH_SRC_DIR}/csrc"
+diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
+index ef5c2fd..6a15d1e 100644
+--- a/cmake/Dependencies.cmake
++++ b/cmake/Dependencies.cmake
+@@ -299,12 +299,8 @@ endif()
+ # --- [ PocketFFT
+ set(AT_POCKETFFT_ENABLED 0)
+ if(NOT AT_MKL_ENABLED)
+-  set(POCKETFFT_INCLUDE_DIR "${Torch_SOURCE_DIR}/third_party/pocketfft/")
+-  if(NOT EXISTS "${POCKETFFT_INCLUDE_DIR}")
+-    message(FATAL_ERROR "pocketfft directory not found, expected ${POCKETFFT_INCLUDE_DIR}")
+-  elseif(NOT EXISTS "${POCKETFFT_INCLUDE_DIR}/pocketfft_hdronly.h")
+-    message(FATAL_ERROR "pocketfft headers not found in ${POCKETFFT_INCLUDE_DIR}")
+-  endif()
++  find_package(pocketfft REQUIRED CONFIG)
++  list(APPEND Caffe2_DEPENDENCY_LIBS pocketfft::pocketfft)
+ 
+   set(AT_POCKETFFT_ENABLED 1)
+   message(STATUS "Using pocketfft in directory: ${POCKETFFT_INCLUDE_DIR}")
+@@ -403,12 +399,7 @@ if(INTERN_BUILD_MOBILE OR NOT DISABLE_NNPACK_AND_FAMILY)
+ 
+   if(NOT TARGET pthreadpool)
+     if(USE_SYSTEM_PTHREADPOOL)
+-      add_library(pthreadpool SHARED IMPORTED)
+-      find_library(PTHREADPOOL_LIBRARY pthreadpool)
+-      set_property(TARGET pthreadpool PROPERTY IMPORTED_LOCATION "${PTHREADPOOL_LIBRARY}")
+-      if(NOT PTHREADPOOL_LIBRARY)
+-        message(FATAL_ERROR "Cannot find pthreadpool")
+-      endif()
++      find_package(pthreadpool REQUIRED CONFIG)
+       message("-- Found pthreadpool: ${PTHREADPOOL_LIBRARY}")
+     else()
+       if(NOT DEFINED PTHREADPOOL_SOURCE_DIR)
+@@ -433,6 +424,7 @@ else()
+ endif()
+ 
+ if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(s390x|ppc64le)$")
++  find_package(cpuinfo REQUIRED CONFIG)
+   # ---[ Caffe2 uses cpuinfo library in the thread pool
+   # ---[ But it doesn't support s390x/powerpc and thus not used on s390x/powerpc
+   if(NOT TARGET cpuinfo AND USE_SYSTEM_CPUINFO)
+@@ -499,7 +491,7 @@ endif()
+ 
+ # ---[ NNPACK
+ if(USE_NNPACK)
+-  include(${CMAKE_CURRENT_LIST_DIR}/External/nnpack.cmake)
++  find_package(NNPACK REQUIRED CONFIG)
+   if(NNPACK_FOUND)
+     if(TARGET nnpack)
+       # ---[ NNPACK is being built together with Caffe2: explicitly specify dependency
+@@ -580,17 +572,8 @@ if(USE_XNNPACK AND NOT USE_SYSTEM_XNNPACK)
+   include_directories(SYSTEM ${XNNPACK_INCLUDE_DIR})
+   list(APPEND Caffe2_DEPENDENCY_LIBS XNNPACK microkernels-prod)
+ elseif(NOT TARGET XNNPACK AND USE_SYSTEM_XNNPACK)
+-  add_library(XNNPACK SHARED IMPORTED)
+-  add_library(microkernels-prod SHARED IMPORTED)
+-  find_library(XNNPACK_LIBRARY XNNPACK)
+-  find_library(microkernels-prod_LIBRARY microkernels-prod)
+-  set_property(TARGET XNNPACK PROPERTY IMPORTED_LOCATION "${XNNPACK_LIBRARY}")
+-  set_property(TARGET microkernels-prod PROPERTY IMPORTED_LOCATION "${microkernels-prod_LIBRARY}")
+-  if(NOT XNNPACK_LIBRARY OR NOT microkernels-prod_LIBRARY)
+-    message(FATAL_ERROR "Cannot find XNNPACK")
+-  endif()
+-  message("-- Found XNNPACK: ${XNNPACK_LIBRARY}")
+-  list(APPEND Caffe2_DEPENDENCY_LIBS XNNPACK microkernels-prod)
++  find_package(xnnpack REQUIRED CONFIG)
++  list(APPEND Caffe2_DEPENDENCY_LIBS XNNPACK)
+ endif()
+ 
+ # ---[ Vulkan deps
+@@ -708,7 +691,7 @@ endif()
+ # ---[ NUMA
+ if(USE_NUMA)
+   if(LINUX)
+-    find_package(Numa)
++    find_package(NUMA CONFIG REQUIRED)
+     if(NOT NUMA_FOUND)
+       message(WARNING "Not compiling with NUMA. Suppress this warning with -DUSE_NUMA=OFF")
+       caffe2_update_option(USE_NUMA OFF)
+@@ -757,9 +740,8 @@ if(NOT TARGET fp16 AND NOT USE_SYSTEM_FP16)
+       "${FP16_SOURCE_DIR}"
+       "${CONFU_DEPENDENCIES_BINARY_DIR}/FP16")
+   endif()
+-elseif(NOT TARGET fp16 AND USE_SYSTEM_FP16)
+-  add_library(fp16 STATIC "/usr/include/fp16.h")
+-  set_target_properties(fp16 PROPERTIES LINKER_LANGUAGE C)
++elseif(USE_SYSTEM_FP16)
++  find_package(fp16 REQUIRED CONFIG)
+ endif()
+ list(APPEND Caffe2_DEPENDENCY_LIBS fp16)
+ 
+@@ -781,7 +763,7 @@ endif()
+ # Due to license considerations, we will only use the MPL2 parts of Eigen.
+ set(EIGEN_MPL2_ONLY 1)
+ if(USE_SYSTEM_EIGEN_INSTALL)
+-  find_package(Eigen3)
++  find_package(EIGEN3 REQUIRED CONFIG)
+   if(EIGEN3_FOUND)
+     message(STATUS "Found system Eigen at " ${EIGEN3_INCLUDE_DIR})
+   else()
+@@ -1307,20 +1289,9 @@ if(CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO AND NOT INTERN_DISABLE_ONNX)
+     endif()
+     list(APPEND Caffe2_DEPENDENCY_WHOLE_LINK_LIBS onnx_library)
+   else()
+-    add_library(onnx SHARED IMPORTED)
+-    find_library(ONNX_LIBRARY onnx)
+-    if(NOT ONNX_LIBRARY)
+-      message(FATAL_ERROR "Cannot find onnx")
+-    endif()
+-    set_property(TARGET onnx PROPERTY IMPORTED_LOCATION ${ONNX_LIBRARY})
+-    add_library(onnx_proto SHARED IMPORTED)
+-    find_library(ONNX_PROTO_LIBRARY onnx_proto)
+-    if(NOT ONNX_PROTO_LIBRARY)
+-      message(FATAL_ERROR "Cannot find onnx")
+-    endif()
+-    set_property(TARGET onnx_proto PROPERTY IMPORTED_LOCATION ${ONNX_PROTO_LIBRARY})
+-    message("-- Found onnx: ${ONNX_LIBRARY} ${ONNX_PROTO_LIBRARY}")
+-    list(APPEND Caffe2_DEPENDENCY_LIBS onnx_proto onnx)
++    find_package(ONNX CONFIG REQUIRED)
++    message("-- Found onnx: ${ONNX_LIBRARIES}")
++    list(APPEND Caffe2_DEPENDENCY_LIBS ONNX::onnx)
+   endif()
+   # Recover the build shared libs option.
+   set(BUILD_SHARED_LIBS ${TEMP_BUILD_SHARED_LIBS})
+@@ -1492,15 +1463,9 @@ if(NOT INTERN_BUILD_MOBILE)
+   endif()
+ 
+   if(USE_KLEIDIAI)
+-    set(TEMP_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libs" FORCE)
++    find_package(KleidiAI REQUIRED CONFIG)
+     set(AT_KLEIDIAI_ENABLED 1)
+-    set(KLEIDIAI_BUILD_TESTS OFF) # Disable building KLEIDIAI tests
+-    set(KLEIDIAI_SRC "${PROJECT_SOURCE_DIR}/third_party/kleidiai")
+-    add_subdirectory(${KLEIDIAI_SRC})
+-    list(APPEND Caffe2_DEPENDENCY_LIBS kleidiai)
+-    # Recover build options.
+-    set(BUILD_SHARED_LIBS ${TEMP_BUILD_SHARED_LIBS} CACHE BOOL "Build shared libs" FORCE)
++    list(APPEND Caffe2_DEPENDENCY_LIBS KleidiAI::kleidiai)
+   endif()
+ 
+   if(UNIX AND NOT APPLE)
+@@ -1514,6 +1479,7 @@ if(NOT INTERN_BUILD_MOBILE)
+   endif(UNIX AND NOT APPLE)
+ 
+   if(UNIX)
++    include(CheckFunctionExists)
+     set(CMAKE_EXTRA_INCLUDE_FILES "sys/mman.h")
+     CHECK_FUNCTION_EXISTS(mmap HAVE_MMAP)
+     if(HAVE_MMAP)
+@@ -1546,7 +1512,7 @@ endif()
+ #
+ set(TEMP_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libs" FORCE)
+-add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/fmt)
++find_package(fmt REQUIRED)
+ 
+ # Disable compiler feature checks for `fmt`.
+ #
+@@ -1555,7 +1521,6 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/fmt)
+ # CMAKE_CXX_FLAGS in ways that break feature checks. Since we already know
+ # `fmt` is compatible with a superset of the compilers that PyTorch is, it
+ # shouldn't be too bad to just disable the checks.
+-set_target_properties(fmt-header-only PROPERTIES INTERFACE_COMPILE_FEATURES "")
+ 
+ list(APPEND Caffe2_DEPENDENCY_LIBS fmt::fmt-header-only)
+ set(BUILD_SHARED_LIBS ${TEMP_BUILD_SHARED_LIBS} CACHE BOOL "Build shared libs" FORCE)
+@@ -1709,16 +1674,10 @@ if(USE_KINETO)
+ endif()
+ 
+ # Include google/FlatBuffers
+-include(${CMAKE_CURRENT_LIST_DIR}/FlatBuffers.cmake)
+-
+-# Include cpp-httplib
+-add_library(httplib INTERFACE IMPORTED)
+-target_include_directories(httplib SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/cpp-httplib)
++find_package(FlatBuffers REQUIRED CONFIG)
++list(APPEND Caffe2_DEPENDENCY_LIBS flatbuffers::flatbuffers)
+ 
+-# Include nlohmann-json
+-add_library(nlohmann INTERFACE IMPORTED)
+-include_directories(nlohmann SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/nlohmann/include)
+ 
+ # Include moodycamel
+-add_library(moodycamel INTERFACE IMPORTED)
+-include_directories(moodycamel SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/third_party/concurrentqueue)
++find_package(concurrentqueue REQUIRED CONFIG GLOBAL)
++list(APPEND Caffe2_DEPENDENCY_LIBS moodycamel) # TODO: this should not be needed
+diff --git a/cmake/public/protobuf.cmake b/cmake/public/protobuf.cmake
+index 77ec362..441a2b1 100644
+--- a/cmake/public/protobuf.cmake
++++ b/cmake/public/protobuf.cmake
+@@ -12,6 +12,8 @@ if((TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite) AND TARGE
+   # modern CMake that ships with a FindProtobuf.cmake file that produces
+   # modern targets.
+   message(STATUS "Caffe2: Found protobuf with new-style protobuf targets.")
++  set(CAFFE2_CUSTOM_PROTOC_EXECUTABLE ${PROTOBUF_PROTOC_EXECUTABLE})
++  set(ONNX_CUSTOM_PROTOC_EXECUTABLE ${PROTOBUF_PROTOC_EXECUTABLE})
+ elseif(Protobuf_FOUND OR PROTOBUF_FOUND)
+   # If the modern targets are not present, we will generate them for you for
+   # backward compatibility. This is backported from CMake's new FindProtobuf.cmake
+diff --git a/tools/generate_torch_version.py b/tools/generate_torch_version.py
+index ce92638..f985fca 100644
+--- a/tools/generate_torch_version.py
++++ b/tools/generate_torch_version.py
+@@ -6,8 +6,6 @@ import re
+ import subprocess
+ from pathlib import Path
+ 
+-from setuptools import distutils  # type: ignore[import,attr-defined]
+-
+ 
+ UNKNOWN = "Unknown"
+ RELEASE_PATTERN = re.compile(r"/v[0-9]+(\.[0-9]+)*(-rc[0-9]+)?/")
+@@ -63,6 +61,29 @@ def get_torch_version(sha: str | None = None) -> str:
+         version += "+git" + sha[:7]
+     return version
+ 
++# TEMP
++
++_MAP = {
++    'y': True,
++    'yes': True,
++    't': True,
++    'true': True,
++    'on': True,
++    '1': True,
++    'n': False,
++    'no': False,
++    'f': False,
++    'false': False,
++    'off': False,
++    '0': False
++}
++
++
++def strtobool(value):
++    try:
++        return _MAP[str(value).lower()]
++    except KeyError:
++        raise ValueError('"{}" is not a valid bool value'.format(value))
+ 
+ if __name__ == "__main__":
+     parser = argparse.ArgumentParser(
+@@ -71,7 +92,7 @@ if __name__ == "__main__":
+     parser.add_argument(
+         "--is-debug",
+         "--is_debug",
+-        type=distutils.util.strtobool,
++        type=strtobool,
+         help="Whether this build is debug mode or not.",
+     )
+     parser.add_argument("--cuda-version", "--cuda_version", type=str)
+diff --git a/torch/nativert/executor/Placement.cpp b/torch/nativert/executor/Placement.cpp
+index 0432ecd..16cdc61 100644
+--- a/torch/nativert/executor/Placement.cpp
++++ b/torch/nativert/executor/Placement.cpp
+@@ -2,6 +2,7 @@
+ 
+ #include <fmt/ostream.h>
+ #include <ostream>
++#include <algorithm>
+ 
+ namespace torch::nativert {
+ 

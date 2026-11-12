@@ -1,4 +1,7 @@
 sources:
+  "9.7.0":
+    url: "https://github.com/OSGeo/PROJ/releases/download/9.7.0/proj-9.7.0.tar.gz"
+    sha256: "65705ecd987b50bf63e15820ce6bd17c042feaabda981249831bd230f6689709"
   "9.6.0":
     url: "https://github.com/OSGeo/PROJ/releases/download/9.6.0/proj-9.6.0.tar.gz"
     sha256: "d8cae521c311c39513193657e75767f7cfbf2f91bd202fcd4a200028d3b57e14"
@@ -16,3 +19,7 @@ patches:
     - patch_file: "patches/0001-use-cmake-targets-9.2.1.patch"
       patch_type: "conan"
       patch_description: "Use cmake targets"
+    - patch_file: "patches/0002-string-append-intel-llvm-flags-9.3.1.patch"
+      patch_type: "backport"
+      patch_description: "Use string(APPEND) for IntelLLVM math flags"
+      patch_source: "https://github.com/OSGeo/PROJ/pull/4784"

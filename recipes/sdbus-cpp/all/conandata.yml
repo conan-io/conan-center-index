@@ -1,25 +1,4 @@
 sources:
-  "2.0.0":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v2.0.0.tar.gz"
-    sha256: "88af4569161a0d0192f0f4a94582a1af4e75722499d06984fb7f91f638f5afb3"
-  "1.5.0":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.5.0.tar.gz"
-    sha256: "577986929f911320fb9ef6a3e2badd464dc38411ebc25d2966f5cb85c39f0897"
-  "1.4.0":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.4.0.tar.gz"
-    sha256: "ca7405c7f0f9ae3023dcfa37bc68974c4b8a1c9ea2909b970e0aedc3e8657ee6"
-  "1.3.0":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.3.0.tar.gz"
-    sha256: "d44f59abdd64d8f1ca3af7db58bc6518cb081fc9ff16285c3d75a68f5c073d10"
-  "1.2.0":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.2.0.tar.gz"
-    sha256: "7f7231904abb6a996b8c18ddc5fb50078ef5dff5191649abf9f127aff41d24e9"
-  "1.1.0":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.1.0.tar.gz"
-    sha256: "35e939fdd9c796522702c9c8762dd59b5c47f3440c01ba9feb9921c042780b55"
-  "1.0.0":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.0.0.tar.gz"
-    sha256: "3db82112c0d8a171a4115d761e3a592b62091fa7600988736652595178ae4e94"
-  "0.8.3":
-    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v0.8.3.tar.gz"
-    sha256: "0fd575ae0f463773dd9141242d1133731e2b780fd6526650ce992ba711d88628"
+  "2.3.1":
+    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v2.3.1.tar.gz"
+    sha256: "3a289eded586c26d06c1387de72c7bf7c809527a70d51ba6401fe61059b19626"

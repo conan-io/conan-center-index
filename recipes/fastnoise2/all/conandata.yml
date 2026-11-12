@@ -1,4 +1,9 @@
 sources:
-  "0.10.0-alpha":
-    url: "https://github.com/Auburn/FastNoise2/archive/v0.10.0-alpha.tar.gz"
-    sha256: "8e1331425d6372e65e73775e13fedd367ae5999ec5616036b99df33434e3b527"
+  "1.1.1":
+    source:
+      url: "https://github.com/Auburn/FastNoise2/archive/refs/tags/v1.1.1.tar.gz"
+      sha256: "e460592c32e9b1a2cf6e6f6aea5e16c9fe23c68bd185adb315202a5a993656b9"
+    # INFO: FastSIMD generates an object file only, and is consumed via CPM during CMake setup
+    fastsimd:
+      url: "https://github.com/Auburn/FastSIMD/archive/16450dae9528727e500e7254f635a671f9c7ee2d.tar.gz"
+      sha256: "b789e0430a812cf73d51ea6b884000ae4d7d1035218678b2e44eb6635bb87b3e"

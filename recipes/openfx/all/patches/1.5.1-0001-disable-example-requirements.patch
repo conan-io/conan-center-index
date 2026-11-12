@@ -1,0 +1,79 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9769abd..361804e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11,8 +11,6 @@ else()
+     LANGUAGES CXX) # no CUDA
+ endif()
+ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+-set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ add_definitions(-D_HAS_AUTO_PTR_ETC)
+@@ -62,9 +60,6 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_BINARY_DIR})
+ 
+ # Conan packages
+ find_package(EXPAT)
+-find_package(opengl_system REQUIRED)
+-find_package(cimg REQUIRED)
+-find_package(spdlog REQUIRED)
+ 
+ # Macros
+ include(OpenFX)
+@@ -85,3 +80,28 @@ add_subdirectory(Support)
+ if(BUILD_EXAMPLE_PLUGINS)
+   add_subdirectory(Examples)
+ endif()
++
++include(GNUInstallDirs)
++install(TARGETS OfxHost OfxSupport
++        EXPORT OpenFXTargets
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++)
++install(DIRECTORY ${OFX_HEADER_DIR}/
++        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++        FILES_MATCHING PATTERN "*.h"
++)
++
++install(DIRECTORY ${OFX_HOSTSUPPORT_INCLUDE_DIR}/
++        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/HostSupport
++        FILES_MATCHING PATTERN "*.h"
++)
++install(DIRECTORY ${OFX_SUPPORT_INCLUDE_DIR}/
++        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Support
++        FILES_MATCHING PATTERN "*.h"
++)
++# Install cmake/OpenFX.cmake file that contains useful macros
++install(FILES ${PROJECT_SOURCE_DIR}/cmake/OpenFX.cmake
++        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/OpenFX
++)
+diff --git a/HostSupport/CMakeLists.txt b/HostSupport/CMakeLists.txt
+index 263242b..ca2ea77 100644
+--- a/HostSupport/CMakeLists.txt
++++ b/HostSupport/CMakeLists.txt
+@@ -1,4 +1,5 @@
+ set(OFX_HOSTSUPPORT_HEADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
++set(OFX_HOSTSUPPORT_INCLUDE_DIR ${OFX_HOSTSUPPORT_HEADER_DIR} PARENT_SCOPE)
+ set(OFX_HOSTSUPPORT_LIBRARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+ 
+ file(GLOB_RECURSE OFX_HOSTSUPPORT_HEADER_FILES "${OFX_HOSTSUPPORT_HEADER_DIR}/*.h")
+@@ -18,5 +19,4 @@ target_link_libraries(OfxHost PUBLIC expat::expat)
+ 
+ target_include_directories(OfxHost PUBLIC
+ 	${OFX_HEADER_DIR}
+-	${OFX_HOSTSUPPORT_HEADER_DIR}
+-	${expat_INCLUDE_DIR})
++	${OFX_HOSTSUPPORT_HEADER_DIR})
+diff --git a/Support/CMakeLists.txt b/Support/CMakeLists.txt
+index 6d07579..9aad819 100644
+--- a/Support/CMakeLists.txt
++++ b/Support/CMakeLists.txt
+@@ -1,4 +1,5 @@
+ set(OFX_SUPPORT_HEADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
++set(OFX_SUPPORT_INCLUDE_DIR ${OFX_SUPPORT_HEADER_DIR} PARENT_SCOPE)
+ file(GLOB_RECURSE OFX_SUPPORT_HEADER_FILES "${OFX_SUPPORT_HEADER_DIR}/*.h")
+ 
+ add_subdirectory(Library)

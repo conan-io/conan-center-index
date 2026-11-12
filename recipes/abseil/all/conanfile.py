@@ -55,7 +55,7 @@ class AbseilConan(ConanFile):
     def build_requirements(self):
         # https://github.com/abseil/abseil-cpp/blob/20240722.0/CMakeLists.txt#L19
         if Version(self.version) >= "20240722.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+            self.tool_requires("cmake/[>=3.16]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,8 +69,9 @@ class AbseilConan(ConanFile):
         tc.cache_variables["ABSL_ENABLE_INSTALL"] = True
         tc.cache_variables["ABSL_PROPAGATE_CXX_STD"] = True
         tc.cache_variables["BUILD_TESTING"] = False
-        if is_msvc(self):
-            tc.cache_variables["ABSL_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        if self.settings.os == "Windows" and self.settings.compiler in ["msvc", "clang"] and self.settings.get_safe("compiler.runtime"):
+            runtime = str(self.settings.compiler.runtime)
+            tc.cache_variables["ABSL_MSVC_STATIC_RUNTIME"] = runtime == "static"
         tc.generate()
 
     def build(self):

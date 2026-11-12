@@ -1,19 +1,9 @@
 sources:
-  "1.2.1":
-    url: "https://github.com/create-dmg/create-dmg/archive/refs/tags/v1.2.1.tar.gz"
-    sha256: "434746a84ed7e4a04b1d1977503e2a23ff79dac480cb86b24aae7b112e3b7524"
-  "1.1.0":
-    url: "https://github.com/create-dmg/create-dmg/archive/refs/tags/v1.1.0.tar.gz"
-    sha256: "d50e14a00b73a3f040732b4cfa11361f5786521719059ce2dfcccd9088d3bf32"
-  "1.0.10":
-    url: "https://github.com/create-dmg/create-dmg/archive/refs/tags/v1.0.10.tar.gz"
-    sha256: "8fd43498988f6d334d483faf4e4a330a25228784995d72c57e4565967d09e6ab"
+  "1.2.2":
+    url: "https://github.com/create-dmg/create-dmg/archive/refs/tags/v1.2.2.tar.gz"
+    sha256: "18e8dd7db06c9d6fb590c7877e1714b79b709f17d1d138bd65e4910cc82391bc"
 patches:
-  "1.2.1":
-    - patch_file: "patches/1.2.1-0001-change-share-to-res.patch"
-      patch_description: "Change share folder to res"
-      patch_type: "conan"
-  "1.1.0":
-    - patch_file: "patches/1.1.0-0001-change-share-to-res.patch"
+  "1.2.2":
+    - patch_file: "patches/1.2.2-0001-change-share-to-res.patch"
       patch_description: "Change share folder to res"
       patch_type: "conan"

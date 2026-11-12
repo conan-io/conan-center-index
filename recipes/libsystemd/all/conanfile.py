@@ -10,8 +10,9 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
+from conan.tools.system import PyEnv
 
-required_conan_version = ">=1.64.0"
+required_conan_version = ">=2.25"
 
 
 class LibsystemdConan(ConanFile):
@@ -52,15 +53,8 @@ class LibsystemdConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",  # gcc 5 is failing
-            "clang": "10"
-        }
-
     def requirements(self):
-        self.requires("libcap/2.69")
+        self.requires("libcap/[>=2.69 <3]")
         self.requires("libmount/2.39.2")
         self.requires("libxcrypt/4.4.36")
         if self.options.with_selinux:
@@ -68,25 +62,20 @@ class LibsystemdConan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_xz:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5.5 <2]")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if Version(self.version) >= "255.0" and minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires {str(self.settings.compiler)} >= {minimum_version}."
-            )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         self.tool_requires("m4/1.4.19")
         self.tool_requires("gperf/3.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.1.0 <3]")
 
     def source(self):
         # Extract using standard Python tools due to Conan's unzip() not handling backslashes in
@@ -94,7 +83,9 @@ class LibsystemdConan(ConanFile):
         download(self, **self.conan_data["sources"][self.version], filename="sources.tar.gz")
         with tarfile.open("sources.tar.gz", "r:gz") as tar:
             tar.extractall()
-        move_folder_contents(self, os.path.join(self.source_folder, f"systemd-stable-{self.version}"), self.source_folder)
+        folder_name = f"systemd-stable-{self.version}" if Version(self.version) < "262" else f"systemd-{self.version}"
+        move_folder_contents(self, os.path.join(self.source_folder, folder_name), self.source_folder)
+        self._patch_sources()
 
     @property
     def _so_version(self):
@@ -109,6 +100,10 @@ class LibsystemdConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
+        pyenv = PyEnv(self)
+        pyenv.install(["Jinja2~=3.0"])
+        pyenv.generate()
 
         tc = MesonToolchain(self)
         tc.project_options["selinux"] = ("true" if self.options.with_selinux
@@ -143,10 +138,15 @@ class LibsystemdConan(ConanFile):
             "link-udev-shared", "link-systemctl-shared", "analyze", "pam",
             "link-networkd-shared", "link-timesyncd-shared", "kernel-install",
             "libiptc", "elfutils", "repart", "homed", "importd", "acl",
-            "dns-over-tls", "log-trace"]
+            "dns-over-tls", "log-trace", "oomd", "sysext"]
 
-        unrelated.append("oomd")
-        unrelated.extend(["sysext", "nscd"])
+        if Version(self.version) < "262":
+            unrelated.append("nscd")
+        else:
+            # Removed options since 262: https://github.com/systemd/systemd/blob/v262.2/NEWS#L41
+            unrelated.remove("libidn")
+            unrelated.remove("libiptc")
+
         unrelated.append("link-boot-shared")
         unrelated.append("link-journalctl-shared")
         if Version(self.version) < "254.7":
@@ -178,17 +178,17 @@ class LibsystemdConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        meson_build = os.path.join(self.source_folder, "meson.build")
-        replace_in_file(self, meson_build, "@CONAN_SRC_REL_PATH@", f"'../{self.source_path.name}'")
+        if Version(self.version) < "262":
+            meson_build = os.path.join(self.source_folder, "meson.build")
+            replace_in_file(self, meson_build, "@CONAN_SRC_REL_PATH@", f"'../{self.source_path.name}'")
 
     def build(self):
-        self._patch_sources()
-
         meson = Meson(self)
         meson.configure()
         target = ("systemd:shared_library" if self.options.shared
                   else "systemd:static_library")
-        meson.build(target=f"version.h {target}")
+        version = "version.h" if Version(self.version) < "262" else "version"
+        meson.build(target=f"{version} {target}")
 
     def package(self):
         copy(self, "LICENSE.LGPL2.1", self.source_folder,

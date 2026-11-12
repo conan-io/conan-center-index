@@ -65,7 +65,6 @@ The license attribute is a mandatory field which provides the legal information 
 * If the library has a license text that does not match a SPDX identifier, including custom wording disclaiming copyright or dedicating the words to the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/), use the [SPDX License Expressions](https://spdx.github.io/spdx-spec/v2-draft/SPDX-license-expressions/), this can follow:
   * `LicenseRef-` as a prefix, followed by the name of the library. For example:`LicenseRef-libfoo-public-domain`
   * If the license is extracted from a specific document, prepend `DocumentRef-<filename>-` to the license name. For example: `DocumentRef-README.md-LicenseRef-libfoo-public-domain`
-* If the library makes no mention of a license and the terms of use - it **shall not be accepted in ConanCenter** , even if the code is publicly available in GitHub or any other platforms.
 
 In case the license changes in a new release, the recipe should update the license attribute accordingly:
 

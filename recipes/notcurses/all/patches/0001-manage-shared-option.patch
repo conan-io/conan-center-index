@@ -1,0 +1,74 @@
+Custom Conan Center Index patch:
+Build either static or shared libraries, and let Conan set the C++ standard
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -62,7 +62,6 @@
+ endif()
+ if(${USE_CXX})
+ set(CMAKE_CXX_EXTENSIONS OFF)
+-set(CMAKE_CXX_STANDARD 17)
+ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+ string(APPEND CMAKE_CXX_FLAGS_DEBUG " -Og")
+ endif()
+@@ -226,10 +225,11 @@
+ ############################################################################
+ # libnotcurses-core (core shared library, core static library)
+ file(GLOB NCCORESRCS CONFIGURE_DEPENDS src/lib/*.c)
+-add_library(notcurses-core SHARED ${NCCORESRCS} ${COMPATSRC})
+ if(${USE_STATIC})
++add_library(notcurses-core SHARED EXCLUDE_FROM_ALL ${NCCORESRCS} ${COMPATSRC})
+ add_library(notcurses-core-static STATIC ${NCCORESRCS} ${COMPATSRC})
+ else()
++add_library(notcurses-core SHARED ${NCCORESRCS} ${COMPATSRC})
+ add_library(notcurses-core-static STATIC EXCLUDE_FROM_ALL ${NCCORESRCS} ${COMPATSRC})
+ endif()
+ # don't want these on freebsd/dragonfly/osx
+@@ -320,12 +320,13 @@
+ ############################################################################
+ # libnotcurses (multimedia shared library+static library)
+ file(GLOB NCSRCS CONFIGURE_DEPENDS src/media/*.c src/media/*.cpp)
+-add_library(notcurses SHARED ${NCSRCS} ${COMPATSRC})
+ if(${USE_STATIC})
+ # can't build binaries against static notcurses until ffmpeg linking issues
+ # are resolved (USE_STATIC_BINARIES) FIXME
++add_library(notcurses SHARED EXCLUDE_FROM_ALL ${NCSRCS} ${COMPATSRC})
+ add_library(notcurses-static STATIC ${NCSRCS} ${COMPATSRC})
+ else()
++add_library(notcurses SHARED ${NCSRCS} ${COMPATSRC})
+ add_library(notcurses-static STATIC EXCLUDE_FROM_ALL ${NCSRCS} ${COMPATSRC})
+ endif()
+ set_target_properties(notcurses PROPERTIES
+@@ -500,10 +501,11 @@
+   src/libcpp/Utilities.cc
+   )
+
+-add_library(notcurses++ SHARED ${NCPP_SOURCES})
+ if(${USE_STATIC})
++add_library(notcurses++ SHARED EXCLUDE_FROM_ALL ${NCPP_SOURCES})
+ add_library(notcurses++-static STATIC ${NCPP_SOURCES})
+ else()
++add_library(notcurses++ SHARED ${NCPP_SOURCES})
+ add_library(notcurses++-static STATIC EXCLUDE_FROM_ALL ${NCPP_SOURCES})
+ endif()
+ set_target_properties(
+@@ -1178,14 +1180,16 @@
+ if(${BUILD_FFI_LIBRARY})
+ LIST(APPEND INSTLIBS notcurses-ffi)
+ endif()
+-LIST(APPEND INSTLIBS notcurses-core notcurses)
+ if(${USE_STATIC})
+ LIST(APPEND INSTLIBS notcurses-core-static notcurses-static)
++else()
++LIST(APPEND INSTLIBS notcurses-core notcurses)
+ endif()
+ if(${USE_CXX})
+-LIST(APPEND INSTLIBS notcurses++)
+ if(${USE_STATIC})
+ LIST(APPEND INSTLIBS notcurses++-static)
++else()
++LIST(APPEND INSTLIBS notcurses++)
+ endif()
+ endif()
+ 

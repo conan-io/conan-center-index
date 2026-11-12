@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, chdir, download, get, replace_in_file
+from conan.tools.files import copy, chdir, get, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, NMakeToolchain
@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2"
 
 
 class SevenZipConan(ConanFile):
@@ -21,24 +21,17 @@ class SevenZipConan(ConanFile):
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
-        if self.settings.arch not in ("x86", "x86_64"):
+        if self.settings.arch not in ("x86", "x86_64", "armv8"):
             raise ConanInvalidConfiguration("Unsupported architecture")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if Version(self.version) < "22":
-            self.build_requires("lzma_sdk/9.20")
-
-        if not is_msvc(self) and self._settings_build.os == "Windows" and "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
+        if not is_msvc(self) and self.settings_build.os == "Windows" and "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
             self.build_requires("make/4.3")
 
     def package_id(self):
@@ -46,15 +39,7 @@ class SevenZipConan(ConanFile):
         del self.info.settings.compiler
 
     def source(self):
-        if Version(self.version) < "22":
-            item = self.conan_data["sources"][self.version]
-            filename = "7z-source.7z"
-            download(self, **item, filename=filename)
-            sevenzip = os.path.join(self.dependencies.build["lzma_sdk"].package_folder, "bin", "7zr.exe")
-            self.run(f"{sevenzip} x {filename}")
-            os.unlink(filename)
-        else:
-            get(self, **self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version])
 
     def generate(self):
         if is_msvc(self):
@@ -75,6 +60,7 @@ class SevenZipConan(ConanFile):
         return {
             "x86_64": "x64",
             "x86": "x86",
+            "armv8": "arm64"
         }[str(self.settings.arch)]
 
     def _build_msvc(self):
@@ -92,12 +78,7 @@ class SevenZipConan(ConanFile):
             os.chmod(fn, 0o644)
             replace_in_file(self, fn, "-MT", f"-{self.settings.compiler.runtime}")
             replace_in_file(self, fn, "-MD", f"-{self.settings.compiler.runtime}")
-            if self.version < Version("23.01"):
-                replace_in_file(self, fn, "-WX", "")
-
-                pfc = os.path.join(self.source_folder, "CPP", "7zip", "UI", "FileManager", "PanelFolderChange.cpp")
-                os.chmod(pfc, 0o644)
-                replace_in_file(self, pfc, r'L"\\"', r'static_cast<UString>(L"\\")')
+            replace_in_file(self, fn, "-WX", "")
 
     def build(self):
         self._patch_sources()
@@ -115,9 +96,5 @@ class SevenZipConan(ConanFile):
         # TODO: Package the libraries: binaries and headers (add the rest of settings)
 
     def package_info(self):
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.path.append(bin_path)
-
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []

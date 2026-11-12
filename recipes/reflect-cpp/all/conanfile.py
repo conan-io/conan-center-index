@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir, replace_in_file, rm
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import check_min_cppstd
@@ -100,19 +100,21 @@ class ReflectCppConan(ConanFile):
         if self.options.with_ubjson:
             self.requires("jsoncons/0.176.0", transitive_headers=True)
         if self.options.with_xml:
-            self.requires("pugixml/1.14", transitive_headers=True)
+            self.requires("pugixml/1.15", transitive_headers=True)
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0", transitive_headers=True)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.23 <4]")
+        self.tool_requires("cmake/[>=3.23]")
 
     def validate(self):
         check_min_cppstd(self, 20)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++20 features, which your compiler does not fully support.")
-
+        if Version(self.version) < "0.22" and self.settings.compiler == "msvc" and self.options.shared:
+            raise ConanInvalidConfiguration("Old versions of this library do not support MSVC-shared builds")
+    
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -158,6 +160,8 @@ class ReflectCppConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        # Remove ctre and yyjson vendored headers, but keep enchantum ones (which are inside a folder)
+        rm(self, "*", os.path.join(self.package_folder, "include", "rfl", "thirdparty"))
 
     def package_info(self):
         self.cpp_info.libs = ["reflectcpp"]

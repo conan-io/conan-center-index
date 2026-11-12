@@ -90,6 +90,7 @@ class FFTWConan(ConanFile):
         tc.variables["ENABLE_SSE2"] = self.options.simd == "sse2"
         tc.variables["ENABLE_AVX"] = self.options.simd == "avx"
         tc.variables["ENABLE_AVX2"] = self.options.simd == "avx2"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     @property

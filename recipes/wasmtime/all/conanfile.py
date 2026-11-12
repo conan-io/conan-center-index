@@ -76,6 +76,7 @@ class WasmtimeConan(ConanFile):
 
     def package(self):
         copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.build_folder, "include"))
+        copy(self, pattern="*.hh", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.build_folder, "include"))
 
         srclibdir = os.path.join(self.build_folder, "lib")
         dstlibdir = os.path.join(self.package_folder, "lib")

@@ -1,4 +1,51 @@
 sources:
+    "24.18.0":
+        Linux:
+            "x86_64":
+                url: "https://nodejs.org/dist/v24.18.0/node-v24.18.0-linux-x64.tar.xz"
+                sha256: "55aa7153f9d88f28d765fcdad5ae6945b5c0f98a36881703817e4c450fa76742"
+            "armv8":
+                url: "https://nodejs.org/dist/v24.18.0/node-v24.18.0-linux-arm64.tar.xz"
+                sha256: "58c9520501f6ae2b52d5b210444e24b9d0c029a58c5011b797bc1fe7105886f6"
+        Macos:
+            "x86_64":
+                url: "https://nodejs.org/dist/v24.18.0/node-v24.18.0-darwin-x64.tar.gz"
+                sha256: "dfd0dbd3e721503434df7b7205e719f61b3a3a31b2bcf9729b8b91fea240f080"
+            "armv8":
+                url: "https://nodejs.org/dist/v24.18.0/node-v24.18.0-darwin-arm64.tar.gz"
+                sha256: "e1a97e14c99c803e96c7339403282ea05a499c32f8d83defe9ef5ec66f979ed1"
+        Windows:
+            "x86_64":
+                url: "https://nodejs.org/dist/v24.18.0/node-v24.18.0-win-x64.zip"
+                sha256: "0ae68406b42d7725661da979b1403ec9926da205c6770827f33aac9d8f26e821"
+            "armv8":
+                url: "https://nodejs.org/dist/v24.18.0/node-v24.18.0-win-arm64.zip"
+                sha256: "f274669adb93b1fd0fbf8f21fd078609e9dcc84333d4f2718d2dde3f9a161a01"
+    "22.20.0":
+        Linux:
+            "x86_64":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-linux-x64.tar.xz"
+                sha256: "00bbd05e306ea68b6e13e17360d0e2f680b493ef95f2fea1c4296ff7437530bc"
+            "armv7":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-linux-armv7l.tar.xz"
+                sha256: "c599a33d91c9a39b7de3319929948f91f6ac42afaa1417f4340a5cc1b2efceda"
+            "armv8":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-linux-arm64.tar.xz"
+                sha256: "06907b9c088ce62305bc1530e5c1ae1510245114645768f7750c349c5b6fe667"
+        Macos:
+            "x86_64":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-darwin-x64.tar.gz"
+                sha256: "00df9c5df3e4ec6848c26b70fb47bf96492f342f4bed6b17f12d99b3a45eeecc"
+            "armv8":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-darwin-arm64.tar.gz"
+                sha256: "cc04a76a09f79290194c0646f48fec40354d88969bec467789a5d55dd097f949"
+        Windows:
+            "x86_64":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-win-x64.zip"
+                sha256: "bb819d6eb8f5bfda294bbc83a7e4ec6539da67c4233d54b0d655b9248b15e29d"
+            "armv8":
+                url: "https://nodejs.org/dist/v22.20.0/node-v22.20.0-win-arm64.zip"
+                sha256: "b12919e609b4fa1176ba8a155b49f761419a0c7cc97b42e6be09874a3f760ab6"
     "20.16.0":
         Windows:
             "x86_64":

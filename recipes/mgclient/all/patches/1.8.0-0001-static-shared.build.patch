@@ -1,0 +1,48 @@
+Upstream unconditionally defines and installs both a static and a shared
+mgclient target. A Conan package provides exactly one of the two, chosen by
+the shared option, so gate each target and its install rule on
+BUILD_SHARED_LIBS.
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index f29626d..94da660 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -51,6 +51,7 @@ else()
+     find_package(OpenSSL REQUIRED)
+     include(GenerateExportHeader)
+ 
++    if(NOT BUILD_SHARED_LIBS)
+     add_library(mgclient-static STATIC ${mgclient_src_files})
+ 
+     generate_export_header(mgclient-static
+@@ -75,6 +76,7 @@ else()
+         target_link_libraries(mgclient-static PUBLIC ws2_32 crypt32 gdi32)
+     endif()
+ 
++    else()
+     add_library(mgclient-shared SHARED ${mgclient_src_files})
+ 
+     generate_export_header(mgclient-shared
+@@ -103,13 +105,21 @@ else()
+     generate_export_header(mgclient-shared
+             BASE_NAME "mgclient"
+             EXPORT_FILE_NAME "mgclient-export.h")
++    endif()
+ 
+     include(GNUInstallDirs)
+ 
+-    install(TARGETS mgclient-static mgclient-shared
++    if(NOT BUILD_SHARED_LIBS)
++    install(TARGETS mgclient-static
+             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+             RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
++    else()
++    install(TARGETS mgclient-shared
++            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++    endif()
+     install(DIRECTORY
+             "${PROJECT_SOURCE_DIR}/include/"
+             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

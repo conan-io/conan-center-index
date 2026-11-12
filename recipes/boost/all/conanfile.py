@@ -180,6 +180,7 @@ class BoostConan(ConanFile):
             cppstd_flags.setdefault("17", "17" if gcc_version >= "5.2" else "1z" if gcc_version >= "5" else None)
             cppstd_flags.setdefault("20", "2a" if gcc_version >= "8" else "20" if gcc_version >= "12" else None)
             cppstd_flags.setdefault("23", "2b" if gcc_version >= "11" else None)
+            cppstd_flags.setdefault("26", "26" if gcc_version >= "14" else None)
             return cppstd_flags.get(cppstd.lstrip("gnu"))
 
         def _cppstd_clang(clang_version, cppstd):
@@ -191,6 +192,7 @@ class BoostConan(ConanFile):
             cppstd_flags.setdefault("17", "17" if clang_version >= "5" else "1z" if clang_version >= "3.5" else None)
             cppstd_flags.setdefault("20", "2a" if clang_version >= "6" else "20" if clang_version >= "12" else None)
             cppstd_flags.setdefault("23", "2b" if clang_version >= "13"  else "23" if clang_version >= "17" else None)
+            cppstd_flags.setdefault("26", "26" if clang_version >= "17" else None)
             return cppstd_flags.get(cppstd.lstrip("gnu"))
 
 
@@ -203,6 +205,7 @@ class BoostConan(ConanFile):
             cppstd_flags.setdefault("17", "17" if clang_version >= "9.1" else "1z" if clang_version >= "6.1" else None)
             cppstd_flags.setdefault("20", "20" if clang_version >= "13.0" else "2a" if clang_version >= "10.0" else None)
             cppstd_flags.setdefault("23", "2b" if clang_version >= "13.0" else None)
+            cppstd_flags.setdefault("26", "26" if clang_version >= "17.0" else None)
             return cppstd_flags.get(cppstd.lstrip("gnu"))
 
         def _cppstd_msvc(visual_version, cppstd):
@@ -214,6 +217,7 @@ class BoostConan(ConanFile):
             cppstd_flags.setdefault("17", "17" if visual_version >= "191" else "latest" if visual_version >= "190" else None)
             cppstd_flags.setdefault("20", "20" if visual_version >= "192" else "latest" if visual_version >= "191" else None)
             cppstd_flags.setdefault("23", "latest" if visual_version >= "193" else None)
+            cppstd_flags.setdefault("26", "latest" if visual_version >= "195" else None)
             return cppstd_flags.get(cppstd)
 
         func = {"gcc": _cppstd_gcc, "clang": _cppstd_clang, "apple-clang": _cppstd_apple_clang, "msvc": _cppstd_msvc}.get(compiler)
@@ -599,6 +603,12 @@ class BoostConan(ConanFile):
             if Version(self.version) == "1.86.0" and is_msvc(self):
                 setattr(self.options, "without_process", True)
 
+        if Version(self.version) in ["1.90.0", "1.91.0"]:
+            # FIXME: boost.coroutine doesn't support Windows ARM64 due to missing context assembly
+            # See https://github.com/boostorg/context/issues/296
+            if self._is_windows_platform and "arm" in str(self.settings.arch):
+                self.options.without_coroutine = True
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -623,6 +633,14 @@ class BoostConan(ConanFile):
         if Version(self.version) == "1.85.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/build/Jamfile.v2#L143
             return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
+        elif Version(self.version) >= "1.91.0":
+            # INFO: from_exception is built for all targets; only Cygwin is excluded upstream
+            # https://github.com/boostorg/stacktrace/blob/boost-1.91.0/build/Jamfile.v2#L252
+            if self.options.header_only or self.options.without_stacktrace:
+                return False
+            if self.settings.get_safe("os.subsystem") == "cygwin":
+                return False
+            return True
         elif Version(self.version) >= "1.86.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
             return not self.options.header_only and not self.options.without_stacktrace and self._b2_architecture == "x86"
@@ -691,6 +709,8 @@ class BoostConan(ConanFile):
             libraries.append("thread")
         if Version(self.version) >= "1.85.0":
             libraries.append("system")
+        if Version(self.version) >= "1.89.0":
+            libraries.append("atomic")
         libraries.sort()
         return list(filter(lambda library: f"without_{library}" in self.options, libraries))
 
@@ -838,6 +858,8 @@ class BoostConan(ConanFile):
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
             if self.info.options.without_python:
                 del self.info.options.python_version
+            if Version(self.version) >= "1.89.0":
+                del self.info.options.system_use_utf8
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -1060,7 +1082,9 @@ class BoostConan(ConanFile):
     def _build_bcp(self):
         folder = os.path.join(self.source_folder, "tools", "bcp")
         with chdir(self, folder):
-            command = f"{self._b2_exe} -j{build_jobs(self)} --abbreviate-paths toolset={self._toolset}"
+            njobs = build_jobs(self)
+            njobs = f"-j{njobs}" if njobs else ""  # boost.build doesn't take -j0 as valid
+            command = f"{self._b2_exe} {njobs} --abbreviate-paths toolset={self._toolset}"
             command += f" -d{self.options.debug_level}"
             self.output.warning(command)
             self.run(command)
@@ -1171,7 +1195,7 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_address_model(self):
-        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x", "riscv64"):
+        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x", "riscv64", "wasm64"):
             return "64"
 
         return "32"
@@ -1440,10 +1464,12 @@ class BoostConan(ConanFile):
         if self.options.extra_b2_flags:
             flags.extend(shlex.split(str(self.options.extra_b2_flags)))
 
+        njobs = build_jobs(self)
+        njobs = f"-j{njobs}" if njobs else ""  # boost.build doesn't take -j0 as valid
         flags.extend([
             "install",
             f"--prefix={self.package_folder}",
-            f"-j{build_jobs(self)}",
+            njobs,
             "--abbreviate-paths",
             f"-d{self.options.debug_level}",
         ])
@@ -1624,7 +1650,7 @@ class BoostConan(ConanFile):
             return "clang-win" if self.settings.compiler.get_safe("toolset") == "ClangCL" else "msvc"
         if self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win"
-        if self.settings.os == "Emscripten" and self.settings.compiler == "clang":
+        if self.settings.os == "Emscripten" and self.settings.compiler in ("clang", "emcc"):
             return "emscripten"
         if self.settings.compiler == "gcc" and is_apple_os(self):
             return "darwin"
@@ -1966,6 +1992,10 @@ class BoostConan(ConanFile):
                 if self._dependencies["libs"][module] and not module_libraries:
                     continue
 
+                # b2 builds boost_numpy only when numpy headers are detected, otherwise b2 silently skips it
+                if module == "numpy" and not set(module_libraries).intersection(all_detected_libraries):
+                    continue
+
                 all_expected_libraries = all_expected_libraries.union(module_libraries)
                 if set(module_libraries).difference(all_detected_libraries):
                     incomplete_components.append(module)
@@ -2045,11 +2075,18 @@ class BoostConan(ConanFile):
 
             if not self.options.without_python:
                 pyversion = Version(self._python_version)
-                self.cpp_info.components[f"python{pyversion.major}{pyversion.minor}"].requires = ["python"]
+                python_versioned_component_name = f"python{pyversion.major}{pyversion.minor}"
+                self.cpp_info.components[python_versioned_component_name].requires = ["python"]
+                self.cpp_info.components[python_versioned_component_name].set_property("cmake_target_name", "Boost::" + python_versioned_component_name)
                 if not self._shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
-                self.cpp_info.components[f"numpy{pyversion.major}{pyversion.minor}"].requires = ["numpy"]
+                # b2 builds boost_numpy only when numpy headers are detected, otherwise b2 silently skips it
+                numpy_libraries = filter_transform_module_libraries(self._dependencies["libs"]["numpy"])
+                if set(numpy_libraries).intersection(all_detected_libraries):
+                    numpy_versioned_component_name = f"numpy{pyversion.major}{pyversion.minor}"
+                    self.cpp_info.components[numpy_versioned_component_name].requires = ["numpy"]
+                    self.cpp_info.components[numpy_versioned_component_name].set_property("cmake_target_name", "Boost::" + numpy_versioned_component_name)
 
             if not self.options.get_safe("without_process"):
                 if self.settings.os == "Windows":

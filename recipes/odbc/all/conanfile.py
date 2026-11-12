@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -69,6 +69,8 @@ class OdbcConan(ConanFile):
             f"--enable-iconv={yes_no(self.options.with_libiconv)}",
             "--sysconfdir=/etc",
         ])
+        if is_apple_os(self):
+            tc.extra_ldflags.append("-headerpad_max_install_names")
         if self.options.with_libiconv:
             libiconv_prefix = self.dependencies["libiconv"].package_folder
             tc.configure_args.append(f"--with-libiconv-prefix={libiconv_prefix}")

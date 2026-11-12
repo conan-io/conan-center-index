@@ -54,7 +54,7 @@ class ProjConan(ConanFile):
         self.requires("nlohmann_json/3.11.3")
         self.requires("sqlite3/[>=3.44 <4]")
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_curl:
             self.requires("libcurl/[>=7.78.0 <9]")
 

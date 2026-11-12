@@ -49,7 +49,7 @@ class EasyhttpcppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("poco/1.12.4", transitive_headers=True, transitive_libs=True)
+        self.requires("poco/1.14.2", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
 
     @property

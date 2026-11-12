@@ -7,7 +7,6 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps", "VirtualRunEnv"
-    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -17,12 +16,18 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.dependencies["ouster_sdk"].options.build_osf:
+        options = self.dependencies["ouster_sdk"].options
+        if options.build_osf:
             tc.preprocessor_definitions["WITH_OSF"] = "1"
-        if self.dependencies["ouster_sdk"].options.build_pcap:
+        if options.build_pcap:
             tc.preprocessor_definitions["WITH_PCAP"] = "1"
-        if self.dependencies["ouster_sdk"].options.build_viz:
+        if options.build_viz:
             tc.preprocessor_definitions["WITH_VIZ"] = "1"
+        if options.build_sensor:
+            tc.preprocessor_definitions["WITH_SENSOR"] = "1"
+        if options.build_mapping:
+            tc.preprocessor_definitions["WITH_MAPPING"] = "1"
+        tc.cache_variables["OUSTER_SDK_SHARED"] = bool(options.shared)
         tc.generate()
 
     def build(self):

@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -16,6 +16,7 @@ class OpenXlsxConan(ConanFile):
     homepage = "https://github.com/troldal/OpenXLSX"
     topics = ("excel", "spreadsheet", "xlsx")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -39,6 +40,9 @@ class OpenXlsxConan(ConanFile):
             "apple-clang": "12",
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -61,6 +65,7 @@ class OpenXlsxConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -94,9 +99,3 @@ class OpenXlsxConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("dl")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "OpenXLSX"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenXLSX"
-        self.cpp_info.names["cmake_find_package"] = "OpenXLSX"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenXLSX"

@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, download, get, load, save
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 
@@ -21,20 +21,6 @@ class VincentlaucsbCsvParserConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -42,23 +28,32 @@ class VincentlaucsbCsvParserConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        # C++17 recommended: https://github.com/vincentlaucsb/csv-parser/blob/2.1.3/README.md
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 14)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if Version(self.version) >= Version("2.5.2"):
+            download(self, **self.conan_data["sources"][self.version], filename="csv.hpp")
+        else:
+            get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def _extract_license(self):
+        # The MIT license text is embedded in the header's leading comment
+        header = load(self, os.path.join(self.source_folder, "csv.hpp"))
+        start = header.index("MIT License")
+        end = header.index("*/", start)
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), header[start:end].strip() + "\n")
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="*",
-             dst=os.path.join(self.package_folder, "include"),
-             src=os.path.join(self.source_folder, "single_include"))
+        if Version(self.version) >= Version("2.5.2"):
+            self._extract_license()
+            copy(self, "csv.hpp",
+                 dst=os.path.join(self.package_folder, "include"),
+                 src=self.source_folder)
+        else:
+            copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+            copy(self, pattern="*",
+                 dst=os.path.join(self.package_folder, "include"),
+                 src=os.path.join(self.source_folder, "single_include"))
 
     def package_info(self):
         self.cpp_info.bindirs = []

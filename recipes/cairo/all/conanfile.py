@@ -4,7 +4,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -22,6 +22,7 @@ class CairoConan(ConanFile):
     topics = ("cairo", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cairographics.org/"
+    package_type = "library"
     license = ("LGPL-2.1-only", "MPL-1.1")
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -80,7 +81,8 @@ class CairoConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+        if self.options.shared or self.settings.os != "Windows" or Version(self.version) < "1.17.6":
+            self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -93,14 +95,14 @@ class CairoConan(ConanFile):
             self.requires("lzo/2.10")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.with_freetype:
-            self.requires("freetype/2.13.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.15.0", transitive_headers=True, transitive_libs=True)
+            self.requires("fontconfig/[>=2.15 <3]", transitive_headers=True, transitive_libs=True)
+        if self.options.with_freetype:
+            self.requires("freetype/[>=2.13 <3]", transitive_headers=True, transitive_libs=True)
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_glib:
-            self.requires("glib/2.78.3")
+            self.requires("glib/[^2.78]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
@@ -128,9 +130,9 @@ class CairoConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.1.0 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -207,8 +209,9 @@ class CairoConan(ConanFile):
 
         # Dependency freetype2 found: NO found 2.11.0 but need: '>= 9.7.3'
         if self.options.with_freetype:
+            source_freetype_version = "9.7.3" if Version(self.version) < "1.18.4" else "23.0.17"
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                                  "freetype_required_version = '>= 9.7.3'",
+                                  f"freetype_required_version = '>= {source_freetype_version}'",
                                   f"freetype_required_version = '>= {self.dependencies['freetype'].ref.version}'")
         meson = Meson(self)
         meson.configure()
@@ -307,6 +310,11 @@ class CairoConan(ConanFile):
 
             if not self.options.shared:
                 self.cpp_info.components["cairo_"].defines.append("CAIRO_WIN32_STATIC_BUILD=1")
+                if Version(self.version) >= "1.17.6":
+                    self.cpp_info.components["cairo_"].system_libs.extend(["ole32", "uuid"])
+                    libcxx = stdcpp_library(self)
+                    if libcxx:
+                        self.cpp_info.components["cairo_"].system_libs.append(libcxx)
 
         if self.options.get_safe("with_opengl"):
             if self.options.with_opengl == "desktop":

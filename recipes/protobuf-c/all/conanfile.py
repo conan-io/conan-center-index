@@ -1,4 +1,4 @@
-from conan import ConanFile, __version__ as conan_version
+from conan import ConanFile
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -49,17 +49,19 @@ class ProtobufCConan(ConanFile):
 
     def build_requirements(self):
         # Since the package using protobuf-c will also need to use protoc (part of protobuf),
-        # we want to make sure the protobuf dep is visible, but the visible param is only available in v2
-        # TODO: Remove after dropping Conan 1.x
-        if conan_version >= Version("2"):
-            self.tool_requires("protobuf/3.21.9", visible=True)
+        # we want to make sure the protobuf dep is visible
+        if Version(self.version) >= "1.5.2":
+            self.tool_requires("protobuf/[>=3.21.9 <=6.30.1]", visible=True)
         else:
-            self.tool_requires("protobuf/3.21.9")
+            self.tool_requires("protobuf/3.21.9", visible=True)
         if Version(self.version) >= "1.5.0":
             self.tool_requires("cmake/[>=3.19 <4]")
 
     def requirements(self):
-        self.requires("protobuf/3.21.9")
+        if Version(self.version) >= "1.5.2":
+            self.requires("protobuf/[>=3.21.9 <=6.30.1]")
+        else:
+            self.requires("protobuf/3.21.9")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

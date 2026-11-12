@@ -2,13 +2,11 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
+from conan.tools.build import cross_building
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.18"
 
 
 class SleefConan(ConanFile):
@@ -29,72 +27,46 @@ class SleefConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    implements = ["auto_shared_fpic"]
+    languages = "C", "C++"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+    @property
+    def _support_gnulibs(self):
+        return self.settings.os in ("Linux", "FreeBSD")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.settings.os == "Windows" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration(
-                "shared sleef not supported on Windows, it produces runtime errors"
+                "sleef on Windows is only supported for x86_64 architecture. See compatibility table https://github.com/shibatch/sleef#test-matrix"
             )
-        if self.settings.compiler == "apple-clang":
-            if cross_building(self):
-                # Fails with "No rule to make target `/bin/mkrename'"
-                # https://github.com/shibatch/sleef/issues/308
-                raise ConanInvalidConfiguration(f"{self.ref} does not support cross-building with apple-clang")
-            if Version(self.version) < "3.6" and self.settings.arch == "armv8":
-                # clang: error: the clang compiler does not support '-march=armv7-a'
-                # clang: warning: argument unused during compilation: '-mfpu=vfpv4' [-Wunused-command-line-argument]
-                # clang: warning: argument unused during compilation: '-arch arm64' [-Wunused-command-line-argument]
-                # clang: warning: argument unused during compilation: '-mmacosx-version-min=11.0' [-Wunused-command-line-argument]
-                raise ConanInvalidConfiguration(f"{self.ref} does not support Mac M1. Please, use {self.name} version >=3.6.")
+        if cross_building(self):
+            # Fails with "No rule to make target `/bin/mkrename'"
+            raise ConanInvalidConfiguration(f"{self.ref} does not support cross-building")
 
     def build_requirements(self):
-        if Version(self.version) >= "3.6":
-            self.tool_requires("cmake/[>=3.18 <4]")
+        self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        if Version(self.version) >= "3.6":
-            tc.cache_variables["SLEEF_BUILD_STATIC_TEST_BINS"] = False
-            tc.cache_variables["SLEEF_BUILD_LIBM"] = True
-            tc.cache_variables["SLEEF_BUILD_DFT"] = False
-            tc.cache_variables["SLEEF_BUILD_QUAD"] = False
-            tc.cache_variables["SLEEF_BUILD_GNUABI_LIBS"] = False
-            tc.cache_variables["SLEEF_BUILD_SCALAR_LIB"] = False
-            tc.cache_variables["SLEEF_BUILD_TESTS"] = False
-            tc.cache_variables["SLEEF_BUILD_INLINE_HEADERS"] = False
-            tc.cache_variables["SLEEF_SHOW_CONFIG"] = True
-            tc.cache_variables["SLEEF_SHOW_ERROR_LOG"] = False
-            tc.cache_variables["SLEEF_ENABLE_ALTDIV"] = False
-            tc.cache_variables["SLEEF_ENABLE_ALTSQRT"] = False
-            tc.cache_variables["SLEEF_DISABLE_FFTW"] = True
-            tc.cache_variables["SLEEF_DISABLE_MPFR"] = True
-            tc.cache_variables["SLEEF_DISABLE_SSL"] = True
-            tc.cache_variables["SLEEF_ENABLE_CUDA"] = False
-            tc.cache_variables["SLEEF_ENABLE_CXX"] = False
-        else:
-            tc.cache_variables["BUILD_DFT"] = False
-            tc.cache_variables["BUILD_GNUABI_LIBS"] = False
-            tc.cache_variables["BUILD_TESTS"] = False
-            tc.cache_variables["DISABLE_FFTW"] = True
+        tc.cache_variables["SLEEF_BUILD_LIBM"] = True
+        tc.cache_variables["SLEEF_BUILD_DFT"] = False
+        tc.cache_variables["SLEEF_BUILD_QUAD"] = True
+        tc.cache_variables["SLEEF_BUILD_GNUABI_LIBS"] = self._support_gnulibs
+        tc.cache_variables["SLEEF_BUILD_TESTS"] = False
+        tc.cache_variables["SLEEF_SHOW_CONFIG"] = True
+        tc.cache_variables["SLEEF_DISABLE_FFTW"] = True
+        tc.cache_variables["SLEEF_DISABLE_MPFR"] = True
+        tc.cache_variables["SLEEF_DISABLE_SVE"] = True
+        tc.cache_variables["SLEEF_DISABLE_SSL"] = True
+        tc.cache_variables["SLEEF_ENABLE_CUDA"] = False
+        tc.cache_variables["SLEEF_ENABLE_TLFLOAT"] = False
+        tc.cache_variables["SLEEF_ENABLE_TESTER4"] = False
         tc.generate()
 
     def build(self):
@@ -110,12 +82,24 @@ class SleefConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "dummy"))
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "sleef")
-        self.cpp_info.libs = ["sleef"]
+        self.cpp_info.set_property("pkg_config_name", "none")
+        self.cpp_info.set_property("cmake_file_name", "sleef")
+
+        self.cpp_info.components["sleef"].libs = ["sleef"]
+        self.cpp_info.components["sleef"].set_property("cmake_target_name", "sleef::sleef")
+        self.cpp_info.components["sleef"].set_property("pkg_config_name", "sleef")
+
+        self.cpp_info.components["sleefquad"].libs = ["sleefquad"]
+        self.cpp_info.components["sleefquad"].set_property("cmake_target_name", "sleef::sleefquad")
+
+        if self._support_gnulibs:
+            self.cpp_info.components["sleef"].system_libs = ["m"]
+            self.cpp_info.components["sleefgnuabi"].libs = ["sleefgnuabi"]
+            self.cpp_info.components["sleefgnuabi"].set_property("cmake_target_name", "sleef::sleefgnuabi")
+            self.cpp_info.components["sleefgnuabi"].system_libs = ["m"]
+
         if self.settings.os == "Windows" and not self.options.shared:
-            self.cpp_info.defines = ["SLEEF_STATIC_LIBS"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.components["sleef"].defines = ["SLEEF_STATIC_LIBS"]
+            self.cpp_info.components["sleefquad"].defines = ["SLEEF_STATIC_LIBS"]

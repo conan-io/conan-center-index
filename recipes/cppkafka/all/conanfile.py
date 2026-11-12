@@ -2,10 +2,9 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class CppKafkaConan(ConanFile):
@@ -25,28 +24,20 @@ class CppKafkaConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("boost/1.83.0", transitive_headers=True)
-        self.requires("librdkafka/2.3.0", transitive_headers=True)
+        self.requires("librdkafka/[>=2.3.0 <3]", transitive_headers=True)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -57,7 +48,7 @@ class CppKafkaConan(ConanFile):
         tc.variables["CPPKAFKA_DISABLE_TESTS"] = True
         tc.variables["CPPKAFKA_DISABLE_EXAMPLES"] = True
         tc.variables["CPPKAFKA_RDKAFKA_STATIC_LIB"] = False # underlying logic is useless
-        if Version(self.version) < "0.4.1" and self.settings.os == "Windows":
+        if self.settings.os == "Windows":
             tc.preprocessor_definitions["NOMINMAX"] = 1
         tc.generate()
         cd = CMakeDeps(self)
@@ -92,10 +83,5 @@ class CppKafkaConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["_cppkafka"].defines.append("CPPKAFKA_STATIC")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CppKafka"
-        self.cpp_info.names["cmake_find_package_multi"] = "CppKafka"
-        self.cpp_info.components["_cppkafka"].names["cmake_find_package"] = "cppkafka"
-        self.cpp_info.components["_cppkafka"].names["cmake_find_package_multi"] = "cppkafka"
         self.cpp_info.components["_cppkafka"].set_property("cmake_target_name", "CppKafka::cppkafka")
         self.cpp_info.components["_cppkafka"].set_property("pkg_config_name", "cppkafka")

@@ -1,4 +1,7 @@
 sources:
+  "1.2":
+    url: "https://github.com/dmlc/dlpack/archive/refs/tags/v1.2.tar.gz"
+    sha256: "58284a3b004a48450c958a23b30274527ebaf35a061124bbd4193fffa45efbd6"
   "1.0":
     url: "https://github.com/dmlc/dlpack/archive/v1.0.tar.gz"
     sha256: "f8cfdcb634ff3cf0e3d9a3426e019e1c6469780a3b0020c9bc4ecc09cf9abcb1"

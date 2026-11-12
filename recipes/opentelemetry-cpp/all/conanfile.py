@@ -4,10 +4,12 @@ from conan.tools.apple import is_apple_os
 from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 
 import os
 
 required_conan_version = ">=2.2"
+
 
 class OpenTelemetryCppConan(ConanFile):
     name = "opentelemetry-cpp"
@@ -65,9 +67,13 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
             del self.options.with_etw
+            # Opentelemetry-cpp on Windows only supports static libraries,
+            # upstream does not support shared builds on Windows
+            self.package_type = "static-library"
+            del self.options.shared
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
@@ -77,15 +83,21 @@ class OpenTelemetryCppConan(ConanFile):
     def _needs_proto(self):
         return self.options.with_otlp_grpc or self.options.with_otlp_http or self.options.get_safe("with_otlp_file")
 
+    @property
+    def _with_http_client_curl(self):
+        return self.options.with_otlp_http or self.options.with_zipkin or self.options.with_elasticsearch
+
     def requirements(self):
         if self.options.with_gsl:
             self.requires("ms-gsl/4.0.0")
 
-        if self._needs_proto:
-            self.requires("protobuf/5.27.0", transitive_headers=True, transitive_libs=True)
-
         if self.options.with_otlp_grpc:
-            self.requires("grpc/1.67.1", transitive_headers=True, transitive_libs=True)
+            # Version range matches arrow, which uses this as a dependency
+            self.requires("grpc/[>=1.67.1 <2]", transitive_headers=True, transitive_libs=True)
+
+        if self._needs_proto:
+            # This will resolve to the pinned version coming from grpc
+            self.requires("protobuf/[>=4.25.3 <7]", transitive_headers=True, transitive_libs=True)
 
         if (self.options.with_zipkin or
            self.options.with_elasticsearch or
@@ -94,29 +106,30 @@ class OpenTelemetryCppConan(ConanFile):
            self.options.get_safe("with_otlp_file")
         ):
             self.requires("nlohmann_json/3.11.3")
-            self.requires("openssl/[>=1.1 <4]")
 
-        if (self.options.with_zipkin or
-           self.options.with_elasticsearch or
-           self.options.with_otlp_http
-        ):
+        if self._with_http_client_curl:
             self.requires("libcurl/[>=7.78.0 <9]")
-
-        if self.options.with_otlp_http_compression:
-            self.requires("zlib/[>=1.2.11 <2]")
+            if self.options.with_otlp_http_compression:
+                self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.with_prometheus:
             self.requires("prometheus-cpp/1.1.0")
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        protobuf_requires_cppstd17 = self._needs_proto and Version(self.dependencies["protobuf"].ref.version) >= "6.30"
+        grpc_requires_cppstd17 = self.options.with_otlp_grpc and Version(self.dependencies["grpc"].ref.version) >= "1.70.0"
+        require_cppstd_17 = protobuf_requires_cppstd17 or grpc_requires_cppstd17
 
-        if self.settings.os != "Linux" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
+        # opentelemetry-cpp itself requires C++14, but newer protobuf/grpc require the consumer to build with C++17
+        check_min_cppstd(self, 17 if require_cppstd_17 else 14)
 
         if self.options.with_otlp_grpc:
             if not self.dependencies["grpc"].options.cpp_plugin:
                 raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
+
+        if self._needs_proto and self.dependencies["protobuf"].package_type == "static-library" and self.package_type != "static-library":
+            # https://github.com/open-telemetry/opentelemetry-cpp/blame/2d80af1b1d26e300d9c0f7f51fa360f22c773523/cmake/opentelemetry-proto.cmake#L189-L193
+            raise ConanInvalidConfiguration(f"opentelemetry-cpp should be built as a static library when using static protobuf")
 
     def build_requirements(self):
         if self._needs_proto:
@@ -125,6 +138,9 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.options.with_otlp_grpc:
             self.tool_requires("grpc/<host_version>")
+
+        if Version(self.version) >= "1.24.0":
+            self.tool_requires("cmake/[>=3.16]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -141,12 +157,14 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["WITH_BENCHMARK"] = False
         tc.cache_variables["WITH_EXAMPLES"] = False
+        tc.cache_variables["WITH_FUNC_TESTS"] = False
         tc.cache_variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
         tc.cache_variables["WITH_STL"] = self._stl_value
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
         tc.cache_variables["WITH_OTLP_GRPC"] = self.options.with_otlp_grpc
         tc.cache_variables["WITH_OTLP_HTTP"] = self.options.with_otlp_http
         tc.cache_variables["WITH_OTLP_HTTP_COMPRESSION"] = self.options.with_otlp_http_compression
+        tc.cache_variables["OTELCPP_PROTO_LIB_TYPE"] = "SHARED_LIBRARY" if self.options.get_safe("shared") else "STATIC_LIBRARY"
         if self.settings.os == "Linux":
             # So that the linker can pick up the correct openssl transitive dependency from libcurl
             # when building shared
@@ -176,17 +194,31 @@ class OpenTelemetryCppConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        # let the otelcpp-proto library follow the default library target type (shared, static)
+        # rather than custom logic
+        patterns = ["list(APPEND OTELCPP_PROTO_TARGET_OPTIONS", "set(OTELCPP_PROTO_LIB_TYPE"]
+        for pattern in patterns:
+            replace_in_file(self, os.path.join(self.source_folder, "cmake/opentelemetry-proto.cmake"),
+                           pattern, f"#{pattern}", strict=False)
+
         if self._needs_proto:
             protos_path = self.dependencies.build["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
             protos_cmake_path = os.path.join(self.source_folder, "cmake", "opentelemetry-proto.cmake")
-            replace_in_file(self, protos_cmake_path,
-                            "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
-                            "if(1)")
-            replace_in_file(self, protos_cmake_path,
-                            '"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto")',
-                            f'"{protos_path}")')
 
-        rmdir(self, os.path.join(self.source_folder, "api", "include", "opentelemetry", "nostd", "absl"))
+            if Version(self.version) < "1.22.0":
+                replace_in_file(self, protos_cmake_path,
+                                "if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto/.git)",
+                                "if(1)")
+                replace_in_file(self, protos_cmake_path,
+                                '"${CMAKE_CURRENT_SOURCE_DIR}/third_party/opentelemetry-proto")',
+                                f'"{protos_path}")')
+            else:
+                replace_in_file(self, protos_cmake_path,
+                                "elseif(EXISTS ${OPENTELEMETRY_PROTO_SUBMODULE}/.git)",
+                                "elseif(1)")
+                replace_in_file(self, protos_cmake_path,
+                                'SOURCE_DIR ${OPENTELEMETRY_PROTO_SUBMODULE}',
+                                f'SOURCE_DIR ${protos_path}')
 
     def build(self):
         self._patch_sources()
@@ -216,7 +248,7 @@ class OpenTelemetryCppConan(ConanFile):
             "opentelemetry_version",
         ]
 
-        if self.options.with_otlp_http or self.options.with_elasticsearch or self.options.with_zipkin:
+        if self._with_http_client_curl:
             # https://github.com/open-telemetry/opentelemetry-cpp/blob/v1.12.0/CMakeLists.txt#L452-L460
             libraries.append(self._http_client_name)
         if self._needs_proto:
@@ -311,6 +343,9 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.options.with_otlp_http or self.options.with_otlp_grpc:
             self.cpp_info.components["opentelemetry_proto"].requires.append("protobuf::protobuf")
+            if Version(self.version) >= "1.25":
+                # https://github.com/open-telemetry/opentelemetry-cpp/issues/4182
+                self.cpp_info.components["opentelemetry_proto"].defines.append("OPENTELEMETRY_PROTO_API=")
             self.cpp_info.components["opentelemetry_otlp_recordable"].requires.extend([
                 "opentelemetry_proto",
                 "opentelemetry_resources",
@@ -344,12 +379,10 @@ class OpenTelemetryCppConan(ConanFile):
                 "opentelemetry_exporter_otlp_grpc_client",
             ])
 
-        if (self.options.with_otlp_http or
-            self.options.with_zipkin or
-            self.options.with_elasticsearch
-        ):
+        if self._with_http_client_curl:
             self.cpp_info.components[self._http_client_name].requires.append("libcurl::libcurl")
-            self.cpp_info.components[self._http_client_name].requires.append("openssl::openssl")
+            if self.options.with_otlp_http_compression:
+                self.cpp_info.components[self._http_client_name].requires.append("zlib::zlib")
 
         if self.options.with_otlp_http:
             self.cpp_info.components["opentelemetry_exporter_otlp_http_client"].requires.extend([
@@ -357,9 +390,6 @@ class OpenTelemetryCppConan(ConanFile):
                 "nlohmann_json::nlohmann_json",
                 "opentelemetry_proto",
             ])
-
-            if self.options.with_otlp_http_compression:
-                self.cpp_info.components["opentelemetry_exporter_otlp_http_client"].requires.append("zlib::zlib")
 
             self.cpp_info.components["opentelemetry_exporter_otlp_http"].requires.extend([
                 "opentelemetry_otlp_recordable",
