@@ -89,3 +89,6 @@ class OpenJPH(ConanFile):
             if self.settings.build_type == "Debug":
                 version_suffix += "d"
         self.cpp_info.libs = ["openjph" + version_suffix]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
