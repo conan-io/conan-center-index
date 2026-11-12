@@ -1,4 +1,4 @@
 sources:
-  "1.2.0":
-    url: "https://github.com/rjahanbakhshi/boost.taar/archive/refs/tags/v1.2.0.tar.gz"
-    sha256: "2cd77132c4615e84fd2fda13d9d3ba5fbf1f12315edf19bc064e73d965748c47"
+  "1.2.1":
+    url: "https://github.com/rjahanbakhshi/boost.taar/archive/refs/tags/v1.2.1.tar.gz"
+    sha256: "913979fbb6e6bc24ce02e982c8f20646a68a0e2e29e64ae8e131c4b3d263d7b5"
