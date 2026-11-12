@@ -77,7 +77,7 @@ class StdexecConan(ConanFile):
         tc.cache_variables["STDEXEC_BUILD_EXAMPLES"] = False
         tc.cache_variables["STDEXEC_INSTALL"] = True
         tc.cache_variables["STDEXEC_BUILD_CLANGD_HELPER"] = False
-        tc.cache_variables["STDEXEC_BUILD_PARALLEL_SCHEDULER"] = bool(self.options.with_parallel_scheduler)
+        tc.cache_variables["STDEXEC_BUILD_PARALLEL_SCHEDULER"] = self.options.with_parallel_scheduler
         rapids_cmake_dir = os.path.join(self.source_folder, "rapids-cmake").replace("\\", "/")
         tc.cache_variables["FETCHCONTENT_SOURCE_DIR_RAPIDS-CMAKE"] = rapids_cmake_dir
         tc.generate()
