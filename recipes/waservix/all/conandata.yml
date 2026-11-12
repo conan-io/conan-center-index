@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/TekservixHQ/waservix-c/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "770a16cc835c292c416ceae4d74f0e2ca1e384d3710a01fc060a43fff9799d60"
