@@ -18,3 +18,4 @@ patches:
     - patch_file: "patches/cci.20210507-0007-use-system-zlib.patch"
     - patch_file: "patches/cci.20220219-0007-static-lib-tool_support.patch"
     - patch_file: "patches/cci.20220219-0008-mini_chromium-find_mac_sdk-no-distutils.patch"
+    - patch_file: "patches/cci.20220219-0009-mini_chromium-missing-stdint.patch"
