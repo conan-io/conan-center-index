@@ -75,7 +75,6 @@ class StdexecConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["STDEXEC_BUILD_TESTS"] = False
         tc.cache_variables["STDEXEC_BUILD_EXAMPLES"] = False
-        tc.cache_variables["STDEXEC_BUILD_DOCS"] = False
         tc.cache_variables["STDEXEC_INSTALL"] = True
         tc.cache_variables["STDEXEC_BUILD_CLANGD_HELPER"] = False
         tc.cache_variables["STDEXEC_BUILD_PARALLEL_SCHEDULER"] = bool(self.options.with_parallel_scheduler)
@@ -96,7 +95,6 @@ class StdexecConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
             rmdir(self, os.path.join(self.package_folder, "lib"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "stdexec")

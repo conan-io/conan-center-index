@@ -5,7 +5,6 @@ find_package(stdexec REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE STDEXEC::stdexec)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 if(TARGET STDEXEC::parallel_scheduler)
     target_link_libraries(${PROJECT_NAME} PRIVATE STDEXEC::parallel_scheduler)
 endif()
