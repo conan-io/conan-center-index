@@ -2,7 +2,7 @@ diff --git src/core/CMakeLists.txt src/core/CMakeLists.txt
 index 298ca17..6c87ea0 100644
 --- src/core/CMakeLists.txt
 +++ src/core/CMakeLists.txt
-@@ -156,7 +156,7 @@ if (BUILD_SHARED_LIBS AND WIN32)
+@@ -175,7 +175,7 @@ if (BUILD_SHARED_LIBS AND WIN32)
  endif()
  
  ## include library version/name

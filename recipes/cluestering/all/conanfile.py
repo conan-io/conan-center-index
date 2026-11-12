@@ -21,7 +21,7 @@ class CLUEsteringConan(ConanFile):
     license = "MPL-2.0"
 
     def requirements(self):
-        self.requires("alpaka/2.1.1", transitive_headers=True)
+        self.requires("alpaka/[>=2.2.0 <3]", transitive_headers=True)
         self.requires("boost/[>=1.74.0 <2]", transitive_headers=True)
 
     def layout(self):

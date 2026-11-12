@@ -1,0 +1,112 @@
+import os
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=2.1"
+
+
+class LibvplConan(ConanFile):
+    name = "libvpl"
+    description = "Intel® Video Processing Library (Intel® VPL) provides a single video processing API for encode, decode, and video processing that works across a wide range of accelerators."
+    license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/intel/libvpl"
+    topics = ("video", "processing", "intel", "encode", "decode")
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def validate(self):
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"The library is not supported on Apple OS")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
+
+        # INFO: Honor fPIC option. The upstream sets fPIC to ON always
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_POSITION_INDEPENDENT_CODE true)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "CompileOptions.cmake"), "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["INSTALL_EXAMPLES"] = False
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "etc"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
+        # Remove MS runtime files
+        for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+            rm(self, pattern=dll_pattern_to_remove, folder=os.path.join(self.package_folder, "bin"), recursive=True)
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "VPL")
+        self.cpp_info.set_property("pkg_config_name", "vpl")
+
+        debug_suffix = ""
+        if is_msvc(self) and self.settings.build_type == "Debug":
+            debug_suffix = "d"
+
+
+        # ------------------------------------------------------------------
+        # dispatcher component (the only one that actually links a .lib/.so)
+        # ------------------------------------------------------------------
+        disp = self.cpp_info.components["dispatcher"]
+        disp.set_property("cmake_target_name", "VPL::dispatcher")
+        disp.libs = [f"vpl{debug_suffix}"]
+        # Note: Headers might be included without vpl prefix for backward compatibility to mfx
+        disp.includedirs = ["include", "include/vpl"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            disp.system_libs = ["dl", "pthread"]
+        elif self.settings.os == "Windows":
+            disp.system_libs = ["ole32", "gdi32", "uuid", "advapi32"]
+
+        # ------------------------------------------------------------------
+        # api component (headers for the C API)
+        # ------------------------------------------------------------------
+        api = self.cpp_info.components["api"]
+        api.set_property("cmake_target_name", "VPL::api")
+        api.includedirs = ["include", "include/vpl"]
+
+        # ------------------------------------------------------------------
+        # cppapi component (headers for the C++ wrapper API)
+        # ------------------------------------------------------------------
+        cppapi = self.cpp_info.components["cppapi"]
+        cppapi.set_property("cmake_target_name", "VPL::cppapi")
+        cppapi.includedirs = ["include", "include/vpl"]
+

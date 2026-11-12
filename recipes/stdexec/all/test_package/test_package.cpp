@@ -1,0 +1,13 @@
+#include <stdexec/execution.hpp>
+
+#include <exec/static_thread_pool.hpp>
+
+#include <cstdlib>
+#include <utility>
+
+int main() {
+    exec::static_thread_pool pool{1};
+    auto work = stdexec::starts_on(pool.get_scheduler(), stdexec::just(42));
+    auto [value] = stdexec::sync_wait(std::move(work)).value();
+    return value == 42 ? EXIT_SUCCESS : EXIT_FAILURE;
+}

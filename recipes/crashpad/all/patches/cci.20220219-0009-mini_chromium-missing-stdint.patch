@@ -1,0 +1,21 @@
+--- third_party/mini_chromium/mini_chromium/base/logging.h
++++ third_party/mini_chromium/mini_chromium/base/logging.h
+@@ -7,6 +7,7 @@
+ 
+ #include <assert.h>
+ #include <errno.h>
++#include <stdint.h>
+ 
+ #include <limits>
+ #include <sstream>
+--- third_party/mini_chromium/mini_chromium/base/strings/utf_string_conversion_utils.h
++++ third_party/mini_chromium/mini_chromium/base/strings/utf_string_conversion_utils.h
+@@ -5,6 +5,8 @@
+ #ifndef MINI_CHROMIUM_BASE_STRINGS_UTF_STRING_CONVERSION_UTILS_H_
+ #define MINI_CHROMIUM_BASE_STRINGS_UTF_STRING_CONVERSION_UTILS_H_
+ 
++#include <stdint.h>
++
+ #include <string>
+ 
+ namespace base {
