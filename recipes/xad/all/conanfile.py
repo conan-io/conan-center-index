@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import replace_in_file, copy, get, rm, rmdir, save
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.0.9"
@@ -34,11 +33,6 @@ class XadConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        if Version(self.version) < "2.2.0":
-            # The VERSION file in the release archive still carries the "-dev" suffix
-            save(self, os.path.join(self.source_folder, "VERSION"), f"{self.version}\n")
-            # Version.hpp.in refers to XAD_VERSION_* while the project defines xad_VERSION_*, which leaves the numeric macros empty
-            replace_in_file(self, os.path.join(self.source_folder, "src", "XAD", "Version.hpp.in"), "@XAD_VERSION_", "@xad_VERSION_")
 
     @property
     def _simd_option(self):
