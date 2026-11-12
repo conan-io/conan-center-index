@@ -166,7 +166,7 @@ class GdalConan(ConanFile):
 
         # Newer gdal requires this flag for
         # ogr/ogrsf_frmts/parquet build correctly
-        if self.options.with_arrow and Version(self.version) >= "3.10.0":
+        if self.options.with_arrow:
             self.options["arrow"].filesystem_layer = True
 
     def layout(self):
@@ -183,10 +183,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            if Version(self.version) >= "3.13.0":
-                self.requires("arrow/[>=14.0.2 <25]")
-            else:
-                self.requires("arrow/[>=14.0.2 <20]")
+            self.requires("arrow/[>=14.0.2 <27]")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -302,10 +299,7 @@ class GdalConan(ConanFile):
         self.tool_requires("cmake/[>=3.18 <4]")
 
     def validate(self):
-        if Version(self.version) >= "3.10.0":
-            check_min_cppstd(self, 17)
-        else:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17)
 
         if self.options.with_pcre and self.options.with_pcre2:
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
@@ -327,7 +321,7 @@ class GdalConan(ConanFile):
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
 
-        if self.options.with_arrow and Version(self.version) >= "3.10.0" and not self.dependencies["arrow"].options.filesystem_layer:
+        if self.options.with_arrow and not self.dependencies["arrow"].options.filesystem_layer:
             raise ConanInvalidConfiguration("Gdal[>=3.10.0] requires -o arrow/*:filesystem_layer=True")
 
     def source(self):
@@ -636,12 +630,6 @@ class GdalConan(ConanFile):
         # Workaround for JXL_THREADS being provided by the JXL package on CCI.
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                         "JXL_THREADS", "JXL", strict=False)
-        # Workaround for Parquet and ArrowDataset being provided by Arrow on CCI.
-        if Version(self.version) < "3.10.0":
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                            "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                            "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
 
     def build(self):
         cmake = CMake(self)
