@@ -39,14 +39,18 @@ class MetalcppConan(ConanFile):
 
     def validate(self):
         os_name = str(self.settings.os)
-        if not os_name in ["Macos", "iOS", "tvOS"]:
+        if not os_name in ["Macos", "iOS", "tvOS", "visionOS"]:
             raise ConanInvalidConfiguration("Metal can only be used on an Macos, iOS or tvOS platform.")
 
         if self.settings.compiler.get_safe("cppstd"):
             min_cppstd = "17"
             check_min_cppstd(self, min_cppstd)
 
-        minimum_os_version = self.conan_data["minimum_os_version"][self.version][os_name]
+        minimum_os_versions_list = self.conan_data["minimum_os_version"][self.version]
+        if not os_name in minimum_os_versions_list:
+            # Prevent unmapped versions (e.g. older versions + visionOS).
+            raise ConanInvalidConfiguration("No minimal compatible version defined for this OS and metal-cpp combination.")
+        minimum_os_version = minimum_os_versions_list[os_name]
 
         xcrun = XCRun(self)
         os_version = self.settings.get_safe("os.version")
