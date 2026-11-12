@@ -5,3 +5,8 @@ sources:
   "2.2":
     url: "https://github.com/agenium-scale/nsimd/archive/v2.2.tar.gz"
     sha256: "7916bec6c8ea9ddc690a5bfc80fb1b9402f9e1b2a4b4bb6b6bb8eb5a07eb018e"
+patches:
+  "3.0.1":
+    - patch_file: "patches/3.0.1-0001-fix-nsimd-cxx-typo.patch"
+      patch_description: "Fix misspelled NSIMD_CXX so C++20 builds targeting SSE4.2 define nsimd::simd_ext_c"
+      patch_type: "portability"

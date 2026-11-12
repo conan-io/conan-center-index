@@ -1,9 +1,9 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, replace_in_file
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class NsimdConan(ConanFile):
@@ -27,6 +27,9 @@ class NsimdConan(ConanFile):
         "simd": None
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -45,6 +48,7 @@ class NsimdConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -56,19 +60,6 @@ class NsimdConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        # nsimd.h uses size_t in its C++20 block but only includes <concepts>,
-        # which no longer pulls in <cstddef> with newer libstdc++ (GCC 14+).
-        # Fixed upstream in 3.0.1.
-        if self.version == "2.2":
-            replace_in_file(self, os.path.join(self.source_folder, "include", "nsimd", "nsimd.h"),
-                            "  #include <concepts>",
-                            "  #include <concepts>\n  #include <cstddef>")
-        # nsimd 3.0.1 misspells NSIMD_CXX in the SSE4.2 block, so C++20 builds
-        # targeting SSE4.2 never define nsimd::simd_ext_c.
-        if self.version == "3.0.1":
-            replace_in_file(self, os.path.join(self.source_folder, "include", "nsimd", "nsimd.h"),
-                            "#if nsIMD_CXX >= 2020",
-                            "#if NSIMD_CXX >= 2020")
         cmakefile_path = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self, cmakefile_path,
                         " SHARED ",
