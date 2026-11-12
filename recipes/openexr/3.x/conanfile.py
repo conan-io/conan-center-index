@@ -54,7 +54,7 @@ class OpenEXRConan(ConanFile):
             self.requires("openjph/[>=0.23.1 <1]")
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17 if Version(self.version) >= "3.5" else 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
