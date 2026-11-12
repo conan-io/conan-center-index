@@ -154,7 +154,7 @@ class FFMpegConan(ConanFile):
         "with_libx265": True,
         "with_libvpx": True,
         "with_libmp3lame": True,
-        "with_libfdk_aac": True,
+        "with_libfdk_aac": False,  # with x264/x265 (GPL) it makes the build nonfree and unredistributable
         "with_libwebp": True,
         "with_ssl": "openssl",
         "with_libalsa": True,
@@ -501,6 +501,15 @@ class FFMpegConan(ConanFile):
 
         tc = self._create_toolchain()
 
+        # Licenses, see https://github.com/FFmpeg/FFmpeg/blob/master/LICENSE.md
+        # libx264, libx265 (and postproc before 8.0) are GPL. With the GPL, libfdk_aac needs --enable-nonfree,
+        # OpenSSL >= 3.0 (Apache-2.0) needs --enable-version3 and older OpenSSL needs --enable-nonfree.
+        gpl = bool(self.options.with_libx264 or self.options.with_libx265 or self.options.get_safe("postproc"))
+        with_openssl = self.options.with_ssl == "openssl"
+        openssl_v3 = with_openssl and Version(self.dependencies["openssl"].ref.version) >= "3.0.0"
+        nonfree = gpl and (bool(self.options.get_safe("with_libfdk_aac")) or (with_openssl and not openssl_v3))
+        version3 = gpl and openssl_v3
+
         args = [
             "--pkg-config-flags=--static",
             "--disable-doc",
@@ -565,9 +574,9 @@ class FFMpegConan(ConanFile):
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
-            opt_enable_disable("nonfree", self.options.get_safe("with_libfdk_aac") or (self.options.with_ssl and (
-                self.options.with_libx264 or self.options.with_libx265 or self.options.get_safe("postproc")))),
-            opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.get_safe("postproc"))
+            opt_enable_disable("gpl", gpl),
+            opt_enable_disable("version3", version3),
+            opt_enable_disable("nonfree", nonfree),
         ]
 
         # Version specific options
