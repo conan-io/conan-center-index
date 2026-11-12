@@ -41,7 +41,7 @@ class HictkConan(ConanFile):
         self.requires("fmt/10.2.1")
         self.requires("hdf5/1.14.3")
         self.requires("highfive/[>=2.9.0 <4]")
-        self.requires("libdeflate/1.22")
+        self.requires("libdeflate/[>=1.22 <2]")
         self.requires("parallel-hashmap/1.3.12") # Note: v1.3.12 is more recent than v1.37
         self.requires("readerwriterqueue/1.0.6")
         self.requires("span-lite/0.11.0")
