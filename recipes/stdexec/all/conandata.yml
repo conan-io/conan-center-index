@@ -1,10 +1,9 @@
 sources:
-  "0.11.0.cci.20261020":
+  "0.11.0":
     "stdexec":
-      url: "https://github.com/NVIDIA/stdexec/archive/dfc8c95718e8c66ff5496bc3b185a9162c93821e.tar.gz"
-      sha256: "a818bf55f8bd23b183737f534afddd660bb753e3455f850bce03411c84df360f"
-    # rapids-cmake is fetched by upstream through CMake FetchContent, it is provided here as a second
-    # source so that the build does not need network access. See NVIDIA/stdexec#2341.
+      url: "https://github.com/NVIDIA/stdexec/archive/refs/tags/v0.11.0.tar.gz"
+      sha256: "6dbc47da4cbc0ca50bbcf6812eb63a195de298f5091ffbc55d30074d81ee91a4"
+    # upstream downloads rapids-cmake at configure time, provided here so the build works offline
     "rapids-cmake":
-      url: "https://github.com/rapidsai/rapids-cmake/archive/refs/tags/v24.08.00.tar.gz"
-      sha256: "30572386ffc9ebcbfaa29c5a72ea07cfec5428bfc29e8e4cc5e95d33ae3913ef"
+      url: "https://github.com/rapidsai/rapids-cmake/archive/refs/tags/v24.02.00.tar.gz"
+      sha256: "5cd5570b07e36727e19a02cd01f08cb1aef46faa96bef17a2d69556b7c2483fd"
