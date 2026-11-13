@@ -1,0 +1,4 @@
+sources:
+  "1.3.0":
+    url: "https://github.com/marton78/pffft/archive/refs/tags/v1.3.0.tar.gz"
+    sha256: "055058d886e72b45e797179681b0d8b658688a37c1dc6fdbff2094074d9515ac"
