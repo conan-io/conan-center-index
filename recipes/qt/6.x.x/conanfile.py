@@ -842,6 +842,10 @@ class QtConan(ConanFile):
     def _cmake_qt6_private_file(self, module):
         return os.path.join("lib", "cmake", f"Qt6{module}", f"conan_qt_qt6_{module.lower()}private.cmake")
 
+    @property
+    def _cmake_qt6_targets_included_file(self):
+        return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_qt6_targets_included.cmake")
+
     def package(self):
         if self.settings.os == "Macos":
             save(self, ".qmake.stash", "")
@@ -856,6 +860,14 @@ class QtConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
             rm(self, mask, self.package_folder, recursive=True, excludes="Qt6HostInfoConfig.cmake")
+        # The Qt6<Module>Config.cmake files deleted above set __qt_<Module>_targets_file_included once their
+        # targets exist, and Qt6<Module>ConfigExtras.cmake attaches its finalizers (QML deployment, Android)
+        # only then. Set it for every module whose extras CMakeDeps includes.
+        extras = glob.glob(os.path.join(self.package_folder, "lib", "cmake", "Qt6*", "Qt6*ConfigExtras.cmake"))
+        modules = sorted(os.path.basename(e)[len("Qt6"):-len("ConfigExtras.cmake")] for e in extras)
+        modules = [module for module in modules if module]  # lib/cmake/Qt6/Qt6ConfigExtras.cmake has no guard
+        save(self, os.path.join(self.package_folder, self._cmake_qt6_targets_included_file),
+             "".join(f"set(__qt_{module}_targets_file_included ON)\n" for module in modules))
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
         rm(self, "*.pdb*", self.package_folder, recursive=True)
         rm(self, "ensure_pro_file.cmake", self.package_folder, recursive=True)
@@ -1638,6 +1650,8 @@ class QtConan(ConanFile):
             _add_build_module("qtPlatform", self._cmake_platform_target_setup_file)
 
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin"))
+        # before every Qt6<Module>ConfigExtras.cmake, which the loop below adds
+        _add_build_module("qtCore", self._cmake_qt6_targets_included_file)
         _add_build_module("qtCore", self._cmake_executables_file)
         _add_build_module("qtCore", self._cmake_qt6_private_file("Core"))
         if self.settings.os in ["Windows", "iOS"]:
