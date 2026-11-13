@@ -61,6 +61,7 @@ class FFMpegConan(ConanFile):
         "with_libx264": [True, False],
         "with_libx265": [True, False],
         "with_libvpx": [True, False],
+        "with_libvpl": [True, False],
         "with_libmp3lame": [True, False],
         "with_libfdk_aac": [True, False],
         "with_libwebp": [True, False],
@@ -153,6 +154,7 @@ class FFMpegConan(ConanFile):
         "with_libx264": True,
         "with_libx265": True,
         "with_libvpx": True,
+        "with_libvpl": False,
         "with_libmp3lame": True,
         "with_libfdk_aac": True,
         "with_libwebp": True,
@@ -240,6 +242,7 @@ class FFMpegConan(ConanFile):
             "with_libx264": ["avcodec"],
             "with_libx265": ["avcodec"],
             "with_libvpx": ["avcodec"],
+            "with_libvpl": ["avcodec"],
             "with_libmp3lame": ["avcodec"],
             "with_libfdk_aac": ["avcodec"],
             "with_libwebp": ["avcodec"],
@@ -378,6 +381,8 @@ class FFMpegConan(ConanFile):
             self.requires("whisper-cpp/[>=1.7.6 <2]")
         if self.options.get_safe("with_openapv"):
             self.requires("openapv/0.2.0.4")
+        if self.options.with_libvpl:
+            self.requires("libvpl/[>=2.6 <3]")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -536,6 +541,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libx264", self.options.with_libx264),
             opt_enable_disable("libx265", self.options.with_libx265),
             opt_enable_disable("libvpx", self.options.with_libvpx),
+            opt_enable_disable("libvpl", self.options.get_safe("with_libvpl")),
             opt_enable_disable("libmp3lame", self.options.with_libmp3lame),
             opt_enable_disable("libfdk-aac", self.options.get_safe("with_libfdk_aac")),
             opt_enable_disable("libwebp", self.options.with_libwebp),
@@ -836,6 +842,8 @@ class FFMpegConan(ConanFile):
             return component
 
         avutil = _add_component("avutil", [])
+        if self.options.get_safe("with_libvpl"):
+            avutil.requires.append("libvpl::dispatcher")
         if self.options.avdevice:
             avdevice = _add_component("avdevice", ["avfilter", "swscale", "avformat", "avcodec", "swresample", "postproc"])
         if self.options.avfilter:
@@ -949,6 +957,8 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("libjxl::libjxl")
             if self.options.get_safe("with_openapv"):
                 avcodec.requires.append("openapv::openapv")
+            if self.options.get_safe("with_libvpl"):
+                avcodec.requires.append("libvpl::dispatcher")
 
         if self.options.avformat:
             if self.options.with_bzip2:
@@ -995,3 +1005,4 @@ class FFMpegConan(ConanFile):
 
         if self.options.get_safe("with_vulkan"):
             avutil.requires.append("vulkan-loader::vulkan-loader")
+
