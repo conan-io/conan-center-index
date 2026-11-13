@@ -22,6 +22,9 @@ class Hfsm2Conan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    def package_id(self):
+        self.info.clear()
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
