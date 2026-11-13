@@ -22,12 +22,11 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         if can_run(self):
-            self.run("swig -swiglib")
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
 
     def test(self):
         if can_run(self):
-            self.run("swig -version")
-            self.run("swig -swiglib")
+            self.run("swig -version", env="conanrun")
+            self.run("swig -swiglib", env="conanrun")
