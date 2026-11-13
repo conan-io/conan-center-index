@@ -5,10 +5,9 @@ from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.microsoft import is_msvc
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
-import glob
 import os
 
-required_conan_version = ">=2.1"
+required_conan_version = ">=2.4"
 
 class DuckdbConan(ConanFile):
     name = "duckdb"
@@ -73,10 +72,6 @@ class DuckdbConan(ConanFile):
             tc.cache_variables["DUCKDB_EXPLICIT_PLATFORM"] = f"{os_name}_{arch}{postfix}"
         # INFO: third_party/re2/CMakeLists.txt:24 requires CMake 3.4 for MSVC shared builds
         tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
-        if is_msvc(self):
-            # INFO: Need for MSVC to set correct __cplusplus value
-            # https://github.com/duckdb/duckdb/issues/2805#issuecomment-1013889896
-            tc.extra_cxxflags.append("/Zc:__cplusplus")
         tc.generate()
 
     def build(self):
@@ -93,11 +88,8 @@ class DuckdbConan(ConanFile):
         # (tools/cpp/duckdb_cpp.hpp), so consumers cannot use it
         rm(self, "*duckdb_cpp_api.*", os.path.join(self.package_folder, "lib"))
         if self.options.shared:
-            rm(self, "duckdb_*.lib", os.path.join(self.package_folder, "lib"))
-            rm(self, "*_extension.lib", os.path.join(self.package_folder, "lib"))
-            for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
-                if not lib.endswith(".dll.a"):
-                    os.remove(lib)
+            rm(self, "*.lib", os.path.join(self.package_folder, "lib"), excludes="duckdb.lib")
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"), excludes="*.dll.a")
         else:
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
