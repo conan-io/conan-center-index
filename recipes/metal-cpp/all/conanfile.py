@@ -40,7 +40,7 @@ class MetalcppConan(ConanFile):
     def validate(self):
         os_name = str(self.settings.os)
         if not os_name in ["Macos", "iOS", "tvOS", "visionOS"]:
-            raise ConanInvalidConfiguration("Metal can only be used on an Macos, iOS or tvOS platform.")
+            raise ConanInvalidConfiguration("Metal can only be used on an Macos, iOS, tvOS or visionOS platform.")
 
         if self.settings.compiler.get_safe("cppstd"):
             min_cppstd = "17"
@@ -52,12 +52,9 @@ class MetalcppConan(ConanFile):
             raise ConanInvalidConfiguration("No minimal compatible version defined for this OS and metal-cpp combination.")
         minimum_os_version = minimum_os_versions_list[os_name]
 
-        xcrun = XCRun(self)
-        os_version = self.settings.get_safe("os.version")
-        sdk_version = self.settings.get_safe("os.sdk_version")
-        visible_sdk_version = xcrun.sdk_version if platform.system() == "Darwin" else None
-
-        sdk_version = sdk_version or os_version or visible_sdk_version
+        sdk_version = self.settings.get_safe("os.sdk_version") or self.settings.get_safe("os.version")
+        if sdk_version is None and platform.system() == "Darwin":
+            sdk_version = XCRun(self).sdk_version
 
         if sdk_version is None:
             # Will raise when `os.version` or `os.sdk_version` are not defined
