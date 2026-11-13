@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/modelica/fmi-ls-xcp/releases/download/v1.0.0/FMI-LS-XCP-1.0.0.zip"
+    sha256: "394dd23991566fcbd252654710fb571c5838c884e01890b7be29a791b9d45c8e"
