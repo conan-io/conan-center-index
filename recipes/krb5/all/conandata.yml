@@ -18,10 +18,10 @@ patches:
       patch_source: "https://github.com/krb5/krb5/pull/1351"
       patch_type: "portability"
   "1.21.2":
-    - patch_file: "patches/1.21.2/0001-no-tests.patch"
+    - patch_file: "patches/0001-no-tests.patch"
       patch_type: "conan"
       patch_description: "Disable building tests"
-    - patch_file: "patches/1.21.2/0002-disable_ksu_root.patch"
+    - patch_file: "patches/0002-disable_ksu_root.patch"
       patch_description: "No ksu install as root user"
       patch_type: "conan"
     - patch_file: "patches/0003-find-openssl-module.patch"
