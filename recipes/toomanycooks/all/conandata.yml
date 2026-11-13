@@ -1,0 +1,7 @@
+sources:
+  "1.6.1":
+    url: "https://github.com/tzcnt/TooManyCooks/archive/refs/tags/v1.6.1.tar.gz"
+    sha256: "f6cfa33b48292ff1eb5637f090bc5a09a41c8ed3cc2c95bcef8a6b4f94d7d2e7"
+patches:
+  "1.6.1":
+    - patch_file: "patches/0001-fallback-futex-waitv.patch"
