@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class HiGHSConan(ConanFile):
@@ -73,9 +73,15 @@ class HiGHSConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "highs")
-        self.cpp_info.set_property("cmake_target_name", "highs::highs")
-        self.cpp_info.set_property("pkg_config_name", "highs")
-        self.cpp_info.libs = ["highs"]
-        self.cpp_info.includedirs = [os.path.join("include", "highs")]
+        self.cpp_info.set_property("cmake_target_name", "none")
+        self.cpp_info.set_property("pkg_config_name", "none")
+        self.cpp_info.components["highs"].set_property("pkg_config_name", "highs")
+        self.cpp_info.components["highs"].set_property("cmake_target_name", "highs::highs")
+        self.cpp_info.components["highs"].libs = ["highs"]
+        self.cpp_info.components["highs"].includedirs.append(os.path.join("include", "highs"))
+        self.cpp_info.components["highs"].requires = ["zlib::zlib"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["m", "pthread"])
+            self.cpp_info.components["highs"].system_libs.extend(["m", "pthread"])
+        self.cpp_info.components["extra"].libs = ["highs_extras"]
+        self.cpp_info.components["extra"].type = "shared-library"
+        self.cpp_info.components["extra"].set_property("cmake_target_name", "highs::highs_extras")
