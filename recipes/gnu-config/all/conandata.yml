@@ -1,10 +1,26 @@
 sources:
   "cci.20210814":
-    url: "https://https.git.savannah.gnu.org/git/config.git"
-    commit: "191bcb948f7191c36eefe634336f5fc5c0c4c2be"
+    "config.guess":
+      url:
+        - "https://git.savannah.gnu.org/cgit/config.git/plain/config.guess?id=191bcb948f7191c36eefe634336f5fc5c0c4c2be"
+        - "https://raw.githubusercontent.com/cgitmirror/config/191bcb948f7191c36eefe634336f5fc5c0c4c2be/config.guess"
+      sha256: "af8a1922c9b3c240bf2119d4ec0965a0b5ec36b1016017ba66db44b3b53e9cea"
+    "config.sub":
+      url:
+        - "https://git.savannah.gnu.org/cgit/config.git/plain/config.sub?id=191bcb948f7191c36eefe634336f5fc5c0c4c2be"
+        - "https://raw.githubusercontent.com/cgitmirror/config/191bcb948f7191c36eefe634336f5fc5c0c4c2be/config.sub"
+      sha256: "d611751fba98e807c9684d253bb02aa73d6825fe0e0b9ae3cbf258a59171c9b0"
   "cci.20201022":
-    url: "https://https.git.savannah.gnu.org/git/config.git"
-    commit: "1c4398015583eb77bc043234f5734be055e64bea"
+    "config.guess":
+      url:
+        - "https://git.savannah.gnu.org/cgit/config.git/plain/config.guess?id=1c4398015583eb77bc043234f5734be055e64bea"
+        - "https://raw.githubusercontent.com/cgitmirror/config/1c4398015583eb77bc043234f5734be055e64bea/config.guess"
+      sha256: "6e0ed0d350ac08471913daad1b73027ac4138df4a595e6344bd109ce78814e42"
+    "config.sub":
+      url:
+        - "https://git.savannah.gnu.org/cgit/config.git/plain/config.sub?id=1c4398015583eb77bc043234f5734be055e64bea"
+        - "https://raw.githubusercontent.com/cgitmirror/config/1c4398015583eb77bc043234f5734be055e64bea/config.sub"
+      sha256: "ffe90eb03551449cc90ae927070ff7d06f12c99b5aae1ec7b3d931f2b09fc938"
 patches:
   "cci.20210814":
     - patch_file: "patches/cci.20210814-0001-tvos-support.patch"
