@@ -1,0 +1,12 @@
+sources:
+  "3.9.1":
+    url: "https://github.com/opencollab/arpack-ng/archive/refs/tags/3.9.1.tar.gz"
+    sha256: "f6641deb07fa69165b7815de9008af3ea47eb39b2bb97521fbf74c97aba6e844"
+patches:
+  "3.9.1":
+    - patch_file: "patches/0001-use-openblas.patch"
+      patch_description: "Use the BLAS and LAPACK provided by OpenBLAS (Conan) instead of the CMake FindBLAS/FindLAPACK modules"
+      patch_type: "conan"
+    - patch_file: "patches/0002-use-conan-eigen.patch"
+      patch_description: "Use the Eigen3 CMake config file provided by Conan instead of falling back to pkg-config"
+      patch_type: "conan"
