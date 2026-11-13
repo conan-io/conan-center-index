@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    url: "https://github.com/Katze719/ThreadSchedule/releases/download/v3.0.0/threadschedule-3.0.0-source.tar.gz"
+    sha256: "05610f65d6238b48ba1ebf3e619849fc841ff0be937cc860b1f7ce20725d399f"
