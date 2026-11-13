@@ -67,6 +67,11 @@ class BisonConan(ConanFile):
             "--disable-nls",
             "--datarootdir=${prefix}/res",
         ])
+        # Don't rebuild the Texinfo manual, as makeinfo isn't a build requirement.
+        # With MSVC, `make install` regenerates doc/bison.help and
+        # doc/cross-options.texi from the built bison.exe, which makes
+        # doc/bison.info out of date, and the build fails without makeinfo.
+        tc.make_args.append("MAKEINFO=true")
         if self.settings.compiler == "apple-clang":
             tc.configure_args.append("gl_cv_compiler_check_decl_option=")
             tc.extra_cflags.append("-Wno-error=incompatible-function-pointer-types")
