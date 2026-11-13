@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os, XCRun, fix_apple_shared_install_name
 from conan.tools.env import Environment
-from conan.tools.files import copy, rename, get, rmdir, chdir
+from conan.tools.files import copy, rename, get, replace_in_file, rmdir, chdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -35,6 +35,20 @@ class LibX264Conan(ConanFile):
         "with_opencl": True,
         "with_asm": True
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    @property
+    def _is_clang_cl(self):
+        """True when building with clang-cl (clang targeting MSVC ABI on Windows)."""
+        return (str(self.settings.compiler) == "clang"
+                and str(self.settings.os) == "Windows")
+
+    @property
+    def _is_msvc_like(self):
+        """True for MSVC and clang-cl — both need CC override and host/build suppression."""
+        return is_msvc(self) or self._is_clang_cl
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -110,12 +124,7 @@ class LibX264Conan(ConanFile):
             env.define("AS", unix_path(self, os.path.join(self.dependencies.build["nasm"].package_folder, "bin", "nasm{}".format(".exe" if self.settings.os == "Windows" else ""))))
             env.vars(self).save_script("conanbuild_nasm")
 
-        if is_msvc(self):
-            env = Environment()
-            env.define("CC", "cl -nologo")
-            env.vars(self).save_script("conanbuild_msvc")
-
-        if is_msvc(self) or self.settings.os in ["iOS", "watchOS", "tvOS"]:
+        if self._is_msvc_like or self.settings.os in ["iOS", "watchOS", "tvOS"]:
             # autotools does not know about the msvc and Apple embedded OS canonical name(s)
             args["--build"] = None
             args["--host"] = None
@@ -131,9 +140,21 @@ class LibX264Conan(ConanFile):
         if extra_ldflags:
             args["--extra-ldflags"] = " ".join(extra_ldflags)
         tc.update_configure_args(args)
-        tc.generate()
+
+        # MSVC-like compilers: x264's configure recognizes "cl" as MSVC.
+        # With the clang-cl detection patch, it also recognizes "clang-cl".
+        # Pass the env through tc.generate() so it goes into the toolchain script
+        # itself (sourced last) instead of a separate script that gets overridden.
+        if self._is_msvc_like:
+            env = tc.environment()
+            cc = "clang-cl -nologo" if self._is_clang_cl else "cl -nologo"
+            env.define("CC", cc)
+            tc.generate(env)
+        else:
+            tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.configure()
@@ -145,7 +166,7 @@ class LibX264Conan(ConanFile):
             autotools = Autotools(self)
             autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if is_msvc(self):
+        if self._is_msvc_like:
             ext = ".dll.lib" if self.options.shared else ".lib"
             rename(self, os.path.join(self.package_folder, "lib", f"libx264{ext}"),
                          os.path.join(self.package_folder, "lib", "x264.lib"))
@@ -154,7 +175,7 @@ class LibX264Conan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "x264")
         self.cpp_info.libs = ["x264"]
-        if is_msvc(self) and self.options.shared:
+        if self._is_msvc_like and self.options.shared:
             self.cpp_info.defines.append("X264_API_IMPORTS")
         if self.settings.os in ["FreeBSD", "Linux"]:
             self.cpp_info.system_libs.extend(["dl", "pthread", "m"])
