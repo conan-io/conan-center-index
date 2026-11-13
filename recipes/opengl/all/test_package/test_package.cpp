@@ -2,7 +2,18 @@
 
 #ifdef __APPLE__
 
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE
+#include <OpenGLES/ES2/gl.h>
+#else
 #include <OpenGL/gl.h>
+#endif
+
+#elif defined(__ANDROID__)
+
+bool init_context() { return true; }
+
+#include <GLES2/gl2.h>
 
 #else
 
