@@ -1,0 +1,4 @@
+sources :
+  "1.0.0" :
+    url : "https://github.com/DLR-TS/odrSpiral/archive/refs/tags/v1.0.0.tar.gz"
+    sha256 : "7b335b9937188279e322ab89a1479c7ce269e9d8fbc57d687891d21abb509dce"
