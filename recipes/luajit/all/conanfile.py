@@ -43,6 +43,17 @@ class LuajitConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    @property
+    def _cross_building_on_windows(self):
+        # INFO: msvcbuild.bat only builds for Windows, so cross builds use the Makefile, which needs a POSIX shell
+        return self.settings_build.os == "Windows" and cross_building(self) and not is_msvc(self)
+
+    def build_requirements(self):
+        if self._cross_building_on_windows:
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+
     def validate(self):
         if self.settings.os == "Macos" and cross_building(self):
             raise ConanInvalidConfiguration("Cross-building LuaJIT on Mac is not supported. See https://github.com/LuaJIT/LuaJIT/issues/947")
@@ -62,7 +73,16 @@ class LuajitConan(ConanFile):
             if self.options.shared and is_apple_os(self):
                 # INFO: changing install names or rpaths can't be redone because larger updated load commands do not fit
                 tc.extra_ldflags.append("-headerpad_max_install_names")
-            tc.generate()
+            env = tc.environment()
+            if cross_building(self):
+                # INFO: LuaJIT's Makefile also adds CFLAGS/LDFLAGS to the host tools (minilua, buildvm), which are run
+                #       during the build, so pass the toolchain flags through the target-only variables instead
+                env.unset("CFLAGS")
+                env.unset("LDFLAGS")
+                env.define("TARGET_CFLAGS", tc.cflags)
+                env.define("TARGET_LDFLAGS", tc.ldflags)
+                env.define("TARGET_SHLDFLAGS", tc.ldflags)
+            tc.generate(env)
 
     def _patch_sources(self):
         if not is_msvc(self):
@@ -96,9 +116,49 @@ class LuajitConan(ConanFile):
     @property
     def _make_arguments(self):
         args = [f"PREFIX={unix_path(self, self.package_folder)}"]
-        if is_apple_os(self) and self._macosx_deployment_target:
+        if self.settings.os == "Macos" and self._macosx_deployment_target:
             args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
+        if cross_building(self) and self._target_sys:
+            args.append(f"TARGET_SYS={self._target_sys}")
+        if self._cross_building_on_windows:
+            args.append(f"HOST_CC={self._host_cc}")
+        if self.settings.os == "Android":
+            # INFO: The NDK compiler only comes through the CC environment variable, which the Makefile's CC overrides,
+            #       and CC must stay the host compiler for the host tools anyway
+            ndk = AutotoolsToolchain(self).android_cross_flags
+            if ndk:
+                cc = ndk["CC"]
+                if cc.endswith(".cmd"):
+                    # INFO: bash can't run the NDK's .cmd wrappers, which only add the target to clang
+                    bin_folder, wrapper = os.path.split(cc)
+                    cc = f"{unix_path(self, os.path.join(bin_folder, 'clang.exe'))} --target={wrapper[:-len('-clang.cmd')]}"
+                else:
+                    cc = unix_path(self, cc)
+                ar = unix_path(self, ndk["AR"])
+                strip = unix_path(self, ndk["STRIP"])
+                args += [f"STATIC_CC=\"{cc}\"", f"DYNAMIC_CC=\"{cc} -fPIC\"", f"TARGET_LD=\"{cc}\"",
+                         f"TARGET_AR=\"{ar} rcus\"", f"TARGET_STRIP={strip}"]
         return args
+
+    @property
+    def _host_cc(self):
+        # INFO: Compiler for the host tools (minilua, buildvm): the build profile's, if the Makefile can use it
+        #       (gcc-style options), else MSYS2's gcc
+        compilers = {}
+        if self.conf_build:
+            compilers = self.conf_build.get("tools.build:compiler_executables", default={}, check_type=dict)
+        if "c" in compilers:
+            return unix_path(self, compilers["c"])
+        if str(self.settings_build.compiler) in ("clang", "apple-clang"):
+            return "clang"
+        return "gcc"
+
+    @property
+    def _target_sys(self):
+        # INFO: Only needed when cross compiling: LuaJIT derives it from the host otherwise
+        if is_apple_os(self) and self.settings.os != "Macos":
+            return "iOS"
+        return {"Macos": "Darwin", "Linux": "Linux", "Android": "Linux", "Windows": "Windows"}.get(str(self.settings.os))
 
     @property
     def _luajit_include_folder(self):
