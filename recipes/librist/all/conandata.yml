@@ -1,0 +1,12 @@
+sources:
+  "0.2.20":
+    url: "https://code.videolan.org/rist/librist/-/archive/v0.2.20/librist-v0.2.20.tar.gz"
+    sha256: "9e40eeb87f014790531ad41326cc271b930a65962e4b15231b301fc59b29fe31"
+patches:
+  "0.2.20":
+    - patch_file: "patches/0.2.20-0001-no-host-lookups.patch"
+      patch_description: "Do not search the build host: drop the Homebrew include dir on macOS and the libmicrohttpd probe"
+      patch_type: "conan"
+    - patch_file: "patches/0.2.20-0002-mbedtls-pkgconfig.patch"
+      patch_description: "Do not search the build host for mbedtls (CMake probe, then find_library): use the mbedcrypto.pc that Conan generates"
+      patch_type: "conan"
