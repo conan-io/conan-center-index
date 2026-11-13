@@ -97,6 +97,10 @@ class NanoarrowConan(ConanFile):
         
         if self.options.with_ipc:
             self.cpp_info.components["nanoarrow_ipc"].libs = [f"nanoarrow_ipc{suffix}"]
+            if not self.options.shared:
+                # The static IPC library depends on the vendored flatcc runtime, which nanoarrow
+                # installs as a separate archive (libflatccrt.a) that consumers must link as well.
+                self.cpp_info.components["nanoarrow_ipc"].libs.append("flatccrt")
             self.cpp_info.components["nanoarrow_ipc"].requires = ["nanoarrow_core"]
             self.cpp_info.components["nanoarrow_ipc"].set_property("cmake_target_name", "nanoarrow::nanoarrow_ipc")
             if self.options.get_safe("with_zstd"):
