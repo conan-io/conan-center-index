@@ -1,0 +1,4 @@
+sources:
+  "1.1.6":
+    url: "https://github.com/caomengxuan666/cxxmcp/releases/download/v1.1.6/cxxmcp-sdk-source-v1.1.6.tar.gz"
+    sha256: "7d321ee1e48f71666659949c98b5e3c81b273db98607b21d7b3d9301f5bf42e2"
