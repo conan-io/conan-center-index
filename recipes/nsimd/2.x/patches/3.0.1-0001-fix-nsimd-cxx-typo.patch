@@ -1,0 +1,11 @@
+--- a/include/nsimd/nsimd.h
++++ b/include/nsimd/nsimd.h
+@@ -414,7 +414,7 @@
+       struct cpu {};
+       struct sse2 {};
+       struct sse42 {};
+-      #if nsIMD_CXX >= 2020
++      #if NSIMD_CXX >= 2020
+         template <typename T>
+         concept simd_ext_c = std::is_same_v<T, nsimd::cpu> ||
+                              std::is_same_v<T, nsimd::sse2> ||

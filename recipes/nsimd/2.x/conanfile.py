@@ -1,14 +1,15 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, replace_in_file
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class NsimdConan(ConanFile):
     name = "nsimd"
     homepage = "https://github.com/agenium-scale/nsimd"
+    deprecated = "nsimd appears unmaintained by its authors - consider using an alternative SIMD library"
     description = "Agenium Scale vectorization library for CPUs and GPUs"
     topics = ("hpc", "neon", "cuda", "avx", "simd", "avx2", "sse2", "aarch64", "avx512", "sse42", "rocm", "sve", "neon128")
     url = "https://github.com/conan-io/conan-center-index"
@@ -26,6 +27,9 @@ class NsimdConan(ConanFile):
         "fPIC": True,
         "simd": None
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,6 +49,7 @@ class NsimdConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
