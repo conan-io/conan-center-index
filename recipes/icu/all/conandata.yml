@@ -34,6 +34,10 @@ patches:
     - patch_file: "patches/0001-76.1-fix-mingw.patch"
       patch_description: "support mingw"
       patch_type: "portability"
+    - patch_file: "patches/0002-79.1-fix-emscripten.patch"
+      patch_description: "Add config file for wasm-emscripten platform"
+      patch_type: "portability"
+      patch_source: "https://gerrit.libreoffice.org/c/core/+/213010/4/external/icu/icu4c-emscripten-cross.patch.1"
   "78.2":
     - patch_file: "patches/0001-76.1-fix-mingw.patch"
       patch_description: "support mingw"
