@@ -14,7 +14,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.0"
 
 
 class ICUConan(ConanFile):
@@ -347,29 +347,3 @@ class ICUConan(ConanFile):
             self.cpp_info.components["icu-test"].set_property("cmake_target_name", "ICU::test")
             self.cpp_info.components["icu-test"].libs = [f"{prefix}icutest{suffix}"]
             self.cpp_info.components["icu-test"].requires = ["icu-tu", "icu-uc"]
-
-        # TODO: to remove after conan v2
-        self.cpp_info.names["cmake_find_package"] = "ICU"
-        self.cpp_info.names["cmake_find_package_multi"] = "ICU"
-        self.cpp_info.components["icu-data"].names["cmake_find_package"] = "data"
-        self.cpp_info.components["icu-data"].names["cmake_find_package_multi"] = "data"
-        self.cpp_info.components["icu-data-alias"].names["cmake_find_package"] = "dt"
-        self.cpp_info.components["icu-data-alias"].names["cmake_find_package_multi"] = "dt"
-        self.cpp_info.components["icu-uc"].names["cmake_find_package"] = "uc"
-        self.cpp_info.components["icu-uc"].names["cmake_find_package_multi"] = "uc"
-        self.cpp_info.components["icu-i18n"].names["cmake_find_package"] = "i18n"
-        self.cpp_info.components["icu-i18n"].names["cmake_find_package_multi"] = "i18n"
-        self.cpp_info.components["icu-i18n-alias"].names["cmake_find_package"] = "in"
-        self.cpp_info.components["icu-i18n-alias"].names["cmake_find_package_multi"] = "in"
-        if self.options.with_icuio:
-            self.cpp_info.components["icu-io"].names["cmake_find_package"] = "io"
-            self.cpp_info.components["icu-io"].names["cmake_find_package_multi"] = "io"
-        if self.settings.os != "Windows" and self.options.data_packaging in ["files", "archive"]:
-            self.env_info.ICU_DATA.append(data_path)
-        if self._enable_icu_tools:
-            self.cpp_info.components["icu-tu"].names["cmake_find_package"] = "tu"
-            self.cpp_info.components["icu-tu"].names["cmake_find_package_multi"] = "tu"
-            self.cpp_info.components["icu-test"].names["cmake_find_package"] = "test"
-            self.cpp_info.components["icu-test"].names["cmake_find_package_multi"] = "test"
-        if self._enable_icu_tools or self.options.with_extras:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
