@@ -1,9 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanException
-from conan.tools.files import copy, load, save, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, download, load, save, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Git
 import os
+import stat
 
 required_conan_version = ">=1.52.0"
 
@@ -27,8 +27,13 @@ class GnuConfigConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        git = Git(self)
-        git.fetch_commit(**self.conan_data["sources"][self.version])
+        # Download the two files at a fixed commit: a snapshot tarball of the
+        # repository has no stable checksum, and a git fetch can't be cached by
+        # the sources backup.
+        for filename, data in self.conan_data["sources"][self.version].items():
+            path = os.path.join(self.source_folder, filename)
+            download(self, **data, filename=path)
+            os.chmod(path, os.stat(path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         apply_conandata_patches(self)
 
     def build(self):
