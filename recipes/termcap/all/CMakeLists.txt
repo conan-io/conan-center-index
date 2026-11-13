@@ -21,7 +21,6 @@ endforeach()
 
 add_definitions(-DSTDC_HEADERS)
 add_definitions(-DTERMCAP_BUILDING)
-add_definitions("-DTERMCAP_FILE=\"${CMAKE_INSTALL_SYSCONFDIR}/termcap\"")
 if(BUILD_SHARED_LIBS)
     add_definitions(-DTERMCAP_SHARED)
 endif()
