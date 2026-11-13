@@ -47,7 +47,8 @@ class SpirvtoolsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"spirv-headers/{self.version}")
+        # TODO: Remove `transitive_headers=True` once Diligent-Core no longer needs SPIRV-Tools private headers
+        self.requires(f"spirv-headers/{self.version}", transitive_headers=True)
 
     def validate_build(self):
         # newer versions of the library require C++17 for internals
@@ -59,7 +60,7 @@ class SpirvtoolsConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "1.3.239":
-            self.tool_requires("cmake/[>=3.17.2 <4]")
+            self.tool_requires("cmake/[>=3.17.2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -145,6 +146,12 @@ class SpirvtoolsConan(ConanFile):
             rm(self, "*SPIRV-Tools-shared.dll", os.path.join(self.package_folder, "bin"))
             rm(self, "*SPIRV-Tools-shared*", os.path.join(self.package_folder, "lib"))
 
+        # TODO: Remove it once Diligent-Core no longer needs SPIRV-Tools private headers
+        # Those same private headers also require headers that the build generates on the fly
+        copy(self, "*.h", src=os.path.join(self.source_folder, "source"), dst=os.path.join(self.package_folder, "include", "source"))
+        copy(self, "*.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*.inc", src=self.build_folder, dst=os.path.join(self.package_folder, "include"))
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SPIRV-Tools")
         self.cpp_info.set_property("pkg_config_name", "SPIRV-Tools-shared" if self.options.shared else "SPIRV-Tools")
@@ -194,6 +201,3 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.components["spirv-tools-diff"].set_property("cmake_target_name", "SPIRV-Tools-diff")
             self.cpp_info.components["spirv-tools-diff"].libs = ["SPIRV-Tools-diff"]
             self.cpp_info.components["spirv-tools-diff"].requires = ["spirv-tools-core", "spirv-tools-opt"]
-
-        if Version(self.version) < "1.3" and not self.options.shared:
-            del self.cpp_info.components["spirv-tools-diff"]

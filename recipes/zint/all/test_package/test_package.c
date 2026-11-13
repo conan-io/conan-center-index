@@ -2,15 +2,11 @@
 
 #include <stdio.h>
 
-#define ZINT_MAJOR(V) (((V)/10000) % 100)
-#define ZINT_MINOR(V) (((V)/  100) % 100)
-#define ZINT_PATCH(V) (((V)      ) % 100)
+int main(void) {
+    struct zint_symbol *symbol = ZBarcode_Create();
+    int error = ZBarcode_Encode(symbol, (unsigned char *)"Hello", 0);
+    ZBarcode_Delete(symbol);
 
-
-int main() {
-    struct zint_symbol *zbar = ZBarcode_Create();
-    ZBarcode_Delete(zbar);
-
-    int version = ZBarcode_Version();
-    printf("Zint version: %d.%d.%d\n", ZINT_MAJOR(version), ZINT_MINOR(version), ZINT_PATCH(version));
+    printf("Zint version: %d\n", ZBarcode_Version());
+    return error < ZINT_WARN_INVALID_OPTION ? 0 : 1;
 }

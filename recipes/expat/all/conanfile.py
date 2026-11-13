@@ -90,7 +90,7 @@ class ExpatConan(ConanFile):
             self.cpp_info.defines = ["XML_STATIC"]
         if self.options.get_safe("char_type") in ("wchar_t", "ushort"):
             self.cpp_info.defines.append("XML_UNICODE")
-        elif self.options.get_safe("char_type") == "wchar_t":
+        if self.options.get_safe("char_type") == "wchar_t":
             self.cpp_info.defines.append("XML_UNICODE_WCHAR_T")
         if self.options.large_size:
             self.cpp_info.defines.append("XML_LARGE_SIZE")

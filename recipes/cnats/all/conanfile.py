@@ -94,7 +94,7 @@ class PackageConan(ConanFile):
         self.cpp_info.libs = [f"{lib_name}{debug}"]
         self.cpp_info.set_property("cmake_file_name", "cnats")
         self.cpp_info.set_property("cmake_target_name", f"cnats::{lib_name}")
-        if f"cnats::{lib_name}{debug}" != "cnats::{lib_name}":
+        if debug:
             # older versions of cnats have cmake targets with debug suffix in the name
             # kept for backwards compatibility, remove in future version
             self.cpp_info.set_property("cmake_target_aliases", [f"cnats::{lib_name}{debug}"])

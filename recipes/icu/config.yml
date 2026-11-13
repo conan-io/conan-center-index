@@ -1,4 +1,6 @@
 versions:
+  "79.1":
+    folder: all
   "78.2":
     folder: all
   "78.1":

@@ -113,6 +113,9 @@ class OpenblasConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
         # When cross-compiling, OpenBLAS requires explicitly setting TARGET
         if cross_building(self, skip_x64_x86=True) and not self.options.target:
             # Try inferring the target from settings.arch

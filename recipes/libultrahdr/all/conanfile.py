@@ -1,7 +1,9 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 import os
 
@@ -38,6 +40,8 @@ class LibultrahdrConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if Version(self.version) >= "2.0":
+            self.license = "MIT", "Apache-2.0"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,6 +73,9 @@ class LibultrahdrConan(ConanFile):
         tc.cache_variables["UHDR_BUILD_DEPS"] = False
         tc.cache_variables['UHDR_BUILD_EXAMPLES'] = False
         tc.cache_variables["CMAKE_REQUIRE_FIND_PACKAGE_JPEG"] = True
+        tc.cache_variables["UHDR_ENABLE_HEIF"] = False
+        if is_msvc(self) and not self.options.shared:
+            tc.cache_variables["BUILD_FOR_WINUI"] = True
 
         tc.generate()
         deps = CMakeDeps(self)
@@ -86,11 +93,14 @@ class LibultrahdrConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.options.shared:
+            rm(self, "libuhdr.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ['uhdr']
+        suffix = "-static" if Version(self.version) >= "2.0" and is_msvc(self) and not self.options.shared else ""
+        self.cpp_info.libs = [f"uhdr{suffix}"]
 
         if self.options.with_jpeg == "libjpeg":
             self.cpp_info.requires = ["libjpeg::libjpeg"]

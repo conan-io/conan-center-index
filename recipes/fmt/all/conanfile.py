@@ -156,3 +156,9 @@ class FmtConan(ConanFile):
                 self.cpp_info.components["_fmt"].defines.append("FMT_SHARED")
 
         self.cpp_info.components["_fmt"].set_property("cmake_target_name", f"fmt::{target}")
+
+        if Version(self.version) >= "12.2.0" and not self.options.header_only:
+            self.cpp_info.components["fmt_c"].set_property("cmake_target_name", "fmt::fmt-c")
+            self.cpp_info.components["fmt_c"].set_property("cmake_target_aliases", ["fmt-c"])
+            self.cpp_info.components["fmt_c"].libs = ["fmt-c"]
+            self.cpp_info.components["fmt_c"].requires = ["_fmt"]

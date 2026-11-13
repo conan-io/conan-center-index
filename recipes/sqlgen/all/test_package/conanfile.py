@@ -25,6 +25,9 @@ class TestPackageConan(ConanFile):
 
         if self.dependencies[self.tested_reference_str].options.with_sqlite3:
             tc.preprocessor_definitions["TEST_SQLITE3_ENABLED"] = True
+
+        if self.dependencies[self.tested_reference_str].options.with_duckdb:
+            tc.preprocessor_definitions["TEST_DUCKDB_ENABLED"] = True
         tc.generate()
 
     def build(self):

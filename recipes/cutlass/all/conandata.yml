@@ -1,4 +1,7 @@
 sources:
+  "4.5.1":
+    url: "https://github.com/NVIDIA/cutlass/archive/refs/tags/v4.5.1.tar.gz"
+    sha256: "550a27be6fe92de8bed43101b64f6b52878346409472b3e94e5b82f65b5b58cb"
   "4.3.5":
     url: "https://github.com/NVIDIA/cutlass/archive/refs/tags/v4.3.5.tar.gz"
     sha256: "73d8c3914a6049ff5c43b7dfb9d70f26e44dc9e10e36049db5a999b9faf6dbf0"

@@ -1,0 +1,70 @@
+Patch CMakeLists.txt to keep the same filenames on Windows as zlib <= 1.3.1:
+- Shared: zlib1.dll + zdll.lib (MSVC) / zlib1.dll + libz.dll.a (MinGW)
+- Static: zlib.lib (MSVC) / libz.a (MinGW)
+- No "d" debug postfix and no "s" static suffix
+- Use win32/zlib1.rc (as 1.3.2 did) so the DLL version resource reports
+  OriginalFilename/InternalName "zlib1.dll" instead of "libz.dll"/"libzd.dll"
+Upstream 1.4 instead produces libz.dll/libz.lib/libzs.lib on MSVC (and libzd* in Debug).
+The PDB is removed in the recipe's package() method.
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2ccbab9..32f97aa 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -233,16 +233,15 @@ set(ZLIB_SRCS
+     uncompr.c
+     zutil.c)
+ 
+-if(WIN32)
+-    set(zlib_static_suffix "s")
+-    set(CMAKE_DEBUG_POSTFIX "d")
+-endif(WIN32)
++if(WIN32 AND NOT MINGW)
++    set(zlib_static_suffix "lib")
++endif(WIN32 AND NOT MINGW)
+ 
+ if(ZLIB_BUILD_SHARED)
+     add_library(
+         zlib SHARED ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS}
+                     ${ZLIB_PRIVATE_HDRS}
+-                    $<$<OR:$<BOOL:${WIN32}>,$<BOOL:${CYGWIN}>>:win32/zlib-cmake.rc>
++                    $<$<OR:$<BOOL:${WIN32}>,$<BOOL:${CYGWIN}>>:win32/zlib1.rc>
+                     $<$<BOOL:${MSVC}>:${zlib_BINARY_DIR}/zlib.def>)
+     add_library(ZLIB::ZLIB ALIAS zlib)
+ 
+@@ -282,6 +281,15 @@ if(ZLIB_BUILD_SHARED)
+         set_target_properties(zlib PROPERTIES OUTPUT_NAME z)
+     endif(MSVC)
+ 
++    if(WIN32)
++        # always zlib1.dll on Windows (consistency with previous versions of the recipe)
++        set_target_properties(zlib PROPERTIES PREFIX "" RUNTIME_OUTPUT_NAME "zlib1")
++        if(NOT MINGW)
++            # "zdll.lib" import library for "zlib1.dll" on Windows
++            set_target_properties(zlib PROPERTIES ARCHIVE_OUTPUT_NAME "zdll")
++        endif()
++    endif()
++
+     if(UNIX
+         AND NOT APPLE
+         AND NOT (CMAKE_SYSTEM_NAME STREQUAL "AIX")
+@@ -321,15 +329,10 @@ if(ZLIB_BUILD_STATIC)
+         set_target_properties(zlibstatic PROPERTIES PREFIX "lib")
+     endif(CYGWIN)
+ 
+-    if(MSVC)
+-        set_target_properties(zlibstatic
+-            PROPERTIES
+-                ARCHIVE_OUTPUT_NAME libz${zlib_static_suffix})
+-    else(MSVC)
+-        set_target_properties(zlibstatic
+-            PROPERTIES
+-                ARCHIVE_OUTPUT_NAME z${zlib_static_suffix})
+-    endif(MSVC)
++    # zlib.lib on Windows (non-MinGW), libz.a elsewhere (consistency with previous versions of the recipe)
++    set_target_properties(zlibstatic
++        PROPERTIES
++            ARCHIVE_OUTPUT_NAME z${zlib_static_suffix})
+ 
+     set_target_properties(zlibstatic
+         PROPERTIES

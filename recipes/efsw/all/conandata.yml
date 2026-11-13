@@ -1,5 +1,8 @@
 sources:
   # Newer versions at the top
+  "1.6.3":
+    url: "https://github.com/SpartanJ/efsw/archive/refs/tags/1.6.3.tar.gz"
+    sha256: "54981ad19532bf818bb4c6b550dfa577bbfdde928036826b36bf950f936cad52"
   "1.5.1":
     url: "https://github.com/SpartanJ/efsw/archive/refs/tags/1.5.1.tar.gz"
     sha256: "403691e15b48dc0e67e7d3fe6e6aa3d116bc8420790df93d1d90d2cecaa06e70"

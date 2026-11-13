@@ -1,0 +1,22 @@
+--- a/fpdfsdk/formfiller/cffl_privatedata.h
++++ b/fpdfsdk/formfiller/cffl_privatedata.h
+@@ -7,6 +7,7 @@
+ #ifndef FPDFSDK_FORMFILLER_CFFL_PRIVATEDATA_H_
+ #define FPDFSDK_FORMFILLER_CFFL_PRIVATEDATA_H_
+
+ #include <memory>
++#include <stdint.h>
+
+ #include "core/fxcrt/observed_ptr.h"
+
+--- a/fpdfsdk/fpdf_flatten.cpp
++++ b/fpdfsdk/fpdf_flatten.cpp
+@@ -11,6 +11,7 @@
+ #include <algorithm>
+ #include <memory>
+ #include <sstream>
+ #include <utility>
+ #include <vector>
++#include <stdint.h>
+
+ #include "constants/annotation_common.h"

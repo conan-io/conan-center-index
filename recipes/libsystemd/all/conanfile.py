@@ -83,7 +83,9 @@ class LibsystemdConan(ConanFile):
         download(self, **self.conan_data["sources"][self.version], filename="sources.tar.gz")
         with tarfile.open("sources.tar.gz", "r:gz") as tar:
             tar.extractall()
-        move_folder_contents(self, os.path.join(self.source_folder, f"systemd-stable-{self.version}"), self.source_folder)
+        folder_name = f"systemd-stable-{self.version}" if Version(self.version) < "262" else f"systemd-{self.version}"
+        move_folder_contents(self, os.path.join(self.source_folder, folder_name), self.source_folder)
+        self._patch_sources()
 
     @property
     def _so_version(self):
@@ -136,10 +138,15 @@ class LibsystemdConan(ConanFile):
             "link-udev-shared", "link-systemctl-shared", "analyze", "pam",
             "link-networkd-shared", "link-timesyncd-shared", "kernel-install",
             "libiptc", "elfutils", "repart", "homed", "importd", "acl",
-            "dns-over-tls", "log-trace"]
+            "dns-over-tls", "log-trace", "oomd", "sysext"]
 
-        unrelated.append("oomd")
-        unrelated.extend(["sysext", "nscd"])
+        if Version(self.version) < "262":
+            unrelated.append("nscd")
+        else:
+            # Removed options since 262: https://github.com/systemd/systemd/blob/v262.2/NEWS#L41
+            unrelated.remove("libidn")
+            unrelated.remove("libiptc")
+
         unrelated.append("link-boot-shared")
         unrelated.append("link-journalctl-shared")
         if Version(self.version) < "254.7":
@@ -171,17 +178,17 @@ class LibsystemdConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        meson_build = os.path.join(self.source_folder, "meson.build")
-        replace_in_file(self, meson_build, "@CONAN_SRC_REL_PATH@", f"'../{self.source_path.name}'")
+        if Version(self.version) < "262":
+            meson_build = os.path.join(self.source_folder, "meson.build")
+            replace_in_file(self, meson_build, "@CONAN_SRC_REL_PATH@", f"'../{self.source_path.name}'")
 
     def build(self):
-        self._patch_sources()
-
         meson = Meson(self)
         meson.configure()
         target = ("systemd:shared_library" if self.options.shared
                   else "systemd:static_library")
-        meson.build(target=f"version.h {target}")
+        version = "version.h" if Version(self.version) < "262" else "version"
+        meson.build(target=f"{version} {target}")
 
     def package(self):
         copy(self, "LICENSE.LGPL2.1", self.source_folder,

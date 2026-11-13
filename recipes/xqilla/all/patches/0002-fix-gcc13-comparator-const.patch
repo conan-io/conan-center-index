@@ -1,0 +1,16 @@
+Fix for error in newer gcc:
+ error: static assertion failed: comparison object must be invocable as const
+ Mark uniqueLessThanCompareFn::operator() const so it satisfies std::set's
+ comparator requirements under libstdc++ 13+ (GCC 13)
+
+--- a/include/xqilla/ast/XQDocumentOrder.hpp
++++ b/include/xqilla/ast/XQDocumentOrder.hpp
+@@ -68,7 +68,7 @@
+   public:
+     uniqueLessThanCompareFn(const DynamicContext *context)
+       : context_(context) {}
+-    bool operator()(const Node::Ptr &first, const Node::Ptr &second)
++    bool operator()(const Node::Ptr &first, const Node::Ptr &second) const
+     {
+       return first->uniqueLessThan(second, context_);
+     }

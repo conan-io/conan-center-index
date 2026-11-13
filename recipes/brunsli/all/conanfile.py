@@ -43,7 +43,7 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("brotli/1.0.9", transitive_libs=True)
+        self.requires("brotli/[>=1.1.1 <2]", transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:

@@ -110,13 +110,13 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_libpng:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
         if self.options.get_safe("with_opencolorio", True):
             self.requires("opencolorio/[>=2.3.1 <4]")
         if self.options.with_opencv:
             self.requires("opencv/[>=4.8.1 <5]")
         if self.options.with_tbb:
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/[>=2021.10.0 <2024]")
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.7")
         if self.options.with_ffmpeg:
@@ -133,7 +133,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.get_safe("with_openjph", False):
             self.requires("openjph/[>=0.16.0 <1]")
         if self.options.with_openvdb:
-            self.requires("openvdb/8.0.1")
+            self.requires("openvdb/[>=8.0.1 <13]")
         if self.options.with_ptex:
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
@@ -206,7 +206,8 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_QT"] = False
         tc.variables["USE_LIBPNG"] = self.options.with_libpng
         tc.variables["USE_FREETYPE"] = self.options.with_freetype
-        tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
+        tc.variables["USE_WEBP"] = self.options.with_libwebp
+        tc.variables["USE_LIBUHDR"] =  self.options.get_safe("with_libultrahdr", False)
         tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
         tc.cache_variables["USE_OPENJPH"] = self.options.get_safe("with_openjph", False)
 
@@ -318,7 +319,7 @@ class OpenImageIOConan(ConanFile):
                 ["dl", "m", "pthread"]
             )
         if self.options.with_tbb:
-            open_image_io_util.requires.append("onetbb::onetbb")
+            open_image_io_util.requires.append("onetbb::libtbb")
 
         # OpenImageIO::OpenImageIO
         open_image_io = self._add_component("OpenImageIO")

@@ -5,11 +5,11 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.1"
 
 
 class ResiprocateConan(ConanFile):
@@ -38,6 +38,9 @@ class ResiprocateConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -53,12 +56,13 @@ class ResiprocateConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on msvc, it does not export required symbols.")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.21 <4]")
+        self.tool_requires("cmake/[>=3.21]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -67,6 +71,7 @@ class ResiprocateConan(ConanFile):
         tc.variables["BUILD_RECON"] = False
         tc.variables["BUILD_REFLOW"] = False
         tc.variables["BUILD_REND"] = False
+        tc.variables["BUILD_MEDIA"] = False
         tc.variables["BUILD_REPRO"] = False
         tc.variables["BUILD_RETURN"] = False
         tc.variables["BUILD_TESTING"] = False

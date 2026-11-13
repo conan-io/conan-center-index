@@ -1,4 +1,7 @@
 sources:
+  "16.1.0":
+    sha256: 50efb4d94c3397aff3b0d61a5abd748b4dd31d9d3f2ab7be05b171d36a510f79
+    url: https://ftp.gnu.org/gnu/gcc/gcc-16.1.0/gcc-16.1.0.tar.xz
   "15.2.0":
     sha256: 7294d65cc1a0558cb815af0ca8c7763d86f7a31199794ede3f630c0d1b0a5723
     url: https://ftp.gnu.org/gnu/gcc/gcc-15.2.0/gcc-15.2.0.tar.gz

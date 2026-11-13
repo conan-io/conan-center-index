@@ -1,4 +1,4 @@
 sources:
-  "cci.20211005":
-    url: "https://github.com/Technica-Engineering/LightPcapNg/archive/58b8dd687bd462aba9d6e6d8a46209f0d1236213.zip"
-    sha256: 3634a2840f7bf43ebb293a9fbdfe0619ab7f233f9f774aac54b058dd5ab1320b
+  "cci.20260618":
+    url: "https://github.com/Technica-Engineering/LightPcapNg/archive/b36c701a2b4f48714e9c23a993c2758717c84123.zip"
+    sha256: 9b686145a4fed61e99afcda0d553c464243b75aa4964b60c4b8124c1fd683751

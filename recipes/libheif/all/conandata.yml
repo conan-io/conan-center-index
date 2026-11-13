@@ -1,7 +1,7 @@
 sources:
-  "1.20.1":
-    url: "https://github.com/strukturag/libheif/releases/download/v1.20.1/libheif-1.20.1.tar.gz"
-    sha256: "55cc76b77c533151fc78ba58ef5ad18562e84da403ed749c3ae017abaf1e2090"
+  "1.23.4":
+    url: "https://github.com/strukturag/libheif/releases/download/v1.23.4/libheif-1.23.4.tar.gz"
+    sha256: "d0c02b4b0e978f34a1974b6f3eea7975a537bf7a9195ffeea38e7242ff316fdd"
   "1.16.2":
     # keeping this version while it is still referenced by other recipes
     url: "https://github.com/strukturag/libheif/releases/download/v1.16.2/libheif-1.16.2.tar.gz"

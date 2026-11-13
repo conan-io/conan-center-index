@@ -66,7 +66,7 @@ class LibVPXConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if str(self.settings.compiler) not in ["Visual Studio", "msvc", "gcc", "clang", "apple-clang"]:
+        if str(self.settings.compiler) not in ["Visual Studio", "msvc", "gcc", "clang", "apple-clang", "emcc"]:
             raise ConanInvalidConfiguration(f"Unsupported compiler {self.settings.compiler}")
         if self.settings.os == "iOS" and (self.settings.os.sdk != "iphonesimulator" and self.settings.arch in ["x86_64", "x86"]):
             raise ConanInvalidConfiguration("iOS platform with x86/x86_64 architectures only supports 'iphonesimulator' SDK option")
@@ -188,6 +188,9 @@ class LibVPXConan(ConanFile):
             env.define("CC", "")
         else:
             env = tc.environment()
+            if is_apple_os(self) and self.settings.arch in ['x86', 'x86_64']:
+                for flag in getattr(tc, "asflags", []):  # asflags exists since 2.30
+                    env.remove("ASFLAGS", flag)
         tc.generate(env)
 
     def _patch_sources(self):

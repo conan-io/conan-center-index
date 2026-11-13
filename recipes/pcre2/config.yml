@@ -1,19 +1,11 @@
 versions:
-  "10.44":
+  "10.49":
+    folder: all
+  "10.48":
+    folder: all
+  "10.47":
     folder: all
   "10.43":
     folder: all
   "10.42":
-    folder: all
-  "10.40":
-    folder: all
-  "10.39":
-    folder: all
-  "10.37":
-    folder: all
-  "10.36":
-    folder: all
-  "10.35":
-    folder: all
-  "10.33":
     folder: all

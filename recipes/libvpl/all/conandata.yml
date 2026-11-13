@@ -1,0 +1,4 @@
+sources:
+  "2.17.0":
+    url: "https://github.com/intel/libvpl/archive/v2.17.0.tar.gz"
+    sha256: "4de3e2faf1e8307fb282e4a43f443191810f6a6b0a484fffa7995ba1c814c6ec"

@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
+from conan.tools.layout import basic_layout
 import os
 
 required_conan_version = ">=2.1"
@@ -8,12 +9,17 @@ required_conan_version = ">=2.1"
 class ZuluOpenJDK(ConanFile):
     name = "zulu-openjdk"
     description = "A OpenJDK distribution"
-    license = "https://www.azul.com/products/zulu-and-zulu-enterprise/zulu-terms-of-use/"
-    url = "https://github.com/conan-io/conan-center-index/"
+    license = "https://www.azul.com/products/zulu-and-zulu-enterprise/zulu-terms-of-use/" # pylint: disable=cci-invalid-recipe-license
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.azul.com"
     topics = ("java", "jdk", "openjdk")
     package_type = "application"
     settings = "os", "arch"
+    upload_policy = "skip"
+    build_policy = "missing"
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         supported_archs = ["x86_64", "armv8"]
@@ -33,24 +39,30 @@ class ZuluOpenJDK(ConanFile):
         get(self, **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)], strip_root=True)
 
     def package(self):
+        # INFO: Azul is changing the directory layout inside macOS bundles so that only the Contents directory
+        # https://foojay.io/today/azul-zulu-april-2026-quarterly-update-released/
+        build_folder = self.build_folder
+        if self.settings.os == "Macos":
+            build_folder = os.path.join(build_folder, "Contents", "Home")
+
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "bin"),
-             src=os.path.join(self.source_folder, "bin"),
+             src=os.path.join(build_folder, "bin"),
              excludes=("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll"))
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "include"),
-             src=os.path.join(self.source_folder, "include"))
+             src=os.path.join(build_folder, "include"))
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "lib"),
-             src=os.path.join(self.source_folder, "lib"))
+             src=os.path.join(build_folder, "lib"))
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "res"),
-             src=os.path.join(self.source_folder, "conf"))
+             src=os.path.join(build_folder, "conf"))
         # conf folder is required for security settings, to avoid
         # java.lang.SecurityException: Can't read cryptographic policy directory: unlimited
         # https://github.com/conan-io/conan-center-index/pull/4491#issuecomment-774555069
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "conf"),
-             src=os.path.join(self.source_folder, "conf"))
+             src=os.path.join(build_folder, "conf"))
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "licenses"),
-             src=os.path.join(self.source_folder, "legal"))
+             src=os.path.join(build_folder, "legal"))
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "lib", "jmods"),
-             src=os.path.join(self.source_folder, "jmods"))
+             src=os.path.join(build_folder, "jmods"))
 
     def package_info(self):
         include_folder = {"Linux": "linux", "Macos": "darwin", "Windows": "win32"}.get(str(self.settings.os))

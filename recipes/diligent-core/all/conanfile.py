@@ -2,13 +2,12 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, collect_libs, export_conandata_patches, copy, apply_conandata_patches, replace_in_file
-from conan.tools.microsoft import visual
+from conan.tools.files import rm, get, rmdir, collect_libs, export_conandata_patches, copy, apply_conandata_patches
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class DiligentCoreConan(ConanFile):
@@ -17,7 +16,8 @@ class DiligentCoreConan(ConanFile):
     homepage = "https://github.com/DiligentGraphics/DiligentCore"
     description = "Diligent Core is a modern cross-platfrom low-level graphics API."
     license = "Apache-2.0"
-    topics = ("graphics")
+    topics = ("graphics", "opengl", "vulkan", "directx", "shaders", "openxr", "raytracing")
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -29,46 +29,30 @@ class DiligentCoreConan(ConanFile):
         "fPIC": True,
         "with_glslang": True
     }
-    short_paths = True
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "6",
-            "clang": "3.4",
-            "apple-clang": "5.1",
-        }
-
-    @property
-    def _minimum_cpp_standard(self):
-        return 14
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warning("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-        if visual.is_msvc_static_runtime(self):
+        check_min_cppstd(self, 17)
+        if is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
+        # ThirdParty/CMakeLists.txt needs the spirv-cross-core target, and Archiver links spirv-cross-glsl
+        if self.dependencies["spirv-cross"].options.shared or not self.dependencies["spirv-cross"].options.glsl:
+            raise ConanInvalidConfiguration(f"{self.ref} requires a static spirv-cross with the glsl option enabled")
 
     def export_sources(self):
         copy(self, "conan_deps.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"), keep_path=False)
         export_conandata_patches(self)
-        
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Dependencies are provided by Conan. Dawn and abseil-cpp are only needed by the WebGPU backend, which is disabled
+        for folder in ["abseil-cpp", "dawn", "glew", "glslang", "SPIRV-Cross", "SPIRV-Headers",
+                       "SPIRV-Tools", "volk", "Vulkan-Headers", "xxHash"]:
+            rmdir(self, os.path.join(self.source_folder, "ThirdParty", folder))
+        apply_conandata_patches(self)
 
     def package_id(self):
-        if visual.is_msvc(self.info):
-            if visual.is_msvc_static_runtime(self.info):
+        if is_msvc(self.info):
+            if is_msvc_static_runtime(self.info):
                 self.info.settings.compiler.runtime = "MT/MTd"
             else:
                 self.info.settings.compiler.runtime = "MD/MDd"
@@ -79,16 +63,28 @@ class DiligentCoreConan(ConanFile):
         tc.variables["DILIGENT_NO_FORMAT_VALIDATION"] = True
         tc.variables["DILIGENT_BUILD_TESTS"] = False
         tc.variables["DILIGENT_NO_DXC"] = True
+        tc.variables["DILIGENT_NO_WEBGPU"] = True
         tc.variables["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
+        # DLSS and DirectSR headers are downloaded via cmake FetchContent
+        tc.variables["DILIGENT_NO_DLSS"] = True
+        tc.variables["DILIGENT_NO_DSR"] = True
         tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.dependencies["spirv-cross"].options.namespace
         tc.variables["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
         tc.variables["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
         tc.variables["ENABLE_RTTI"] = True
         tc.variables["ENABLE_EXCEPTIONS"] = True
         tc.variables[self._diligent_platform()] = True
+        tc.cache_variables["CMAKE_PROJECT_DiligentCore_INCLUDE"] = os.path.join(self.source_folder, "conan_deps.cmake")
+        # By default, Diligent builds static and shared versions of every main library. We select the one we
+        # want based on options.shared in package(). To avoid building every intermediate library as SHARED,
+        # we have to disable BUILD_SHARED_LIBS.
+        tc.cache_variables["BUILD_SHARED_LIBS"] = False
+        # Disable installing NVAPI via FetchContent
+        tc.cache_variables["FETCHCONTENT_FULLY_DISCONNECTED"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("glew", "cmake_target_name", "GLEW::glew")
         deps.generate()
 
     def layout(self):
@@ -102,33 +98,29 @@ class DiligentCoreConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "project(DiligentCore)",
-                        "project(DiligentCore)\n\ninclude(conan_deps.cmake)")
-
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
+        self.tool_requires("cmake/[>=3.24]")
 
     def requirements(self):
         self.requires("opengl/system")
-        if self.settings.os == "Linux":
-            self.requires("wayland/1.22.0")
 
-        self.requires("spirv-cross/1.3.224.0")
-        self.requires("spirv-tools/1.3.224.0")
+        spirv_version = "1.4.357.0"
+        self.requires(f"spirv-cross/{spirv_version}")
+        self.requires(f"spirv-tools/{spirv_version}")
         if self.options.with_glslang:
-            self.requires("glslang/1.3.224.0")
-        self.requires("vulkan-headers/1.3.224.0")
-        self.requires("vulkan-validationlayers/1.3.224.1")
-        self.requires("volk/1.3.224.0")
-        self.requires("xxhash/0.8.1")
+            self.requires(f"glslang/{spirv_version}")
+        self.requires(f"vulkan-headers/{spirv_version}")
+        self.requires(f"vulkan-validationlayers/{spirv_version}")
+        self.requires(f"volk/{spirv_version}")
+        self.requires("xxhash/0.8.3")
+        self.requires("glew/2.2.0")
+        if self.settings.os == "Linux":
+            self.requires("wayland/[>=1.22.0 <2]")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             if not cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.4.1")
+                self.requires("xkbcommon/1.13.1")
 
     def _diligent_platform(self):
         if self.settings.os == "Windows":
@@ -147,16 +139,8 @@ class DiligentCoreConan(ConanFile):
             return "PLATFORM_TVOS"
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
-        # By default, Diligent builds static and shared versions of every main library. We select the one we
-        # want based on options.shared in package(). To avoid building every intermediate library as SHARED,
-        # we have to disable BUILD_SHARED_LIBS.
-        # However, BUILD_SHARED_LIBS cannot be disabled normally (in the toolchain in configure()), because
-        # Conan outputs that override after the standard line that enables BUILD_SHARED_LIBS. Since the latter
-        # is a CACHE variable that cannot be overwritten with another set(), we have to specify it on the
-        # command-line, so it takes effect before the toolchain is parsed.
-        cmake.configure(variables={"BUILD_SHARED_LIBS": "OFF"})
+        cmake.configure()
         cmake.build()
 
     def package(self):

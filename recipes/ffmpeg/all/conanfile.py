@@ -315,11 +315,11 @@ class FFMpegConan(ConanFile):
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.get_safe("with_freetype"):
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
         if self.options.with_libxml2:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.get_safe("with_fontconfig"):
-            self.requires("fontconfig/2.15.0")
+            self.requires("fontconfig/[>=2.15.0 <3]")
         if self.options.get_safe("with_fribidi"):
             self.requires("fribidi/1.0.13")
         if self.options.get_safe("with_harfbuzz"):
@@ -870,7 +870,11 @@ class FFMpegConan(ConanFile):
                 avdevice.system_libs = ["ole32", "psapi", "strmiids", "uuid", "oleaut32", "shlwapi", "gdi32", "vfw32"]
             avutil.system_libs = ["user32", "bcrypt"]
             if self.options.avformat:
-                avformat.system_libs = ["secur32"]
+                avformat.system_libs = ["ws2_32"]
+                if not self.options.with_ssl:
+                    avformat.system_libs.append("secur32")
+                    if Version(self.version) >= "8.0":
+                        avformat.system_libs.extend(["crypt32", "ncrypt"])
         elif is_apple_os(self):
             if self.options.avdevice:
                 avdevice.frameworks = ["CoreFoundation", "Foundation", "CoreGraphics"]

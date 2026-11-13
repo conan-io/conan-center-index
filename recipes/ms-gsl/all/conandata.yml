@@ -1,4 +1,7 @@
 sources:
+  "5.0.1":
+    url: "https://github.com/microsoft/GSL/archive/v5.0.1.tar.gz"
+    sha256: "733a87a7eea56db075ee060735ba7616a27c1c55955f264d5473bf9e83294ad0"
   "4.2.2":
     url: "https://github.com/microsoft/GSL/archive/v4.2.2.tar.gz"
     sha256: "59e2a0a0ea22e8bcf9db2dc4d4bd21212ac6595748295fc27a7e02cf75eac4b5"

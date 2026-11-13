@@ -1,0 +1,13 @@
+diff --git a/libpkgconf/path.c b/libpkgconf/path.c
+index 80db165..f963d12 100644
+--- a/libpkgconf/path.c
++++ b/libpkgconf/path.c
+@@ -208,7 +208,7 @@ pkgconf_path_split(const char *text, pkgconf_list_t *dirlist, bool filter)
+ 	if (workbuf == NULL)
+ 		return 0;
+ 
+-	while ((p = strtok(iter, PKG_CONFIG_PATH_SEP_S)) != NULL)
++	while ((p = strtok(iter, ";:")) != NULL)
+ 	{
+ 		pkgconf_path_add(p, dirlist, filter);
+ 
