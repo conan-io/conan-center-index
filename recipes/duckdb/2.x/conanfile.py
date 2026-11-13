@@ -28,7 +28,6 @@ class DuckdbConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    short_paths = True
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -69,8 +68,6 @@ class DuckdbConan(ConanFile):
         tc.variables["EXTENSION_STATIC_BUILD"] = not self.options.shared
         tc.variables["ENABLE_SANITIZER"] = False
         tc.variables["ENABLE_UBSAN"] = False
-        if is_msvc(self) and not self.options.shared:
-            tc.preprocessor_definitions["DUCKDB_API"] = ""
         if cross_building(self):
             tc.variables["DUCKDB_EXPLICIT_PLATFORM"] = f"{self.settings.os}_{self.settings.arch}"
         # INFO: third_party/re2/CMakeLists.txt:32 (CMake version 3.4)
@@ -89,16 +86,6 @@ class DuckdbConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
                         "")
-        if is_msvc(self) and not self.options.shared:
-            replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb.h"),
-                            f"#define DUCKDB_C_API __declspec(dllimport)",
-                            f"#define DUCKDB_C_API"
-                            )
-            replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb", "common", "winapi.hpp"),
-                            f"#define DUCKDB_API __declspec(dllimport)",
-                            f"#define DUCKDB_API"
-                            )
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -127,9 +114,14 @@ class DuckdbConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "DuckDB")
+        self.cpp_info.set_property("cmake_target_name", "duckdb")
         if self.options.shared:
             self.cpp_info.libs = ["duckdb"]
         else:
+            self.cpp_info.set_property("cmake_target_aliases", ["duckdb_static"])
+            if self.settings.os == "Windows":
+                self.cpp_info.defines.append("DUCKDB_STATIC_BUILD")
             self.cpp_info.libs = [
                 "core_functions_extension",
                 "parquet_extension",
