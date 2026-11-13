@@ -143,6 +143,33 @@ class Open62541Conan(ConanFile):
         "parsing": True,
         "nodeset_loader": False,
     }
+    package_id_abi_options = (
+        "shared",
+        "historize",
+        "logging_level",
+        "subscription",
+        "methods",
+        "dynamic_nodes",
+        "single_header",
+        "multithreading",
+        "imutable_nodes",
+        "web_socket",
+        "discovery",
+        "discovery_semaphore",
+        "query",
+        "encryption",
+        "json_support",
+        "pub_sub",
+        "pub_sub_encryption",
+        "data_access",
+        "compiled_nodeset_descriptions",
+        "namespace_zero",
+        "typenames",
+        "cpp_compatible",
+        "readable_statuscodes",
+        "parsing",
+        "nodeset_loader",
+    )
 
     exports = "submoduledata.yml"
 
@@ -177,6 +204,10 @@ class Open62541Conan(ConanFile):
 
         if self.options.web_socket:
             self.options["libwebsockets"].with_ssl = self.options.encryption
+
+        self.package_id_abi_options = tuple(
+            option for option in self.package_id_abi_options if option in self.options
+        )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
