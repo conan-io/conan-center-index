@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.scm import Version
 import os
 
 
@@ -14,6 +15,11 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
+        if Version(self.tested_reference_str.split("/")[1]) >= "3.0":
+            # C++23 consumer compilation and the Visual Studio 2022 generator.
+            self.tool_requires("cmake/[>=3.21 <4]")
 
     def build(self):
         cmake = CMake(self)
