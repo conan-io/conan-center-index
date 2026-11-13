@@ -1,3 +1,5 @@
+Custom: No ksu install as root user
+
 diff --git a/src/config/pre.in b/src/config/pre.in
 index 1197c1ffd..fa499cf9d 100644
 --- a/src/config/pre.in
