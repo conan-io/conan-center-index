@@ -1,0 +1,34 @@
+From fc57b32ffb10075f67f7386c077aa30ac4a5034e Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Fri, 31 Oct 2025 12:44:39 +0100
+Subject: [PATCH 3/5] Use conan catch2 and tweak include directory
+
+---
+ Config.cmake/runtime_test.cmake | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/Config.cmake/runtime_test.cmake b/Config.cmake/runtime_test.cmake
+index cd6fda3..f0ded27 100644
+--- a/Config.cmake/runtime_test.cmake
++++ b/Config.cmake/runtime_test.cmake
+@@ -192,13 +192,16 @@ add_test(NAME ctest_fmi_zip_zip_test COMMAND fmi_zip_zip_test)
+ # ------------------------------------------------------------------------------
+ 
+ set(CMAKE_CXX_STANDARD 11) # Required by Catch2
++find_package(Catch2 REQUIRED)
++get_target_property(Catch2_INCLUDE_DIR Catch2::Catch2 INTERFACE_INCLUDE_DIRECTORIES)
+ add_library(Catch INTERFACE)
++target_include_directories(Catch INTERFACE ${Catch2_INCLUDE_DIR}/catch2)
++
+ 
+ # Catch2 consists of only headers, but we still want to compile its main function
+ # in a separate object file so we don't need to do it for each test.
+ add_library(catch2_main STATIC ${FMIL_TEST_DIR}/catch2_main.cpp)
+ target_link_libraries(catch2_main PUBLIC Catch)
+-target_include_directories(catch2_main PUBLIC ${FMILIB_THIRDPARTYLIBS}/Catch2/single_include/catch2)
+ 
+ # Creates a Catch2 test.
+ #
+-- 
+2.39.5
+
