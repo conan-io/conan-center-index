@@ -7,6 +7,24 @@ from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
+imconfig_options = {
+    "disable_obsolete_functions": {
+        "macro": "IMGUI_DISABLE_OBSOLETE_FUNCTIONS",
+        "default": False,
+    },
+    "enable_test_engine": {
+        "macro": "IMGUI_ENABLE_TEST_ENGINE",
+        "default": False,
+    },
+    "enable_test_engine_coroutine_stdthread_impl": {
+        "macro": "IMGUI_TEST_ENGINE_ENABLE_COROUTINE_STDTHREAD_IMPL",
+        "default": True,
+    },
+    "use_wchar32": {
+        "macro": "IMGUI_USE_WCHAR32",
+        "default": False,
+    },
+}
 
 class IMGUIConan(ConanFile):
     name = "imgui"
@@ -21,16 +39,14 @@ class IMGUIConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_test_engine": [True, False],
         "with_sdl3_binding": [True, False],
-        "use_wchar32": [True, False],
+        **{key: [True, False] for key, _ in imconfig_options.items()},
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_test_engine": False,
         "with_sdl3_binding": False,
-        "use_wchar32": False,
+        **{key: value["default"] for key, value in imconfig_options.items()},
     }
 
     def requirements(self):
@@ -45,7 +61,9 @@ class IMGUIConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if "testengine" not in self.conan_data["sources"][self.version]:
-            self.output.warning("No test engine found for this version, removing test engine option")
+            self.output.warning(
+                "No test engine found for this version, removing test engine option"
+            )
             del self.options.enable_test_engine
 
         # sdl3 bindings were introduced with 1.89.3
@@ -54,6 +72,11 @@ class IMGUIConan(ConanFile):
             del self.options.with_sdl3_binding
 
     def configure(self):
+        # Remove the test engine coroutine option if the test engine is not enabled
+        if not self.options.get_safe("enable_test_engine", False):
+            self.output.info("Test engine is not enabled, removing coroutine option")
+            del self.options.enable_test_engine_coroutine_stdthread_impl
+
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -63,21 +86,33 @@ class IMGUIConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["core"], strip_root=True)
         if "testengine" in self.conan_data["sources"][self.version]:
-            get(self, **self.conan_data["sources"][self.version]["testengine"], strip_root=True, destination="test_engine")
+            get(
+                self,
+                **self.conan_data["sources"][self.version]["testengine"],
+                strip_root=True,
+                destination="test_engine"
+            )
         self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["IMGUI_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        tc.variables["IMGUI_WITH_SDL3_BINDING"] = self.options.get_safe("with_sdl3_binding", False)
-        # test engine is not available for all versions
+        tc.variables["IMGUI_WITH_SDL3_BINDING"] = self.options.get_safe(
+            "with_sdl3_binding", False
+        )
+
+        # define preprocessor definitions and cmake variables to match the chosen options
+        for name, option in imconfig_options.items():
+            if self.options.get_safe(name, False):
+                tc.preprocessor_definitions[option["macro"]] = "1"
+                tc.variables[option["macro"]] = "ON"
+
+        # test engine enabled builds need the source dir of the test engine sources
         if self.options.get_safe("enable_test_engine"):
-            tc.preprocessor_definitions["IMGUI_ENABLE_TEST_ENGINE"] = "1"
-            tc.preprocessor_definitions["IMGUI_TEST_ENGINE_ENABLE_COROUTINE_STDTHREAD_IMPL"] = "1"
-            tc.variables["IMGUI_ENABLE_TEST_ENGINE"] = "ON"
-            tc.variables["IMGUI_TEST_ENGINE_DIR"] = os.path.join(self.source_folder, "test_engine").replace("\\", "/")
-        if self.options.use_wchar32:
-            tc.preprocessor_definitions["IMGUI_USE_WCHAR32"] = "1"
+            tc.variables["IMGUI_TEST_ENGINE_DIR"] = os.path.join(
+                self.source_folder, "test_engine"
+            ).replace("\\", "/")
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -87,10 +122,11 @@ class IMGUIConan(ConanFile):
         apply_conandata_patches(self)
 
         # Ensure we take into account export_headers
-        replace_in_file(self,
+        replace_in_file(
+            self,
             os.path.join(self.source_folder, "imgui.h"),
             "#ifdef IMGUI_USER_CONFIG",
-            "#include \"imgui_export_headers.h\"\n\n#ifdef IMGUI_USER_CONFIG"
+            '#include "imgui_export_headers.h"\n\n#ifdef IMGUI_USER_CONFIG',
         )
 
     def build(self):
@@ -120,8 +156,9 @@ class IMGUIConan(ConanFile):
         _is_docking_branch = "docking" in str(self.version)
         self.conf_info.define("user.imgui:with_docking", _is_docking_branch)
         self.cpp_info.libs = ["imgui"]
-        if self.options.use_wchar32:
-            self.cpp_info.defines.append("IMGUI_USE_WCHAR32")
+        for name, option in imconfig_options.items():
+            if self.options.get_safe(name, False):
+                self.cpp_info.defines.append(f"{option["macro"]}=1")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
         if self.settings.os == "Windows":
