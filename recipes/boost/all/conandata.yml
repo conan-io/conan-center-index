@@ -97,6 +97,12 @@ patches:
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"
       patch_type: "conan"
+    - patch_file: "patches/1.86.0-process-win-cross-compile.patch"
+      patch_description: "Declare Windows system libs unconditionally so Boost.Process can be cross-compiled to Windows from non-Windows hosts"
+      patch_type: "conan"
+    - patch_file: "patches/1.86.0-stacktrace-from-exception-mingw.patch"
+      patch_description: "Disable boost_stacktrace_from_exception for GCC targeting Windows as its source uses POSIX/ELF APIs unavailable in MinGW"
+      patch_type: "conan"
   "1.85.0":
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"
