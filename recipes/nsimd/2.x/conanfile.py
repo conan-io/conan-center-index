@@ -9,6 +9,7 @@ required_conan_version = ">=1.53.0"
 class NsimdConan(ConanFile):
     name = "nsimd"
     homepage = "https://github.com/agenium-scale/nsimd"
+    deprecated = "nsimd appears unmaintained by its authors - consider using an alternative SIMD library"
     description = "Agenium Scale vectorization library for CPUs and GPUs"
     topics = ("hpc", "neon", "cuda", "avx", "simd", "avx2", "sse2", "aarch64", "avx512", "sse42", "rocm", "sve", "neon128")
     url = "https://github.com/conan-io/conan-center-index"
