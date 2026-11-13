@@ -3,8 +3,9 @@ import os
 from conan import ConanFile
 from conan.tools.files import copy
 from conan.tools.build import check_min_cppstd
-from conan.tools.layout import basic_layout
 from conan.tools.files import get
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import rmdir
 
 required_conan_version = ">=2.0"
 
@@ -26,7 +27,11 @@ class Hfsm2Conan(ConanFile):
         self.info.clear()
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def validate(self):
         check_min_cppstd(self, 11)
@@ -34,9 +39,15 @@ class Hfsm2Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build(self):
+        pass
+
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
