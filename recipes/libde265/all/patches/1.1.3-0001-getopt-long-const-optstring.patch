@@ -1,0 +1,16 @@
+Make the option string of getopt_long const-correct.
+
+dec265 passes a string literal as the option string, which MSVC rejects
+(error C2664) when /Zc:strictStrings is in effect.
+
+Upstream issue: https://github.com/strukturag/libde265/issues/549
+
+--- a/extra/getopt.h
++++ b/extra/getopt.h
+@@ -57,5 +57,5 @@
+ 
+ int getopt(int, char**, char*);
+-int getopt_long(int, char**, char*, struct option*, int*);
++int getopt_long(int, char**, const char*, struct option*, int*);
+ 
+ #ifdef __cplusplus
