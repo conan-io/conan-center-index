@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/stdiobus/stdiobus-cpp/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "8d20a8a8a170a2ae77f93af5d5b2c24601247f3ae3a3b5aa5045fb11cbc64511"
