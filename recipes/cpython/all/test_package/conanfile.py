@@ -156,6 +156,12 @@ class TestPackageConan(ConanFile):
                 with env.vars(self).apply():
                     self._test_module("ssl", True)
 
+                if self._py_version >= "3.14":
+                    self._test_module("compression.zstd", self._cpython_option("with_zstd"))
+
+            if self._cpython_option("free_threaded"):
+                self.run(f'{self._python} -c "import sys; assert \'t\' in sys.abiflags, f\'Expected t in abiflags, got {{sys.abiflags}}\'"', env="conanrun")
+
             if is_apple_os(self) and not self._cpython_option("shared"):
                 self.output.info(
                     "Not testing the module, because these seem not to work on apple when cpython is built as"
