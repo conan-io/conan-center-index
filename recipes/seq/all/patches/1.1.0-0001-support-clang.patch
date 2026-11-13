@@ -1,0 +1,13 @@
+diff --git a/seq/type_traits.hpp b/seq/type_traits.hpp
+index 9ee7058..376f6fc 100644
+--- a/seq/type_traits.hpp
++++ b/seq/type_traits.hpp
+@@ -35,7 +35,7 @@
+ 
+ namespace std
+ {
+-#if defined(__GNUG__) && (__GNUC__ < 5)
++#if !defined(__clang__) && defined(__GNUG__) && (__GNUC__ < 5)
+ 
+ 	// Reimplement the wheel for older gcc
+ 
