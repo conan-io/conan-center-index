@@ -47,11 +47,14 @@ class OpenEXRConan(ConanFile):
         self.requires("imath/[>=3.1.9 <4]", transitive_headers=True)
         self.requires("libdeflate/[>=1.19 <2]")
 
-        if Version(self.version) >= "3.4":
+        if Version(self.version) >= "3.5":
+            self.requires("openjph/[>=0.32.0 <1]")
+            self.requires("zstd/[>=1.5 <1.6]")
+        elif Version(self.version) >= "3.4":
             self.requires("openjph/[>=0.23.1 <1]")
 
-    def validate(self):
-        check_min_cppstd(self, 11)
+    def validate_build(self):
+        check_min_cppstd(self, 17 if Version(self.version) >= "3.5" else 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -145,6 +148,8 @@ class OpenEXRConan(ConanFile):
         OpenEXRCore.requires.append("libdeflate::libdeflate")
         if Version(self.version) >= "3.4":
             OpenEXRCore.requires.append("openjph::openjph")
+        if Version(self.version) >= "3.5":
+            OpenEXRCore.requires.append("zstd::zstdlib")
         if self.settings.os in ["Linux", "FreeBSD"]:
             OpenEXRCore.system_libs = ["m"]
 
