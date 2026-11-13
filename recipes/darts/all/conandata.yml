@@ -1,0 +1,4 @@
+sources:
+  "0.32":
+    url: "http://chasen.org/~taku/software/darts/src/darts-0.32.tar.gz"
+    sha256: "0dfc0b82f0a05d93b92acf849368e54bf93f1de8ffb31ba0a21e45ab9e269285"
