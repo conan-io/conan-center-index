@@ -13,6 +13,7 @@ from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from pathlib import Path
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.system import PyEnv
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.26"
 
@@ -121,7 +122,7 @@ class LibtorchRecipe(ConanFile):
         self.tool_requires("protobuf/<host_version>")
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        check_min_cppstd(self, 20 if Version(self.version) >= "2.13.0" else 17)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -214,7 +215,10 @@ class LibtorchRecipe(ConanFile):
         tc.cache_variables["USE_NNPACK"] = self.options.get_safe("with_nnpack")
         tc.cache_variables["USE_NUMA"] = self.options.get_safe("with_numa")
 
-        pyenv = PyEnv(self)
+        # PyTorch requires Python >= 3.10 even when BUILD_PYTHON=OFF
+        # (codegen / version scripts). Use UV via py_version so macOS CLT
+        # Python 3.9 is not picked up as the venv base interpreter.
+        pyenv = PyEnv(self, py_version="3.10")
         pyenv.install(["pyyaml", "typing-extensions"])
         pyenv.generate()
         # PyEnv is set up to put the virtual env first in PATH
@@ -262,6 +266,7 @@ class LibtorchRecipe(ConanFile):
 
         # C10 component
         c10 = _whole_archive(self.cpp_info.components["c10"], "c10")
+        c10.bindirs = ["lib"]
         c10.requires = [
             "eigen::eigen",
             "fmt::fmt",
@@ -289,6 +294,7 @@ class LibtorchRecipe(ConanFile):
         if self._has_qnnpack:
             # TODO: is linking with 'log' in Android, check
             self.cpp_info.components["clog"].libs = ["clog"]
+            self.cpp_info.components["clog"].type = "static-library"
 
             self.cpp_info.components["pytorch_qnnpack"].libs = ["pytorch_qnnpack"]
             self.cpp_info.components["pytorch_qnnpack"].requires = [
@@ -338,6 +344,7 @@ class LibtorchRecipe(ConanFile):
 
         # Torch global component
         self.cpp_info.components["torch"].libs = ["torch"]
+        self.cpp_info.components["torch"].bindirs = ["lib"]
         self.cpp_info.components["torch"].requires = ["torch_cpu"]
         self.cpp_info.components["torch"].includedirs = ["include/torch/csrc/api/include", "include"]
 
