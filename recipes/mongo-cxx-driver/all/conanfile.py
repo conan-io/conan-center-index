@@ -22,13 +22,13 @@ class MongoCxxConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "polyfill": ["std", "boost", "mnmlstc", "experimental"],
+        "polyfill": ["std", "boost", "mnmlstc", "impls"],
         "with_ssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "polyfill": "boost",
+        # "polyfill" default set in config_options()
         "with_ssl": True,
     }
 
@@ -38,6 +38,8 @@ class MongoCxxConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        self.options.polyfill = "std" if valid_min_cppstd(self, 17) else "impls"
 
     def configure(self):
         if self.options.shared:
@@ -58,9 +60,8 @@ class MongoCxxConan(ConanFile):
     def _minimal_std_version(self):
         return {
             "std": "17",
-            "experimental": "14",
             "boost": "11",
-            "polyfill": "11"
+            "impls": "11",
         }[str(self.options.polyfill)]
 
     @property
@@ -73,15 +74,7 @@ class MongoCxxConan(ConanFile):
                 "clang": "5",
                 "apple-clang": "10"
             }
-        elif self.info.options.polyfill == "experimental":
-            # C++14
-            return {
-                "Visual Studio": "15",
-                "gcc": "5",
-                "clang": "3.5",
-                "apple-clang": "10"
-            }
-        elif self.info.options.polyfill == "boost":
+        elif self.info.options.polyfill in ["boost", "impls"]:
             # C++11
             return {
                 "Visual Studio": "14",
@@ -94,9 +87,16 @@ class MongoCxxConan(ConanFile):
                 f"please, specify _compilers_minimum_version for {self.options.polyfill} polyfill"
             )
 
+    @property
+    def _supports_external_polyfill(self):
+        return Version(self.version) < 4
+
     def validate(self):
         if self.options.with_ssl and not bool(self.dependencies["mongo-c-driver"].options.with_ssl):
             raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
+
+        if not self._supports_external_polyfill and self.options.polyfill in ["boost", "mnmlstc"]:
+            raise ConanInvalidConfiguration("external polyfill (boost or mnmlstc) is no longer supported in mongo-cxx-driver versions 4+")
 
         if self.options.polyfill == "mnmlstc":
             # TODO: add mnmlstc polyfill support
@@ -107,8 +107,6 @@ class MongoCxxConan(ConanFile):
             check_min_cppstd(self, self._minimal_std_version)
 
         compiler = str(self.settings.compiler)
-        if self.options.polyfill == "experimental" and compiler == "apple-clang":
-            raise ConanInvalidConfiguration("experimental polyfill is not supported for apple-clang")
 
         version = Version(self.settings.compiler.version)
         if compiler in self._compilers_minimum_version and version < self._compilers_minimum_version[compiler]:
@@ -122,10 +120,15 @@ class MongoCxxConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_PROJECT_MONGO_CXX_DRIVER_INCLUDE"] = os.path.join(self.generators_folder, "conan_cmake_project_include.cmake")
-        tc.variables["BSONCXX_POLY_USE_MNMLSTC"] = self.options.polyfill == "mnmlstc"
+
+        tc.variables["BSONCXX_POLY_USE_IMPLS"] = self.options.polyfill == "impls"
+
+        if self._supports_external_polyfill:
+            tc.variables["BSONCXX_POLY_USE_MNMLSTC"] = self.options.polyfill == "mnmlstc"
+            tc.variables["BSONCXX_POLY_USE_BOOST"] = self.options.polyfill == "boost"
+
         tc.variables["BSONCXX_POLY_USE_STD"] = self.options.polyfill == "std"
-        tc.variables["BSONCXX_POLY_USE_STD_EXPERIMENTAL"] = self.options.polyfill == "experimental"
-        tc.variables["BSONCXX_POLY_USE_BOOST"] = self.options.polyfill == "boost"
+
         tc.cache_variables["BUILD_VERSION"] = self.version
         tc.cache_variables["BSONCXX_LINK_WITH_STATIC_MONGOC"] = "OFF" if self.dependencies["mongo-c-driver"].options.shared else "ON"
         tc.cache_variables["MONGOCXX_LINK_WITH_STATIC_MONGOC"] = "OFF" if self.dependencies["mongo-c-driver"].options.shared else "ON"
