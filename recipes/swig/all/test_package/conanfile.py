@@ -16,6 +16,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_PROGRAM_PATH"] = self.dependencies[self.tested_reference_str].cpp_info.bindirs[0]
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
