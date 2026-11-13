@@ -1,14 +1,13 @@
-import glob
 import os
-import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.files import chdir, copy, get, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.files import chdir, copy, get
+from conan.tools.gnu import AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc
+from conan.tools.microsoft import MSBuild, MSBuildToolchain, VCVars, is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -27,16 +26,6 @@ class PremakeConan(ConanFile):
 
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "lto": [True, False],
-    }
-    default_options = {
-        "lto": False,
-    }
-
-    def config_options(self):
-        if self.settings.os != "Windows" or is_msvc(self):
-            self.options.rm_safe("lto")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -46,100 +35,89 @@ class PremakeConan(ConanFile):
 
     def requirements(self):
         if self.settings.os != "Windows":
-            self.requires("util-linux-libuuid/2.39")
+            self.requires("util-linux-libuuid/2.39.2")
 
     def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
+        if cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=False)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _ide_version(self):
-        compiler_version = str(self.settings.compiler.version)
-        if str(self.settings.compiler) == "Visual Studio":
-            return {"17": "2022",
-                    "16": "2019",
-                    "15": "2017",
-                    "14": "2015",
-                    "12": "2013"}.get(compiler_version)
-        else:
-            return {"194": "2022",
-                    "193": "2022",
-                    "192": "2019",
-                    "191": "2017",
-                    "190": "2015",
-                    "180": "2013"}.get(compiler_version)
+        return {"195": "2026",
+                "194": "2022",
+                "193": "2022",
+                "192": "2019",
+                "191": "2017",
+                "190": "2015",
+                "180": "2013"}.get(str(self.settings.compiler.version))
 
     @property
-    def _msvc_build_dir(self):
-        return os.path.join(self.source_folder, "build", f"vs{self._ide_version}")
-
-    def _version_info(self, version):
-        res = []
-        for p in re.split("[.-]|(alpha|beta)", version):
-            if p is None:
-                continue
-            try:
-                res.append(int(p))
-                continue
-            except ValueError:
-                res.append(p)
-        return tuple(res)
+    def _msvc_sln(self):
+        # VS2026 switched to the newer .slnx solution format
+        ext = "sln" if Version(self.settings.compiler.version) < 195 else "slnx"
+        return f"Premake5.{ext}"
 
     @property
-    def _gmake_platform(self):
+    def _bootstrap_arch(self):
         return {
-            "FreeBSD": "bsd",
-            "Windows": "windows",
-            "Linux": "unix",
-            "Macos": "macosx",
-        }[str(self.settings.os)]
+            "x86": "x86",
+            "x86_64": "x86_64",
+            "armv8": "AARCH64",
+        }.get(str(self.settings.arch), str(self.settings.arch))
 
     @property
-    def _gmake_build_dir(self):
-        return os.path.join(self.source_folder, "build", f"gmake.{self._gmake_platform}")
+    def _bootstrap_config(self):
+        return "debug" if self.settings.build_type == "Debug" else "release"
 
     @property
-    def _gmake_config(self):
-        build_type = "debug" if self.settings.build_type == "Debug" else "release"
-        if self.settings.os == "Windows":
-            arch = {
-                "x86": "x86",
-                "x86_64": "x64",
-            }[str(self.settings.arch)]
-            config = f"{build_type}_{arch}"
-        else:
-            config = build_type
-        return config
+    def _bootstrap_dir(self):
+        return os.path.join(self.source_folder, "build", "bootstrap")
 
     def generate(self):
         if is_msvc(self):
+            VCVars(self).generate()
             tc = MSBuildToolchain(self)
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
-            tc.make_args = ["verbose=1", f"config={self._gmake_config}"]
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()
 
-    def _patch_sources(self):
-        if self.options.get_safe("lto", None) is False:
-            for fn in glob.glob(os.path.join(self._gmake_build_dir, "*.make")):
-                replace_in_file(self, fn, "-flto", "", strict=False)
+    def _generate_build_files(self):
+        """Bootstrap premake using its own Bootstrap.mak/Bootstrap.bat, following
+        https://premake.github.io/docs/Building-Premake#using-the-git-code-repository
+        """
+        with chdir(self, self.source_folder):
+            if is_msvc(self):
+                # Stops before the devenv build so we can build with Conan's own MSBuild below.
+                self.run(
+                    f"nmake -f Bootstrap.mak windows-base "
+                    f"MSDEV=vs{self._ide_version} PLATFORM={self._bootstrap_arch}"
+                )
+            else:
+                # These targets bootstrap a minimal premake, embed the Lua scripts, generate the
+                # gmake project files, and build the final premake5 binary, all in one go.
+                make, target = {
+                    "Linux": ("make", "linux"),
+                    "Macos": ("make", "osx"),
+                    "FreeBSD": ("gmake", "bsd"),
+                    "Windows": ("mingw32-make", "mingw"),
+                }[str(self.settings.os)]
+                self.run(
+                    f"{make} -f Bootstrap.mak {target} "
+                    f"PLATFORM={self._bootstrap_arch} CONFIG={self._bootstrap_config}"
+                )
 
     def build(self):
-        self._patch_sources()
+        self._generate_build_files()
         if is_msvc(self):
-            with chdir(self, self._msvc_build_dir):
+            with chdir(self, self._bootstrap_dir):
                 msbuild = MSBuild(self)
-                msbuild.build(sln="Premake5.sln")
-        else:
-            with chdir(self, self._gmake_build_dir):
-                autotools = Autotools(self)
-                autotools.make(target="Premake5")
+                msbuild.build(sln=self._msvc_sln)
 
     def package(self):
         copy(self, "LICENSE.txt",
