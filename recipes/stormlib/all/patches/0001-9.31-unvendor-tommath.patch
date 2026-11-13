@@ -1,0 +1,27 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c78e88a..d8236dc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -306,9 +306,10 @@ else()
+ 	set(SRC_FILES ${SRC_FILES} ${BZIP2_FILES})
+ endif()
+ 
++find_package(libtommath REQUIRED CONFIG)
+ if(WIN32)
+-    set(SRC_ADDITIONAL_FILES ${TOMCRYPT_FILES} ${TOMMATH_FILES})
+-	set(LINK_LIBS ${LINK_LIBS} wininet)
++    set(SRC_ADDITIONAL_FILES ${TOMCRYPT_FILES})
++	set(LINK_LIBS ${LINK_LIBS} wininet libtommath)
+ else()
+     option(WITH_LIBTOMCRYPT "Use system LibTomCrypt library" OFF)
+     if(WITH_LIBTOMCRYPT)
+@@ -319,7 +320,8 @@ else()
+         set(LINK_LIBS ${LINK_LIBS} ${LIBTOMCRYPT_LIBRARY})
+         target_include_directories(${LIBRARY_NAME} PRIVATE ${LIBTOMCRYPT_INCLUDE_DIR})
+     else()
+-        set(SRC_ADDITIONAL_FILES ${TOMCRYPT_FILES} ${TOMMATH_FILES})
++        set(SRC_ADDITIONAL_FILES ${TOMCRYPT_FILES})
++        set(LINK_LIBS ${LINK_LIBS} libtommath)
+     endif()
+ endif()
+ 
