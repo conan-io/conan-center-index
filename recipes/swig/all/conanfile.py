@@ -54,8 +54,7 @@ class SwigConan(ConanFile):
             if is_msvc(self):
                 self.tool_requires("cccl/1.3")
         if is_msvc(self):
-            # bison 3.8.2 is not ready for msvc
-            self.tool_requires("bison/3.7.6")
+            self.tool_requires("winflexbison/[>=2 <3]")
         else:
             self.tool_requires("bison/3.8.2")
         self.tool_requires("automake/1.16.5")
@@ -85,6 +84,7 @@ class SwigConan(ConanFile):
             if is_msvc(self):
                 env.define("CC", "cccl -FS")
                 env.define("CXX", "cccl -FS")
+                env.define("BISON", "win_bison") # configure.ac uses AC_CHECK_PROGS([BISON], [bison])
                 tc.configure_args.append("--disable-ccache")
             else:
                 tc.extra_ldflags.append("-static")
