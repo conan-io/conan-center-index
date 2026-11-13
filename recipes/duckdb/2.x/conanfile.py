@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.microsoft import is_msvc
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 
 import glob
 import os
@@ -40,8 +40,7 @@ class DuckdbConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
+        check_min_cppstd(self, 17)
         # https://github.com/duckdb/duckdb/issues/27645
         if is_msvc(self) and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC Debug builds")
@@ -49,6 +48,7 @@ class DuckdbConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # Upstream forces the static MSVC runtime, let the profile's compiler.runtime decide
+        # https://github.com/duckdb/duckdb/issues/27643
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
                         "")
@@ -78,9 +78,6 @@ class DuckdbConan(ConanFile):
             # https://github.com/duckdb/duckdb/issues/2805#issuecomment-1013889896
             tc.extra_cxxflags.append("/Zc:__cplusplus")
         tc.generate()
-
-        dpes = CMakeDeps(self)
-        dpes.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -127,20 +124,7 @@ class DuckdbConan(ConanFile):
                 "duckdb_httplib",
                 "duckdb_loadable_extensions",
                 "duckdb_static",
-                "duckdb_fmt",
-                "duckdb_re2",
-                "duckdb_miniz",
-                "duckdb_utf8proc",
-                "duckdb_hyperloglog",
-                "duckdb_fastpforlib",
-                "duckdb_mbedtls",
-                "duckdb_fsst",
-                "duckdb_zstd",
-                "duckdb_skiplistlib",
-                "duckdb_yyjson",
             ]
-            if self.settings.os == "Linux" and self.settings.arch == "x86_64":
-                self.cpp_info.libs.append("duckdb_jemalloc")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread", "dl", "m"])
