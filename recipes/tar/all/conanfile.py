@@ -9,8 +9,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
-
+required_conan_version = ">=2.4"
 
 class TarConan(ConanFile):
     name = "tar"
@@ -21,18 +20,11 @@ class TarConan(ConanFile):
     topics = "archive"
 
     package_type = "application"
+    languages = "C"
     settings = "os", "arch", "compiler", "build_type"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def configure(self):
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -43,14 +35,14 @@ class TarConan(ConanFile):
     def requirements(self):
         self.requires("bzip2/1.0.8", run=True, headers=False, libs=False)
         self.requires("lzip/1.23", run=True, headers=False, libs=False)
-        self.requires("xz_utils/5.4.5", run=True, headers=False, libs=False)
-        self.requires("zstd/1.5.5", run=True, headers=False, libs=False)
+        self.requires("xz_utils/[>=5.4.5 <6]", options={"with_tools": True}, run=True, headers=False, libs=False)
+        self.requires("zstd/[~1.5]", run=True, headers=False, libs=False)
         # self.requires("lzo/2.10", run=True, headers=False, libs=False)
 
     def build_requirements(self):
         if Version(self.version) == "1.35":
-            self.build_requires("automake/1.16.5")
-            self.build_requires("gettext/0.22.5")
+            self.tool_requires("automake/1.16.5")
+            self.tool_requires("gettext/1.0")
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -65,7 +57,6 @@ class TarConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = AutotoolsToolchain(self)
-        tc.generate()
         tc.configure_args += [
             "--disable-acl",
             "--disable-nls",
@@ -115,9 +106,4 @@ class TarConan(ConanFile):
 
         tar_bin = os.path.join(self.package_folder, "bin", "tar")
         self.conf_info.define("user.tar:path", tar_bin)
-        self.env_info.TAR = tar_bin
-
-        # TODO: to remove in conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_path)
-        self.user_info.tar = tar_bin
+        self.runenv_info.define_path("TAR", tar_bin)
