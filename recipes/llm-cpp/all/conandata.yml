@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/Mattbusel/llm-cpp/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "336957f25a0aa15ffcb628e14d2c9e60bf3ddbf3d39629667bd169c6d930ae90"
