@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
@@ -46,7 +47,7 @@ class SuiteSparseConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os == "Macos":
+        if self.settings.compiler == "apple-clang":
             # no OpenMP runtime available for apple-clang
             del self.options.with_openmp
         if self.settings.os == "Windows":
@@ -55,23 +56,23 @@ class SuiteSparseConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.options["openblas"].build_lapack = True
 
     def layout(self):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("openblas/0.3.30")
-        # GMP and MPFR are required by SPEX
-        self.requires("gmp/6.3.0", transitive_headers=True, transitive_libs=True)
-        self.requires("mpfr/4.2.2", transitive_headers=True, transitive_libs=True)
+        self.requires("openblas/[^0.3.30]", options={"build_lapack": True})
+        self.requires("gmp/[>=6.3 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("mpfr/[>=4.2 <5]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.23 <4]")
+        self.tool_requires("cmake/[>=3.23]")
         self.tool_requires("ninja/[>=1.10 <2]")
 
     def validate(self):
         check_min_cppstd(self, 17)
+        if not self.dependencies["openblas"].options.get_safe("build_lapack", False):
+            raise ConanInvalidConfiguration("suitesparse requires openblas with build_lapack=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
