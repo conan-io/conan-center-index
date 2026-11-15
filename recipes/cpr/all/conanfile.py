@@ -79,6 +79,11 @@ class CprConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        if self.options.with_ssl == "wolfssl":
+            self.options["libcurl"].with_ssl = "wolfssl"
+            self.options["wolfssl"].with_curl = True
+            self.options["wolfssl"].tls13 = True
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -88,6 +93,10 @@ class CprConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/5.9.1")
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.15.0":
+            self.tool_requires("cmake/[>=3.24 <4]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -119,7 +128,6 @@ class CprConan(ConanFile):
         if Version(self.version) >= "1.9.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 6")
 
-        
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
