@@ -3,7 +3,6 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 
 required_conan_version = ">=2.4"
@@ -72,15 +71,15 @@ class SuiteSparseConan(ConanFile):
         self.tool_requires("ninja/[>=1.10 <2]")
 
     def validate(self):
-        # ParU is C++, GraphBLAS JIT-compiled code expects a modern compiler
         check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-        CMakeDeps(self).generate()
+        deps = CMakeDeps(self)
+        deps.generate()
         tc = CMakeToolchain(self)
 
         tc.cache_variables["BLA_VENDOR"] = "OpenBLAS"
@@ -93,11 +92,10 @@ class SuiteSparseConan(ConanFile):
         tc.cache_variables["SUITESPARSE_USE_FORTRAN"] = False
         tc.cache_variables["SUITESPARSE_DEMOS"] = False
         tc.cache_variables["BUILD_TESTING"] = False
-        tc.cache_variables["SUITESPARSE_USE_OPENMP"] = bool(self.options.get_safe("with_openmp", False))
+        tc.cache_variables["SUITESPARSE_USE_OPENMP"] = self.options.get_safe("with_openmp", False)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -110,8 +108,6 @@ class SuiteSparseConan(ConanFile):
         for package in self._packages:
             copy(self, "License.txt", os.path.join(self.source_folder, package, "Doc"), licenses_folder)
             copy(self, "LICENSE*", os.path.join(self.source_folder, package), licenses_folder)
-        # remove upstream CMake package-config and pkg-config files:
-        # CMakeDeps and PkgConfigDeps generate their own from the components below
         for folder in ("lib/cmake", "lib/pkgconfig", "share"):
             rmdir(self, os.path.join(self.package_folder, folder))
 
