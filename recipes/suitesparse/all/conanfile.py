@@ -1,5 +1,4 @@
 import os
-import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -11,7 +10,6 @@ from conan.tools.files import (
     export_conandata_patches,
     get,
     rmdir,
-    save,
 )
 
 required_conan_version = ">=2.4"
@@ -108,32 +106,7 @@ class SuiteSparseConan(ConanFile):
         deps.set_property("mpfr", "cmake_file_name", "MPFR")
         deps.generate()
         tc = CMakeToolchain(self)
-
-        # Route BLAS/LAPACK to Conan's OpenBLAS through the "user supplied
-        # variables" branch of upstream SuiteSparseBLAS.cmake / SuiteSparseLAPACK.cmake
-        # instead of patching them: this file is included right after project() and
-        # makes the OpenBLAS targets available to the rest of the build
-        blas_file = "conan_openblas_blas.cmake"
-        save(
-            self,
-            blas_file,
-            textwrap.dedent("""\
-            if ( NOT TARGET OpenBLAS::OpenBLAS )
-                find_package ( OpenBLAS CONFIG REQUIRED )
-            endif ( )
-            set ( BLAS_LIBRARIES "OpenBLAS::OpenBLAS" )
-            set ( LAPACK_LIBRARIES "OpenBLAS::OpenBLAS" )
-            set ( BLAS_INCLUDE_DIRS "${OpenBLAS_INCLUDE_DIRS}" )
-            if ( CMAKE_BUILD_TYPE )
-                set ( CMAKE_TRY_COMPILE_CONFIGURATION ${CMAKE_BUILD_TYPE} )
-            endif ( )
-        """),
-        )
         tc.cache_variables["BLA_VENDOR"] = "OpenBLAS"
-        tc.cache_variables["CMAKE_PROJECT_INCLUDE"] = os.path.join(
-            self.generators_folder, blas_file
-        )
-
         tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.cache_variables["GRAPHBLAS_BUILD_STATIC_LIBS"] = not self.options.shared
         tc.cache_variables["GRAPHBLAS_USE_JIT"] = False
@@ -178,8 +151,6 @@ class SuiteSparseConan(ConanFile):
         self.cpp_info.includedirs = [os.path.join("include", "suitesparse")]
         self.cpp_info.set_property("cmake_file_name", "SuiteSparse")
 
-        # component name: (libs, requires, pkg-config name)
-        # library names as installed by the upstream CMake install step
         components = {
             "suitesparse_config": (["suitesparseconfig"], [], "SuiteSparse_config"),
             "amd": (["amd"], ["suitesparse_config"], "AMD"),
