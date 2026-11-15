@@ -90,7 +90,6 @@ class SuiteSparseConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.23]")
-        self.tool_requires("ninja/[>=1.10 <2]")
 
     def validate(self):
         check_min_cppstd(self, 17)
