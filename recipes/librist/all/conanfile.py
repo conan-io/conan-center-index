@@ -63,17 +63,9 @@ class LibristConan(ConanFile):
     def generate(self):
         tc = MesonToolchain(self)
         tc.project_options["test"] = False
-        tc.project_options["static_analyze"] = False
-        tc.project_options["built_tools"] = bool(self.options.tools)
+        tc.project_options["built_tools"] = False
         # Never fall back to the copies of cJSON/LZ4/mbedtls vendored in upstream's contrib/ folder
         tc.project_options["fallback_builtin"] = False
-        tc.project_options["builtin_cjson"] = False
-        tc.project_options["builtin_lz4"] = False
-        tc.project_options["builtin_mbedtls"] = False
-        tc.project_options["use_mbedtls"] = bool(self.options.with_mbedtls)
-        tc.project_options["use_gnutls"] = False
-        tc.project_options["use_nettle"] = False
-        tc.project_options["allow_obj_filter"] = False
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
@@ -87,19 +79,19 @@ class LibristConan(ConanFile):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
+        if is_msvc(self) and not self.options.shared:
+            # Meson names static libraries lib*.a even with MSVC
+            rename(self, os.path.join(self.package_folder, "lib", "librist.a"),
+                   os.path.join(self.package_folder, "lib", "librist.lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "librist")
-        # No upstream CMake config; these names are this recipe's convention
-        self.cpp_info.set_property("cmake_file_name", "librist")
-        self.cpp_info.set_property("cmake_target_name", "librist::librist")
         # Upstream builds the library with an empty name_prefix: librist.so / librist.a / librist.lib
         self.cpp_info.libs = ["librist" if is_msvc(self) else "rist"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["m", "pthread"])
+            self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi", "bcrypt"])
