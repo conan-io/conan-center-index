@@ -95,6 +95,7 @@ class DuckdbConan(ConanFile):
             rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
             rm(self, "duckdb.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll.a", os.path.join(self.package_folder, "lib"))
             # Upstream also installs the vendored libraries that duckdb_static already embeds
             for lib in ["fastpforlib", "fmt", "fsst", "hyperloglog", "jemalloc", "mbedtls", "miniz", "re2",
                         "skiplistlib", "utf8proc", "yyjson", "zstd"]:
