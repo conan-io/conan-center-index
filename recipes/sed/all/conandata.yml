@@ -1,0 +1,7 @@
+sources:
+  "4.10":
+    url:
+      - "https://ftpmirror.gnu.org/sed/sed-4.10.tar.xz"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/sed/sed-4.10.tar.xz"
+      - "https://ftp.gnu.org/pub/gnu/sed/sed-4.10.tar.xz"
+    sha256: "b8e72182b2ec96a3574e2998c47b7aaa64cc20ce000d8e9ac313cc07cecf28c7"
