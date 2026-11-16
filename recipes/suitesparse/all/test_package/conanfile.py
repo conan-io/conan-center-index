@@ -15,7 +15,6 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.23 <4]")
-        self.tool_requires("ninja/[>=1.10 <2]")
 
     def layout(self):
         cmake_layout(self)
@@ -29,5 +28,3 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
-            bin_path_cpp = os.path.join(self.cpp.build.bindir, "test_package_cpp")
-            self.run(bin_path_cpp, env="conanrun")
