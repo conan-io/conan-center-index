@@ -1,0 +1,18 @@
+--- a/egg/hatch.py
++++ b/egg/hatch.py
+@@ -51,7 +51,6 @@
+ import gen_friendly_but_not_optimized
+ import gen_modules
+ import gen_scalar_utilities
+-import get_sleef_code
+ 
+ # Dir of this script
+ script_dir = os.path.dirname(__file__)
+@@ -165,6 +164,7 @@
+     if opts.src == True or opts.all == True:
+         gen_src.doit(opts)
+     if opts.sleef == True or opts.all == True:
++        import get_sleef_code
+         get_sleef_code.doit(opts)
+     if opts.scalar_utilities == True or opts.all == True:
+         gen_scalar_utilities.doit(opts)
