@@ -22,14 +22,10 @@ class LibristConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_mbedtls": [True, False],
-        "tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_mbedtls": True,
-        "tools": False,
     }
     implements = ["auto_shared_fpic"]
     languages = "C"
@@ -46,10 +42,9 @@ class LibristConan(ConanFile):
         # Optional payload compression (LZ4_compress_default/LZ4_decompress_safe in the library itself).
         self.requires("lz4/[>=1.10.0 <2]")
 
-        if self.options.with_mbedtls:
-            # Used for SRP/EAP authentication and AES; without it librist falls back to its bundled AES
-            # mbedtls >= 3.6 is needed so that PkgConfigDeps provides "mbedcrypto.pc"
-            self.requires("mbedtls/[>=3.6 <4]")
+        # Used for SRP/EAP authentication and AES; without it librist falls back to its bundled AES
+        # mbedtls >= 3.6 is needed so that PkgConfigDeps provides "mbedcrypto.pc"
+        self.requires("mbedtls/[>=3.6 <4]")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
