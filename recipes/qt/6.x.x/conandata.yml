@@ -66,6 +66,12 @@ sources:
       - "https://ftp.yz.yamagata-u.ac.jp/pub/qtproject/archive/qt/6.8/6.8.3/single/qt-everywhere-src-6.8.3.tar.xz"
     sha256: "cdd3a69967208276bb01af7ace7dba0ba53e679f886a4cbe624225c60fb73f2c"
 patches:
+  "6.12.0":
+    - "patch_file": "patches/6.12.0-entrypoint-sync-headers.patch"
+      "base_path": "qtbase"
+      "patch_description": "Add sync header dependency for entrypoint library on all platforms (fixes iOS build, QTBUG-151960)"
+      "patch_type": "bugfix"
+      "patch_source": "https://github.com/qt/qtbase/commit/55d3591740"
   "6.8.3":
     - "patch_file": "patches/remove-linkage-to-agl-framework.patch"
       "base_path": "qtbase"
