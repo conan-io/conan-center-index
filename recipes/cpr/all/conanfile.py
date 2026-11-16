@@ -121,7 +121,9 @@ class CprConan(ConanFile):
                 raise ConanInvalidConfiguration("WinSSL is only on Windows")
             if ssl_library == "wolfssl" and Version(self.version) < "1.15.0":
                 raise ConanInvalidConfiguration("Wolfssl is only supported from version 1.15.0")
-
+            if ssl_library == "wolfssl" and self.dependencies["libcurl"].options.with_ssl != "wolfssl":
+                raise ConanInvalidConfiguration(f"{self.ref} with_ssl=wolfssl requires libcurl/*:with_ssl=wolfssl")
+            
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
