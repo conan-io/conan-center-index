@@ -1,9 +1,7 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
-from conan.tools.microsoft import is_msvc
+from conan.tools.files import copy, get, rm, rmdir
 
 import os
 
@@ -39,12 +37,6 @@ class OpenTimelineIOConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
 
-        if is_msvc(self): # and self.options.shared:
-            raise ConanInvalidConfiguration(
-                # This is actually visible in the test package but there has to be an underlying problem.
-                "Skip windows due to problems with linking."
-            )
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -53,15 +45,13 @@ class OpenTimelineIOConan(ConanFile):
 
     def requirements(self):
         self.requires("imath/[>=3.1.9 <4]", transitive_headers=True)
-        self.requires("rapidjson/cci.20230929")
+        self.requires("rapidjson/cci.20250205")
 
+    def build_requirements(self):
         self.tool_requires("cmake/[>=3.18.2 <5]")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["OTIO_PYTHON_INSTALL"] = False
-        tc.cache_variables["OTIO_INSTALL_PYTHON_MODULES"] = False
-        tc.cache_variables["OTIO_DEPENDENCIES_INSTALL"] = False
         tc.cache_variables["OTIO_FIND_IMATH"] = True
         tc.cache_variables["OTIO_FIND_RAPIDJSON"] = True
         tc.cache_variables["OTIO_AUTOMATIC_SUBMODULES"] = False
@@ -82,23 +72,27 @@ class OpenTimelineIOConan(ConanFile):
         cmake.install()
         # Remove cmake files installed to the "share" folder.
         rmdir(self, os.path.join(self.package_folder, "share"))
-
-    @staticmethod
-    def _conan_comp(name):
-        return f"opentimelineio_{name.lower()}"
-
-    def _add_component(self, name):
-        component = self.cpp_info.components[self._conan_comp(name)]
-        component.set_property("cmake_target_name", f"OpenTimelineIO::{name}")
-        return component
+        if self.settings.os == "Windows" and self.options.shared:
+            # Upstream installs DLLs into lib/
+            lib_folder = os.path.join(self.package_folder, "lib")
+            copy(self, "*.dll", src=lib_folder, dst=os.path.join(self.package_folder, "bin"))
+            rm(self, "*.dll", lib_folder)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenTimelineIO")
-        self.cpp_info.set_property("pkg_config_name", "OpenTimelineIO")
 
-        opentime = self._add_component("opentime")
-        opentime.libs = ["opentime"]
+        # Upstream sets a "d" DEBUG_POSTFIX on Windows
+        postfix = "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
+        # Upstream exports these as PUBLIC definitions (*_EXPORTS avoids dllimport on constexpr data in shared builds)
+        kind = "EXPORTS" if self.options.shared else "STATIC"
 
-        opentimelineio = self._add_component("opentimelineio")
-        opentimelineio.libs = ["opentimelineio"]
-        opentimelineio.requires = ["imath::imath", "rapidjson::rapidjson"]
+        opentime = self.cpp_info.components["opentime"]
+        opentime.set_property("cmake_target_name", "OTIO::opentime")
+        opentime.libs = [f"opentime{postfix}"]
+        opentime.defines = [f"OPENTIME_{kind}"]
+
+        opentimelineio = self.cpp_info.components["opentimelineio"]
+        opentimelineio.set_property("cmake_target_name", "OTIO::opentimelineio")
+        opentimelineio.libs = [f"opentimelineio{postfix}"]
+        opentimelineio.defines = [f"OTIO_{kind}"]
+        opentimelineio.requires = ["opentime", "imath::imath", "rapidjson::rapidjson"]
