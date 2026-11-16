@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanException
-from conan.tools.files import copy, download, load, save, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, download, load, save, apply_conandata_patches, export_conandata_patches, trim_conandata
 from conan.tools.layout import basic_layout
 import os
 import stat
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.5"
 
 
 class GnuConfigConan(ConanFile):
@@ -25,6 +25,11 @@ class GnuConfigConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def export(self):
+        # this will ensure locally-exported recipes match the recipe revision from
+        # the Conan Center remote
+        trim_conandata(self)
 
     def source(self):
         # Download the two files at a fixed commit: a snapshot tarball of the
