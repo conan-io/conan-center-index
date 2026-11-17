@@ -146,8 +146,6 @@ class SuiteSparseConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        # all SuiteSparse headers are installed into include/suitesparse
-        self.cpp_info.includedirs = [os.path.join("include", "suitesparse")]
         self.cpp_info.set_property("cmake_file_name", "SuiteSparse")
 
         components = {
