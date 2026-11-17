@@ -3,9 +3,9 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, replace_in_file
 
-required_conan_version = ">=2.28"
+required_conan_version = ">=2.5"
 
 class InfluxdbCxxConan(ConanFile):
     name = "influxdb-cxx"
@@ -48,6 +48,16 @@ class InfluxdbCxxConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        # Let the profile's compiler.cppstd drive the standard (validate() enforces the minimum)
+        replace_in_file(self, cmakelists,
+                        "set(CMAKE_CXX_STANDARD 20)\n"
+                        "set(CMAKE_CXX_STANDARD_REQUIRED ON)\n"
+                        "set(CMAKE_CXX_EXTENSIONS OFF)\n", "")
+        # Let the toolchain handle fPIC
+        replace_in_file(self, cmakelists,
+                        "# Set fPIC for all targets\n"
+                        "set(CMAKE_POSITION_INDEPENDENT_CODE ON)\n", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
