@@ -9,7 +9,7 @@ required_conan_version = ">=2.4"
 class Gl2psConan(ConanFile):
     name = "gl2ps"
     description = "GL2PS: an OpenGL to PostScript printing library (also PDF, SVG, LaTeX and PGF output)"
-    license = ("LGPL-2.0-or-later", "DocumentRef-COPYING.GL2PS:LicenseRef-GL2PS")
+    license = ("LGPL-2.0-or-later", "GL2PS")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.onelab.info/gl2ps/gl2ps"
     topics = ("opengl", "postscript", "pdf", "svg", "vector-graphics", "printing")
