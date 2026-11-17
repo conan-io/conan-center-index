@@ -79,7 +79,7 @@ class SuiteSparseConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("openblas/[^0.3.30]", options={"build_lapack": True})
+        self.requires("openblas/[^0.3.30]")
         self.requires("gmp/[>=6.3 <7]", transitive_headers=True, transitive_libs=True)
         self.requires("mpfr/[>=4.2 <5]", transitive_headers=True, transitive_libs=True)
 
