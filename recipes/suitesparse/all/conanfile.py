@@ -4,11 +4,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 from conan.tools.files import (
     apply_conandata_patches,
     copy,
     export_conandata_patches,
     get,
+    rm,
     rmdir,
 )
 
@@ -143,8 +145,12 @@ class SuiteSparseConan(ConanFile):
                 os.path.join(self.source_folder, package),
                 licenses_folder,
             )
-        for folder in ("bin", "lib/cmake", "lib/pkgconfig", "share"):
+        for folder in ("lib/cmake", "lib/pkgconfig", "share"):
             rmdir(self, os.path.join(self.package_folder, folder))
+        # on Windows the DLLs of a shared build are installed into bin
+        if not (self.settings.os == "Windows" and self.options.shared):
+            rmdir(self, os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         # all SuiteSparse headers are installed into include/suitesparse
@@ -243,7 +249,11 @@ class SuiteSparseConan(ConanFile):
         }
         for name, (libs, requires, pkg_config) in components.items():
             component = self.cpp_info.components[name]
-            component.libs = libs
+            # INFO: upstream names static libraries <lib>_static when building with MSVC
+            static_suffix = (
+                "_static" if is_msvc(self) and not self.options.shared else ""
+            )
+            component.libs = [f"{lib}{static_suffix}" for lib in libs]
             component.includedirs = [os.path.join("include", "suitesparse")]
             component.set_property(
                 "cmake_target_name", f"SuiteSparse::{cmake_targets[name]}"
@@ -251,3 +261,6 @@ class SuiteSparseConan(ConanFile):
             component.set_property("pkg_config_name", pkg_config)
             if requires:
                 component.requires = requires
+            if self.options.get_safe("with_openmp") and not is_msvc(self):
+                component.sharedlinkflags = ["-fopenmp"]
+                component.exelinkflags = ["-fopenmp"]
