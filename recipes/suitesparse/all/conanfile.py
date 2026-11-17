@@ -257,3 +257,9 @@ class SuiteSparseConan(ConanFile):
             if self.options.get_safe("with_openmp") and not is_msvc(self):
                 component.sharedlinkflags = ["-fopenmp"]
                 component.exelinkflags = ["-fopenmp"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["suitesparse_config"].system_libs.append("m")
+            self.cpp_info.components["graphblas"].system_libs.append("m")
+        if self.settings.os == "Linux":
+            self.cpp_info.components["graphblas"].system_libs.append("dl")
