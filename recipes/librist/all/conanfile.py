@@ -37,14 +37,9 @@ class LibristConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # cJSON is used internally (stats output), not exposed in public headers
-        self.requires("cjson/[>=1.7.16 <2]")
-        # Optional payload compression (LZ4_compress_default/LZ4_decompress_safe in the library itself).
-        self.requires("lz4/[>=1.10.0 <2]")
-
-        # Used for SRP/EAP authentication and AES; without it librist falls back to its bundled AES
-        # mbedtls >= 3.6 is needed so that PkgConfigDeps provides "mbedcrypto.pc"
-        self.requires("mbedtls/[>=3.6 <4]")
+        self.requires("cjson/1.7.19")
+        self.requires("lz4/1.11.1")
+        self.requires("mbedtls/3.6.7")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -79,7 +74,6 @@ class LibristConan(ConanFile):
             rename(self, os.path.join(self.package_folder, "lib", "librist.a"),
                    os.path.join(self.package_folder, "lib", "librist.lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
         fix_apple_shared_install_name(self)
 
