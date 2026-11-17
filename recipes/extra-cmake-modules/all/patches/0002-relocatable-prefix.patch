@@ -1,0 +1,37 @@
+Make the ECM package relocatable
+
+ECMConfig.cmake records the install prefix ECM was built with, and
+KDEInstallDirs makes it the default CMAKE_INSTALL_PREFIX of every
+consumer. In a Conan package that prefix is the build machine's package
+folder. Use PACKAGE_PREFIX_DIR, as ECM 5 did, and keep CMake's own
+default install prefix.
+
+diff --git a/ECMConfig.cmake.in b/ECMConfig.cmake.in
+index e11138306dfb..a518f953f84f 100644
+--- a/ECMConfig.cmake.in
++++ b/ECMConfig.cmake.in
+@@ -6,7 +6,7 @@ set(ECM_MODULE_DIR "@PACKAGE_MODULES_INSTALL_DIR@")
+ 
+ set(ECM_KDE_MODULE_DIR "@PACKAGE_KDE_MODULES_INSTALL_DIR@")
+ 
+-set(ECM_PREFIX "@CMAKE_INSTALL_PREFIX@")
++set(ECM_PREFIX "${PACKAGE_PREFIX_DIR}")
+ 
+ set(ECM_MODULE_PATH "${ECM_MODULE_DIR}" "${ECM_FIND_MODULE_DIR}" "${ECM_KDE_MODULE_DIR}")
+ 
+diff --git a/kde-modules/KDEInstallDirsCommon.cmake b/kde-modules/KDEInstallDirsCommon.cmake
+index cf266719e845..1530c041abe5 100644
+--- a/kde-modules/KDEInstallDirsCommon.cmake
++++ b/kde-modules/KDEInstallDirsCommon.cmake
+@@ -224,11 +224,6 @@ if(APPLE)
+         BUNDLE_INSTALL_DIR)
+ endif()
+ 
+-# Only supported since cmake 3.7
+-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+-    set(CMAKE_INSTALL_PREFIX "${ECM_PREFIX}" CACHE PATH "Install path prefix" FORCE)
+-endif()
+-
+ _define_absolute(EXECROOTDIR ""
+     "executables and libraries"
+     EXEC_INSTALL_PREFIX)
