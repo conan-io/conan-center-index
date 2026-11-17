@@ -43,6 +43,7 @@ class SuiteSparseConan(ConanFile):
         "fPIC": True,
         "with_openmp": False,
     }
+    implements = ["auto_shared_fpic"]
 
     # all libraries built from the single upstream monorepo
     _packages = (
@@ -73,12 +74,6 @@ class SuiteSparseConan(ConanFile):
         if self.settings.compiler == "apple-clang":
             # no OpenMP runtime available for apple-clang
             del self.options.with_openmp
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self)
