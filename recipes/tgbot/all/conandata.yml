@@ -5,3 +5,6 @@ sources:
   "1.13.1":
     url: "https://github.com/reo7sp/tgbot-cpp/archive/v1.13.1.tar.gz"
     sha256: "d986febe6a9f4be2200a37e245e736d97ab1e09d9e646e458c27ec2a81453630"
+  "1.14":
+    url: "https://github.com/reo7sp/tgbot-cpp/archive/v1.14.tar.gz"
+    sha256: "60c6d8d5af3820d04007f426f8f87695745fccdd7552f63401307c21b3d5d19b"
