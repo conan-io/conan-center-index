@@ -58,9 +58,6 @@ patches:
   "6.12.0":
     - "patch_file": "patches/6.12.0-entrypoint-sync-headers.patch"
       "base_path": "qtbase"
-      "patch_description": "Add sync header dependency for entrypoint library on all platforms (fixes iOS build, QTBUG-151960)"
-      "patch_type": "bugfix"
-      "patch_source": "https://github.com/qt/qtbase/commit/55d3591740"
   "6.8.5":
     - "patch_file": "patches/c72097e_6.8.x.diff"
       "base_path": "qtwebengine"

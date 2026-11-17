@@ -941,8 +941,7 @@ class QtConan(ConanFile):
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
             targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltc"])
             targets.extend(["qmldom", "qmljsrootgen"])
-            if Version(self.version) >= "6.8.3":
-                targets.extend(["qmlaotstats"])
+            targets.extend(["qmlaotstats"])
             if Version(self.version) >= "6.11.0" and "settings" not in disabled_features:
                 # https://github.com/qt/qtdeclarative/blob/v6.11.3/src/qml/configure.cmake#L195-L199
                 targets.extend(["qmlcontextpropertydump"])

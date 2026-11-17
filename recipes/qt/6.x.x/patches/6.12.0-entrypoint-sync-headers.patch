@@ -1,5 +1,11 @@
+Add sync header dependency for entrypoint library on all platforms (fixes iOS build, QTBUG-151960)
+
+https://qt-project.atlassian.net/browse/QTBUG-151960
+https://github.com/qt/qtbase/commit/55d3591740
+
+
 From 55d3591740d60f4c3e1c75782c9770c81801ff55 Mon Sep 17 00:00:00 2001
-From: Viktor Arvidsson <viktor.arvidss@gmail.com>
+From: Viktor Arvidsson
 Date: Tue, 3 Nov 2026 13:11:01 +0100
 Subject: [PATCH] Add sync header dependency for entrypoint library on all
  platforms
