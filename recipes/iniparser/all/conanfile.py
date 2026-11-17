@@ -1,17 +1,17 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0.9"
 
 
 class iniparserConan(ConanFile):
     name = "iniparser"
     description = "iniParser is a simple C library offering ini file parsing services."
     license = "MIT"
-    url = "https://gitlab.com/iniparser/iniparser"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://iniparser.gitlab.io/iniparser/"
     topics = ("ini", "parser", "configuration", "file")
 
@@ -44,8 +44,7 @@ class iniparserConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
-        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_STATIC_LIBS"] = False
         tc.generate()
 
     def build(self):
@@ -54,13 +53,16 @@ class iniparserConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["iniparser"]
+        self.cpp_info.libs = ["libiniparser" if is_msvc(self) and not self.options.shared else "iniparser"]
 
         self.cpp_info.set_property("cmake_file_name", "iniparser")
-        self.cpp_info.set_property("cmake_target_name", "iniparser::iniparser")
+        self.cpp_info.set_property("cmake_target_name", "iniparser-shared" if self.options.shared else "iniparser-static")
         self.cpp_info.set_property("pkg_config_name", "iniparser")
-        self.cpp_info.includedirs = ["include", os.path.join("include", "iniparser")]
+        self.cpp_info.includedirs = [os.path.join("include", "iniparser")]
