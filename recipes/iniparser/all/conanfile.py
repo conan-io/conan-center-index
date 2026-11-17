@@ -4,7 +4,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.4"
 
 
 class iniparserConan(ConanFile):
@@ -25,16 +25,8 @@ class iniparserConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -62,7 +54,5 @@ class iniparserConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["libiniparser" if is_msvc(self) and not self.options.shared else "iniparser"]
 
-        self.cpp_info.set_property("cmake_file_name", "iniparser")
         self.cpp_info.set_property("cmake_target_name", "iniparser-shared" if self.options.shared else "iniparser-static")
-        self.cpp_info.set_property("pkg_config_name", "iniparser")
-        self.cpp_info.includedirs = [os.path.join("include", "iniparser")]
+        self.cpp_info.includedirs = ["include", os.path.join("include", "iniparser")]
