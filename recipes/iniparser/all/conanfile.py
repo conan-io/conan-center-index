@@ -55,4 +55,4 @@ class iniparserConan(ConanFile):
         self.cpp_info.libs = ["libiniparser" if is_msvc(self) and not self.options.shared else "iniparser"]
 
         self.cpp_info.set_property("cmake_target_name", "iniparser-shared" if self.options.shared else "iniparser-static")
-        self.cpp_info.includedirs = ["include", os.path.join("include", "iniparser")]
+        self.cpp_info.includedirs.append(os.path.join("include", "iniparser"))
