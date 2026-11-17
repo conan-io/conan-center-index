@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.28"
 
 class InfluxdbCxxConan(ConanFile):
     name = "influxdb-cxx"
@@ -39,7 +39,7 @@ class InfluxdbCxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpr/[~1.10]")
+        self.requires("cpr/[>=1.10 <2]")
         if self.options.boost:
             self.requires("boost/[>=1.82.0 <2]")
 
@@ -55,6 +55,7 @@ class InfluxdbCxxConan(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.cache_variables["INFLUXCXX_TESTING"] = False
         tc.cache_variables["INFLUXCXX_WITH_BOOST"] = self.options.boost
+        tc.cache_variables["INFLUXCXX_WERROR"] = False
         if self.options.shared:
             # See https://github.com/offa/influxdb-cxx/issues/194
             # Feedback pending: https://github.com/offa/influxdb-cxx/pull/245
