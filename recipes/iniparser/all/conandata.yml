@@ -1,0 +1,4 @@
+sources:
+  "4.3.2":
+    url: "https://gitlab.com/iniparser/iniparser/-/archive/v4.3.2/iniparser-v4.3.2.tar.gz"
+    sha256: "d7382f72f94649afa7a9d61346a7fc31cd3ff9ae389a71f92770133d49f1b22c"
