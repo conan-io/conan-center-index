@@ -15,12 +15,3 @@
  use_mbedtls = get_option('use_mbedtls')
  use_nettle = get_option('use_nettle')
  use_gnutls = get_option('use_gnutls')
-@@ -206,7 +198,7 @@
- 
- sock_un_h = cc.has_header('sys/un.h')
- cdata.set10('HAVE_SOCK_UN_H', sock_un_h)
--microhttpd = dependency('libmicrohttpd', required: false)
-+microhttpd = dependency('', required: false)
- cdata.set10('HAVE_LIBMICROHTTPD', microhttpd.found())
- if microhttpd.found()
- 	code = '''
