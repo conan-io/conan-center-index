@@ -37,7 +37,7 @@ class bgfxConan(ConanFile):
             self.requires("xorg/system")
             self.requires("opengl/system")
             # INFO: Wayland is optional, but we enable it by default on Linux - CMakeLists.txt:46
-            self.requires("wayland/1.23.92")
+            self.requires("wayland/[>=1.22.0 <2]")
         # INFO: miniz, tinyexr and libsquish are vendored in bgfx as well
         self.requires("miniz/3.0.2")
         if not self.options.shared or self.options.tools:
