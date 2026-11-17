@@ -3,6 +3,8 @@
 #include "SuiteSparseQR.hpp"
 #include "ParU.h"
 #include "Mongoose.hpp"
+#include "SPEX.h"
+#include "GraphBLAS.h"
 
 int main()
 {
@@ -20,6 +22,21 @@ int main()
 
     std::printf("Mongoose: %d.%d.%d\n", Mongoose::major_version(),
                 Mongoose::minor_version(), Mongoose::patch_version());
+
+    // SPEX_initialize() sets the GMP/MPFR memory functions, so it needs both libraries to link
+    if (SPEX_initialize() != SPEX_OK) {
+        std::fprintf(stderr, "SPEX_initialize failed\n");
+        return 1;
+    }
+    SPEX_finalize();
+    std::printf("SPEX: initialized\n");
+
+    if (GrB_init(GrB_NONBLOCKING) != GrB_SUCCESS) {
+        std::fprintf(stderr, "GrB_init failed\n");
+        return 1;
+    }
+    GrB_finalize();
+    std::printf("GraphBLAS: initialized\n");
 
     return 0;
 }

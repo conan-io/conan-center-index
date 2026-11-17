@@ -8,4 +8,6 @@ target_link_libraries(test_package PRIVATE
     SuiteSparse::SPQR
     SuiteSparse::ParU
     SuiteSparse::Mongoose
+    SuiteSparse::SPEX
+    SuiteSparse::GraphBLAS
 )
