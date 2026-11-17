@@ -21,12 +21,8 @@ class SuiteSparseConan(ConanFile):
     name = "suitesparse"
     description = "A suite of sparse matrix algorithms"
     license = (
-        "BSD-2-Clause",
-        "BSD-3-Clause",
-        "LGPL-2.1-or-later",
-        "GPL-2.0-or-later",
-        "GPL-3.0-or-later",
-        "Apache-2.0",
+        "BSD-2-Clause AND BSD-3-Clause AND Apache-2.0 AND "
+        "LGPL-2.1-or-later AND GPL-2.0-or-later AND GPL-3.0-or-later"
     )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/DrTimothyAldenDavis/SuiteSparse"
@@ -128,17 +124,19 @@ class SuiteSparseConan(ConanFile):
         licenses_folder = os.path.join(self.package_folder, "licenses")
         copy(self, "LICENSE.txt", self.source_folder, licenses_folder)
         for package in self._packages:
+            # one sub-folder per package, otherwise files with the same name overwrite each other
+            package_licenses_folder = os.path.join(licenses_folder, package)
             copy(
                 self,
                 "License.txt",
                 os.path.join(self.source_folder, package, "Doc"),
-                licenses_folder,
+                package_licenses_folder,
             )
             copy(
                 self,
                 "LICENSE*",
                 os.path.join(self.source_folder, package),
-                licenses_folder,
+                package_licenses_folder,
             )
         for folder in ("lib/cmake", "lib/pkgconfig", "share"):
             rmdir(self, os.path.join(self.package_folder, folder))
