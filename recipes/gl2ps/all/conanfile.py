@@ -30,7 +30,6 @@ class Gl2psConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # INFO: gl2ps.h includes <GL/gl.h> (<OpenGL/gl.h> on macOS)
         self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libpng/[>=1.6 <2]")
@@ -59,10 +58,6 @@ class Gl2psConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        # INFO: names used by VTK's FindGL2PS module
-        self.cpp_info.set_property("cmake_file_name", "GL2PS")
-        self.cpp_info.set_property("cmake_target_name", "GL2PS::GL2PS")
-
         self.cpp_info.libs = ["gl2ps"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
