@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
@@ -95,6 +96,11 @@ class LibvplConan(ConanFile):
             disp.system_libs = ["dl", "pthread"]
         elif self.settings.os == "Windows":
             disp.system_libs = ["ole32", "gdi32", "uuid", "advapi32"]
+
+        if not self.options.shared:
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                disp.system_libs.append(libcxx)
 
         # ------------------------------------------------------------------
         # api component (headers for the C API)
