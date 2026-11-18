@@ -60,9 +60,13 @@ class ReadLineConan(ConanFile):
             env.generate(scope="build")
 
         tc = AutotoolsToolchain(self)
-        tc.configure_args.extend([
-            "--with-curses={}".format("yes" if self.options.with_library == "curses" else "no"),
-        ])
+        tc.configure_args.extend(
+            [
+                "--with-curses={}".format(
+                    "yes" if self.options.with_library == "curses" else "no"
+                ),
+            ]
+        )
         if cross_building(self):
             tc.configure_args.append("bash_cv_wcwidth_broken=yes")
 
@@ -74,9 +78,18 @@ class ReadLineConan(ConanFile):
 
     def _patch_sources(self):
         if self.options.with_library == "termcap":
-            replace_in_file(self, os.path.join(self.source_folder, "shlib", "Makefile.in"), "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
-                              "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS) -ltermcap")
-            replace_in_file(self, os.path.join(self.source_folder, "Makefile.in"), "@TERMCAP_LIB@", "-ltermcap")
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "shlib", "Makefile.in"),
+                "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
+                "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS) -ltermcap",
+            )
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "Makefile.in"),
+                "@TERMCAP_LIB@",
+                "-ltermcap",
+            )
 
     def build(self):
         self._patch_sources()
@@ -85,7 +98,12 @@ class ReadLineConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "COPYING",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
         autotools = Autotools(self)
         autotools.install()
 
@@ -94,4 +112,4 @@ class ReadLineConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ["history", "readline"]
+        self.cpp_info.libs = ["readline", "history"]
