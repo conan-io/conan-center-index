@@ -1,4 +1,7 @@
 sources:
+  "2.90.1":
+    url: "https://download.gnome.org/sources/glib/2.90/glib-2.90.1.tar.xz"
+    sha256: "93c941aa17d5eb1d53fe838365f29a8b4e539c222a256d974ec8f30fc413e396"
   "2.86.5":
     url: "https://download.gnome.org/sources/glib/2.86/glib-2.86.5.tar.xz"
     sha256: "ce85a947bb8b3c0204dbeff79aec39bcb46371c6fafb64ba5b8726c71e038d5f"
