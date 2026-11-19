@@ -82,14 +82,12 @@ class Dav1dConan(ConanFile):
             tc.project_options["bitdepths"] = "8,16"
         else:
             tc.project_options["bitdepths"] = str(self.options.bit_depth)
+        # https://code.videolan.org/videolan/dav1d/-/blob/master/meson_options.txt
+        tc.project_options["enable_docs"] = False
         tc.generate()
 
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                              "subdir('doc')", "")
 
     def build(self):
-        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
