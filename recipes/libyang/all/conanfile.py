@@ -34,7 +34,7 @@ class LibYangConan(ConanFile):
                 f"{self.ref} Conan recipe is not prepared to work on Windows. Contributions are welcome.")
 
     def requirements(self):
-        self.requires("pcre2/10.42", transitive_headers=True)
+        self.requires("pcre2/[>=10.42 <11]", transitive_headers=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22]")

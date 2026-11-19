@@ -90,7 +90,7 @@ class LibGit2Conan(ConanFile):
         if self.options.with_regex == "pcre":
             self.requires("pcre/8.45")
         elif self.options.with_regex == "pcre2":
-            self.requires("pcre2/10.42")
+            self.requires("pcre2/[>=10.42 <11]")
 
     @property
     def _need_openssl(self):

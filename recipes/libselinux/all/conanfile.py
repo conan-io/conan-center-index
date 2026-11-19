@@ -54,7 +54,7 @@ class LibSELinuxConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("pcre2/10.42")
+        self.requires("pcre2/[>=10.42 <11]")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:

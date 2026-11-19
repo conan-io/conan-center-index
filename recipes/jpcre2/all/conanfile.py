@@ -23,7 +23,7 @@ class Jpcre2Conan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("pcre2/10.42")
+        self.requires("pcre2/[>=10.42 <11]")
 
     def package_id(self):
         self.info.clear()

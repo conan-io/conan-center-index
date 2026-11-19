@@ -78,7 +78,7 @@ class NCursesConan(ConanFile):
 
     def requirements(self):
         if self.options.with_pcre2:
-            self.requires("pcre2/10.42")
+            self.requires("pcre2/[>=10.42 <11]")
         if is_msvc(self):
             self.requires("getopt-for-visual-studio/20200201")
             self.requires("dirent/1.24")
