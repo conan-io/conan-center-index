@@ -1,4 +1,4 @@
 sources:
-  "5.4.3":
-    url: "https://download.kde.org/stable/md4qt/5.4.3/md4qt-5.4.3.tar.xz"
-    sha256: "e1bcb13f0094543e5224bbd89620203b97088327a1de66787c0a01c9c45ebc3e"
+  "5.4.4":
+    url: "https://download.kde.org/stable/md4qt/5.4.4/md4qt-5.4.4.tar.xz"
+    sha256: "a105abe8bdb24dcf7418670a62ae0a9f45107fa1ec315f01b32a7cd32b9de787"
