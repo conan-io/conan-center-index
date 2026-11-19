@@ -27,8 +27,8 @@ class AmgclConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("with_boost"):
-            self.requires("boost/1.85.0")
+        if self.options.with_boost:
+            self.requires("boost/[>=1.85.0 <2]")
 
     def package_id(self):
         self.info.clear()
