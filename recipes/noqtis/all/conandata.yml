@@ -1,4 +1,4 @@
 sources:
-  "0.1.4":
-    url: "https://github.com/rootcoder007/noqtis/releases/download/v0.1.4/noqtis-0.1.4.tar.gz"
-    sha256: "5947768511c94b369d76e416c09de6af5eabc013c04020a2e198c1e9701064b2"
+  "0.2.2":
+    url: "https://github.com/rootcoder007/noqtis/releases/download/v0.2.2/noqtis-0.2.2.tar.gz"
+    sha256: "e9710a5f453d2dfa7f0ef1f5634099f286675bee2e237bf329c25f94c92a1112"
