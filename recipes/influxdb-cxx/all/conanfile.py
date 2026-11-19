@@ -48,16 +48,6 @@ class InfluxdbCxxConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        # Let the profile's compiler.cppstd drive the standard (validate() enforces the minimum)
-        replace_in_file(self, cmakelists,
-                        "set(CMAKE_CXX_STANDARD 20)\n"
-                        "set(CMAKE_CXX_STANDARD_REQUIRED ON)\n"
-                        "set(CMAKE_CXX_EXTENSIONS OFF)\n", "")
-        # Let the toolchain handle fPIC
-        replace_in_file(self, cmakelists,
-                        "# Set fPIC for all targets\n"
-                        "set(CMAKE_POSITION_INDEPENDENT_CODE ON)\n", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -66,9 +56,6 @@ class InfluxdbCxxConan(ConanFile):
         tc.cache_variables["INFLUXCXX_TESTING"] = False
         tc.cache_variables["INFLUXCXX_WITH_BOOST"] = self.options.boost
         tc.cache_variables["INFLUXCXX_WERROR"] = False
-        # Upstream builds OBJECT libraries that get linked into the shared library, so PIC must be set
-        # explicitly (the fPIC option is removed for shared builds)
-        tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         if self.options.shared:
             # See https://github.com/offa/influxdb-cxx/issues/194
             # Feedback pending: https://github.com/offa/influxdb-cxx/pull/245
@@ -77,7 +64,19 @@ class InfluxdbCxxConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        # Let the profile's compiler.cppstd drive the standard (validate() enforces the minimum)
+        replace_in_file(self, cmakelists,
+                        "set(CMAKE_CXX_STANDARD 20)\n"
+                        "set(CMAKE_CXX_STANDARD_REQUIRED ON)\n"
+                        "set(CMAKE_CXX_EXTENSIONS OFF)\n", "")
+        # Let the toolchain handle fPIC, otherwise, keep the upstream behavior
+        if self.options.get_safe("fPIC") is not None:
+            replace_in_file(self, cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)\n", "")
+
     def build(self):
+        self._patch_sources()  # it needs to read the self.options (forbidden in source())
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
