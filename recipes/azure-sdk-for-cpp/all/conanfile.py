@@ -48,8 +48,14 @@ class AzureSDKForCppConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
+        # Outside Windows, openssl is used by azure-core, azure-identity and azure-storage-common.
+        # On Windows, they use bcrypt/crypt32 instead, but openssl is still needed: the whole SDK
+        # is built from its root CMakeLists, and azure-security-attestation requires openssl on
+        # every OS. Its lib is packaged but not declared as a component in package_info()
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("libxml2/[>=2.12.5 <3]")
+        if self.settings.os != "Windows":
+            # On Windows, the storage SDK parses XML with the Windows Web Services API
+            self.requires("libxml2/[>=2.12.5 <3]")
 
         if self.settings.os == "Windows":
             # wil is always required on windows since azure-identity can't be disabled via cmake.
