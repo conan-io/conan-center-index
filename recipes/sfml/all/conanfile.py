@@ -2,13 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
-import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class SfmlConan(ConanFile):
@@ -60,14 +58,13 @@ class SfmlConan(ConanFile):
                 self.requires("libudev/system")
                 self.requires("xorg/system")
         if self.options.graphics:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/[>=2.13.2 <3]")
             self.requires("stb/cci.20230920")
         if self.options.audio:
             self.requires("flac/1.4.3")
             self.requires("openal-soft/1.22.2")
             self.requires("vorbis/1.3.7")
-            if Version(self.version) >= "2.6.0":
-                self.requires("minimp3/cci.20211201")
+            self.requires("minimp3/cci.20211201")
 
     def validate(self):
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
@@ -77,9 +74,6 @@ class SfmlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # sfml/2.6.0 uses minimp3 and glad in extlibs
-        if Version(self.version) < "2.6.0":
-            rmdir(self, os.path.join(self.source_folder, "extlibs"))
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -93,19 +87,17 @@ class SfmlConan(ConanFile):
         tc.variables["SFML_GENERATE_PDB"] = False
         tc.variables["SFML_USE_SYSTEM_DEPS"] = True
         tc.variables["WARNINGS_AS_ERRORS"] = False
-        if Version(self.version) >= "2.6.0":
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
+        tc.variables["CMAKE_CXX_STANDARD"] = 11
         if is_msvc(self):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
-        if Version(self.version) >= "2.6.2":
-            if self.options.audio:
-                deps.set_property("vorbis", "cmake_file_name", "VORBIS")
-            if self.options.graphics:
-                deps.set_property("freetype", "cmake_file_name", "Freetype")
-                deps.set_property("freetype", "cmake_additional_variables_prefixes", ["FREETYPE"])
-                deps.set_property("freetype", "cmake_target_name", "Freetype")
+        if self.options.audio:
+            deps.set_property("vorbis", "cmake_file_name", "VORBIS")
+        if self.options.graphics:
+            deps.set_property("freetype", "cmake_file_name", "Freetype")
+            deps.set_property("freetype", "cmake_additional_variables_prefixes", ["FREETYPE"])
+            deps.set_property("freetype", "cmake_target_name", "Freetype")
         deps.generate()
 
     def build(self):
@@ -115,8 +107,7 @@ class SfmlConan(ConanFile):
         cmake.build()
 
     def package(self):
-        if Version(self.version) >= "2.6.0":
-            copy(self, pattern="license.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="license.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -134,7 +125,7 @@ class SfmlConan(ConanFile):
             return ["ws2_32"] if self.settings.os == "Windows" else []
 
         def dl():
-            return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "2.6.0" else []
+            return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
         def libudev():
             return ["libudev::libudev"] if self.settings.os == "Linux" else []
@@ -249,9 +240,7 @@ class SfmlConan(ConanFile):
                 },
             })
         if self.options.audio:
-            audio_requires = ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis"]
-            if Version(self.version) >= "2.6.0":
-                audio_requires.append("minimp3::minimp3")
+            audio_requires = ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis", "minimp3::minimp3"]
             sfml_components.update({
                 "audio": {
                     "target": "sfml-audio",

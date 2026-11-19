@@ -1,0 +1,67 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -191,48 +191,7 @@
+       OFF
+       CACHE INTERNAL "")
+ 
+-  # A flatcc installation is unlikely, so default to building the vendored one
+-  if(NOT NANOARROW_FLATCC_INCLUDE_DIR AND NOT NANOARROW_FLATCC_ROOT_DIR)
+-
+-    # If the bundler didn't already assign the source files for the library, do so here
+-    if(NOT NANOARROW_BUNDLE)
+-      set(NANOARROW_FLATCC_BUILD_SOURCES
+-          thirdparty/flatcc/src/runtime/builder.c thirdparty/flatcc/src/runtime/emitter.c
+-          thirdparty/flatcc/src/runtime/verifier.c thirdparty/flatcc/src/runtime/refmap.c)
+-      set(NANOARROW_FLATCC_INCLUDE_DIR
+-          "${CMAKE_CURRENT_LIST_DIR}/thirdparty/flatcc/include")
+-    else()
+-      set(NANOARROW_FLATCC_INCLUDE_DIR "${NANOARROW_BUILD_INCLUDE_DIR}")
+-    endif()
+-
+-    add_library(flatccrt STATIC ${NANOARROW_FLATCC_BUILD_SOURCES})
+-    target_include_directories(flatccrt
+-                               PUBLIC $<BUILD_INTERFACE:${NANOARROW_FLATCC_INCLUDE_DIR}>
+-                                      $<INSTALL_INTERFACE:include>)
+-    set_target_properties(flatccrt PROPERTIES POSITION_INDEPENDENT_CODE ON)
+-    install(TARGETS flatccrt
+-            EXPORT nanoarrow-exports
+-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-
+-  elseif(NOT NANOARROW_FLATCC_ROOT_DIR)
+-    add_library(flatccrt STATIC IMPORTED)
+-    set_target_properties(flatccrt
+-                          PROPERTIES IMPORTED_LOCATION
+-                                     "${NANOARROW_FLATCC_LIB_DIR}/libflatccrt.a"
+-                                     INTERFACE_INCLUDE_DIRECTORIES
+-                                     "${NANOARROW_FLATCC_INCLUDE_DIR}")
+-
+-  elseif(NOT NANOARROW_FLATCC_INCLUDE_DIR)
+-    set(NANOARROW_FLATCC_INCLUDE_DIR "${NANOARROW_FLATCC_ROOT_DIR}/include")
+-    add_library(flatccrt STATIC IMPORTED)
+-    set_target_properties(flatccrt
+-                          PROPERTIES IMPORTED_LOCATION
+-                                     "${NANOARROW_FLATCC_ROOT_DIR}/lib/libflatccrt.a"
+-                                     INTERFACE_INCLUDE_DIRECTORIES
+-                                     "${NANOARROW_FLATCC_INCLUDE_DIR}")
+-  endif()
++  find_package(flatcc REQUIRED CONFIG)
+ 
+   if(NANOARROW_IPC_WITH_ZSTD)
+     find_package(zstd REQUIRED)
+@@ -258,12 +217,12 @@
+ 
+   add_library(nanoarrow_ipc_static STATIC ${NANOARROW_IPC_BUILD_SOURCES})
+   target_link_libraries(nanoarrow_ipc_static
+-                        PRIVATE flatccrt ${NANOARROW_IPC_EXTRA_LIBS}
++                        PRIVATE flatcc::flatcc ${NANOARROW_IPC_EXTRA_LIBS}
+                         PUBLIC nanoarrow_static nanoarrow_coverage_config)
+ 
+   add_library(nanoarrow_ipc_shared SHARED ${NANOARROW_IPC_BUILD_SOURCES})
+   target_link_libraries(nanoarrow_ipc_shared
+-                        PRIVATE flatccrt ${NANOARROW_IPC_EXTRA_LIBS}
++                        PRIVATE flatcc::flatcc ${NANOARROW_IPC_EXTRA_LIBS}
+                         PUBLIC nanoarrow_shared nanoarrow_coverage_config)
+ 
+   install(FILES src/nanoarrow/nanoarrow_ipc.h src/nanoarrow/nanoarrow_ipc.hpp

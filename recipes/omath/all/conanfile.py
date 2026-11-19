@@ -14,7 +14,7 @@ class OmathConan(ConanFile):
     description = "Cross-platform modern general purpose math library written in C++23"
     license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/orange-cpp/omath"
+    homepage = "https://git.libomath.org/orange/omath/"
     topics = ("math", "linear-algebra", "vector", "matrix")
 
     package_type = "library"
@@ -52,7 +52,7 @@ class OmathConan(ConanFile):
         tc.cache_variables["OMATH_BUILD_AS_SHARED_LIBRARY"] = self.options.shared
         tc.cache_variables["OMATH_BUILD_VIA_VCPKG"] = False
         tc.generate()
-        
+
         deps = CMakeDeps(self)
         deps.generate()
 

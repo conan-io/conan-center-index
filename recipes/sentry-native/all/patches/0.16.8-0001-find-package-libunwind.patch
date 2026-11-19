@@ -1,0 +1,33 @@
+Find the system libunwind with find_package(libunwind CONFIG) instead of pkg-config
+
+SENTRY_LIBUNWIND_SYSTEM uses pkg_check_modules(libunwind / libunwind-ptrace). Conan provides
+libunwind through CMakeDeps, so look it up as a CMake package and link the Conan components.
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -722,12 +722,11 @@
+ if(SENTRY_WITH_LIBUNWIND)
+ 	if(LINUX)
+ 		if(SENTRY_LIBUNWIND_SYSTEM)
+-			find_package(PkgConfig REQUIRED)
+-			pkg_check_modules(LIBUNWIND REQUIRED IMPORTED_TARGET libunwind)
++			find_package(libunwind CONFIG REQUIRED)
+ 			if(SENTRY_BUILD_SHARED_LIBS)
+-				target_link_libraries(sentry PRIVATE PkgConfig::LIBUNWIND)
++				target_link_libraries(sentry PRIVATE libunwind::unwind)
+ 			else()
+-				target_link_libraries(sentry PUBLIC PkgConfig::LIBUNWIND)
++				target_link_libraries(sentry PUBLIC libunwind::unwind)
+ 			endif()
+ 		else()
+ 			# Use vendored libunwind
+@@ -983,8 +982,7 @@
+ 
+ 	if(SENTRY_WITH_LIBUNWIND AND LINUX)
+ 		if(SENTRY_LIBUNWIND_SYSTEM)
+-			pkg_check_modules(LIBUNWIND_PTRACE REQUIRED IMPORTED_TARGET libunwind-ptrace)
+-			target_link_libraries(sentry-crash PRIVATE PkgConfig::LIBUNWIND PkgConfig::LIBUNWIND_PTRACE)
++			target_link_libraries(sentry-crash PRIVATE libunwind::unwind libunwind::ptrace)
+ 		else()
+ 			# Use unwind_remote for the daemon (includes ptrace accessors
+ 			# for remote DWARF unwinding of the crashed process)

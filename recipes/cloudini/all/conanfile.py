@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=2.0.9"
@@ -79,6 +79,7 @@ class CloudiniConan(ConanFile):
             dst=os.path.join(self.package_folder, "licenses"),
         )
         CMake(self).install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cloudini")

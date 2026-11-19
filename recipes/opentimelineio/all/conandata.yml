@@ -1,0 +1,4 @@
+sources:
+  "0.18.1":
+    url: "https://github.com/AcademySoftwareFoundation/OpenTimelineIO/archive/refs/tags/v0.18.1.tar.gz"
+    sha256: "bcb516a43a962dac0cde3e1f9da634c1fd409915d499ff8f3ce6f738a4637d72"

@@ -5,18 +5,15 @@
 #  Note: please do not maintain multiple patch versions of the same minor,
 #        unless required by the above.
 sources:
-  3.6.3:
-    url: "https://github.com/openssl/openssl/releases/download/openssl-3.6.3/openssl-3.6.3.tar.gz"
-    sha256: 243a86649cf6f23eeb6a2ff2456e09e5d77dd9018a54d3d96b0c6bdd6ba6c7f1
-  3.5.7: # LTS: keep until next LTS is designed
-    url: "https://github.com/openssl/openssl/releases/download/openssl-3.5.7/openssl-3.5.7.tar.gz"
-    sha256: a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8
-  3.4.6:
-    url: "https://github.com/openssl/openssl/releases/download/openssl-3.4.6/openssl-3.4.6.tar.gz"
-    sha256: a57b8a1f09b502c904352c8a5386987675f2d6c52bc155f9a2f416faea1c0473
+  3.6.5:
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.6.5/openssl-3.6.5.tar.gz"
+    sha256: a2157c2830efdec3788939b00c9b0638306d3f0bbb76dc4832ee503bb397df98
+  3.5.9: # LTS: keep until next LTS is designed
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz"
+    sha256: 603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a
+  3.4.8:
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.4.8/openssl-3.4.8.tar.gz"
+    sha256: 9de9ce2f29e584044ae07ab93fc601637be01fdc91d109c5a655ec7419e6022b
   3.1.2: # Most recent FIPS validated as of 2025-03-14
     url: "https://github.com/openssl/openssl/releases/download/openssl-3.1.2/openssl-3.1.2.tar.gz"
     sha256: a0ce69b8b97ea6a35b96875235aa453b966ba3cba8af2de23657d8b6767d6539
-  3.0.21: # LTS: 3.5.7 should be used, but this is supported by OpenSSL until 2026-09-07
-    url: "https://github.com/openssl/openssl/releases/download/openssl-3.0.21/openssl-3.0.21.tar.gz"
-    sha256: 617e29af8e421f46649484a4937e48c685e47f46488167c982f88bc4ec1d522f

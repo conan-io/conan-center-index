@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -10,7 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LibSafeCConan(ConanFile):
@@ -38,10 +38,6 @@ class LibSafeCConan(ConanFile):
     }
 
     @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
     def _supported_compiler(self):
         compiler = self.settings.compiler
         version = Version(self.settings.compiler.version)
@@ -65,10 +61,6 @@ class LibSafeCConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if Version(self.version) < "3.9.1" and is_apple_os(self) and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration(
-                f"This platform is not yet supported by {self.ref} (os=Macos arch=armv8)"
-            )
         if not self._supported_compiler:
             raise ConanInvalidConfiguration(
                 f"{self.ref} doesn't support {self.settings.compiler}-{self.settings.compiler.version}"
@@ -79,7 +71,7 @@ class LibSafeCConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -119,13 +111,5 @@ class LibSafeCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libsafec")
-
-        if Version(self.version) >= "3.7.0":
-            self.cpp_info.includedirs.append(os.path.join("include", "safeclib"))
-            self.cpp_info.libs = ["safec"]
-        else:
-            self.cpp_info.includedirs.append(os.path.join("include", "libsafec"))
-            self.cpp_info.libs = [f"safec-{self.version}"]
-
-        bin_dir = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_dir)
+        self.cpp_info.includedirs.append(os.path.join("include", "safeclib"))
+        self.cpp_info.libs = ["safec"]

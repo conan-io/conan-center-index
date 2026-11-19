@@ -8,7 +8,7 @@ https://github.com/google-deepmind/mujoco/pull/2693
 https://github.com/google-deepmind/mujoco/pull/3224
 
 diff --git a/cmake/MujocoOptions.cmake b/cmake/MujocoOptions.cmake
-index 952163a1..88abcad1 100644
+index 74bf25bb..a20b4d33 100644
 --- a/cmake/MujocoOptions.cmake
 +++ b/cmake/MujocoOptions.cmake
 @@ -12,17 +12,21 @@

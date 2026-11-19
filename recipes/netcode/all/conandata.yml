@@ -1,0 +1,4 @@
+sources:
+  "1.4.8":
+    url: "https://github.com/mas-bandwidth/netcode/archive/refs/tags/v1.4.8.tar.gz"
+    sha256: "a92b6a86bfc746409684510aec46b4beef63efd9e4734999d415debe48311753"

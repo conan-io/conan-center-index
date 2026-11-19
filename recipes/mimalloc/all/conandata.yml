@@ -1,4 +1,7 @@
 sources:
+  "3.5.1":
+    url: "https://github.com/microsoft/mimalloc/archive/v3.5.1.tar.gz"
+    sha256: "2602daad9b64b213a8835dee6fadda96d2081c0171bfcd3fb2db39bdc669d6b3"
   "3.3.2":
     url: "https://github.com/microsoft/mimalloc/archive/v3.3.2.tar.gz"
     sha256: "ca02384e007f46950598500dfaebde5ff9948c1d231f5a81b058799afa64bbbb"

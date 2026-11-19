@@ -161,9 +161,12 @@ class FreeImageConan(ConanFile):
             return components
 
         self.cpp_info.components["FreeImage"].libs = ["freeimage"]
-        self.cpp_info.components["FreeImage"].requires = imageformats_deps()
         self.cpp_info.components["FreeImagePlus"].libs = ["freeimageplus"]
         self.cpp_info.components["FreeImagePlus"].requires = ["FreeImage"]
 
-        if not self.options.shared:
+        deps = imageformats_deps()
+        if self.options.shared:
+            deps = [d for d in imageformats_deps() if self.dependencies[d.split("::")[0]].options.get_safe("shared")]
+        else:
             self.cpp_info.components["FreeImage"].defines.append("FREEIMAGE_LIB")
+        self.cpp_info.components["FreeImage"].requires = deps

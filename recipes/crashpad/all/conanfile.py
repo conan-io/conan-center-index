@@ -155,7 +155,7 @@ class CrashpadConan(ConanFile):
         extra_cflags = _get_flags("CPPFLAGS")
         extra_cflags_c = []
         extra_cflags_cc = _get_flags("CXXFLAGS")
-        extra_ldflags = _get_flags("LDFLAGS") + _get_flags("LIBS")
+        extra_ldflags = _get_flags("LDFLAGS") + _get_flags("_LINK_") + _get_flags("LIBS")
         if self.options.get_safe("fPIC"):
             extra_cflags.append("-fPIC")
         if self.settings.compiler == "clang":

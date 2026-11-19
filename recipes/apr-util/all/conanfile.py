@@ -75,7 +75,7 @@ class AprUtilConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("apr/1.7.4", transitive_headers=True)
+        self.requires("apr/[>=1.7.4 <2]", transitive_headers=True)
         if self.settings.os != "Windows":
             #cmake build doesn't allow injection of iconv yet
             # https://github.com/conan-io/conan-center-index/pull/16142#issuecomment-1494282164
@@ -87,7 +87,7 @@ class AprUtilConan(ConanFile):
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_expat:
             self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_postgresql:

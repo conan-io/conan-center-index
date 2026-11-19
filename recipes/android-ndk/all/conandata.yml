@@ -38,6 +38,19 @@ sources:
       "x86_64":
         url: "https://dl.google.com/android/repository/android-ndk-r28b-darwin.zip"
         sha256: "76d33f698302dce31f59b86e9ed82e87b530f10cc52cbaeb44207473689be309"
+  "r27d":
+    "Windows":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r27d-windows.zip"
+        sha256: "82094f53e66a76b6a9ec4fc35a5076091a92de3b91d13c5d4a7cfdb226304c59"
+    "Linux":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r27d-linux.zip"
+        sha256: "601246087a682d1944e1e16dd85bc6e49560fe8b6d61255be2829178c8ed15d9"
+    "Macos":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r27d-darwin.zip"
+        sha256: "e69092f9d2bfa5d1199039980a14eb91c03cc971ab5c6968fc08a8e6b84e7bb7"
   "r27c":
     "Windows":
       "x86_64":

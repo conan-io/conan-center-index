@@ -1,0 +1,14 @@
+Custom: do not add abseil-cpp, it is only needed by Dawn (WebGPU backend), which is disabled
+
+--- a/ThirdParty/CMakeLists.txt
++++ b/ThirdParty/CMakeLists.txt
+@@ -157,9 +157,6 @@
+     list(APPEND THIRD_PARTY_LIBS volk)
+ endif()
+ 
+-add_subdirectory(abseil-cpp EXCLUDE_FROM_ALL)
+-set_directory_root_folder("abseil-cpp" "DiligentCore/ThirdParty")
+-
+ if (WEBGPU_SUPPORTED)
+     add_subdirectory(dawn EXCLUDE_FROM_ALL)
+     set_directory_root_folder("dawn" "DiligentCore/ThirdParty/dawn")

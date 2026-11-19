@@ -144,6 +144,7 @@ class Libxml2Conan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libxml2")
         self.cpp_info.set_property("cmake_target_name", "LibXml2::LibXml2")
         self.cpp_info.set_property("cmake_additional_variables_prefixes", ["LIBXML2"])
+        self.cpp_info.set_property("cmake_file_name_variants", ["LibXml2"])
         self.cpp_info.set_property("pkg_config_name", "libxml-2.0")
 
         is_unix = self.settings.os in ["Linux", "FreeBSD", "Macos", "Android"] or is_apple_os(self)

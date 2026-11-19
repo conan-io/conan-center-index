@@ -2,10 +2,9 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=2.1"
 
 
 class AmgclConan(ConanFile):
@@ -24,16 +23,12 @@ class AmgclConan(ConanFile):
     options = { 'with_boost': [True, False] }
     default_options = { 'with_boost': True }
 
-    def config_options(self):
-        if Version(self.version) < "1.4.4":
-            del self.options.with_boost
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("with_boost"):
-            self.requires("boost/1.85.0")
+        if self.options.with_boost:
+            self.requires("boost/[>=1.85.0 <2]")
 
     def package_id(self):
         self.info.clear()
@@ -55,3 +50,5 @@ class AmgclConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "amgcl::amgcl")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if not self.options.with_boost:
+            self.cpp_info.defines = ["AMGCL_NO_BOOST"]

@@ -68,6 +68,7 @@ class CcacheConan(ConanFile):
         tc.variables["ENABLE_DOCUMENTATION"] = False
         tc.variables["ENABLE_TESTING"] = False
         tc.variables["STATIC_LINK"] = False  # Don't link static runtimes and let Conan handle it
+        tc.variables["CCACHE_DEV_MODE"] = False
         tc.generate()
 
         deps = CMakeDeps(self)

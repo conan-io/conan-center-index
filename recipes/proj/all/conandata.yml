@@ -19,3 +19,7 @@ patches:
     - patch_file: "patches/0001-use-cmake-targets-9.2.1.patch"
       patch_type: "conan"
       patch_description: "Use cmake targets"
+    - patch_file: "patches/0002-string-append-intel-llvm-flags-9.3.1.patch"
+      patch_type: "backport"
+      patch_description: "Use string(APPEND) for IntelLLVM math flags"
+      patch_source: "https://github.com/OSGeo/PROJ/pull/4784"
