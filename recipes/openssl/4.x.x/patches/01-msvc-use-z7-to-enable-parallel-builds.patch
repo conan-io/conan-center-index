@@ -1,0 +1,90 @@
+Backport https://github.com/openssl/openssl/commit/be67880c1e6e37102a8488f81a8263554fa97d53
+
+From be67880c1e6e37102a8488f81a8263554fa97d53 Mon Sep 17 00:00:00 2001
+From: Milan Broz
+Date: Thu, 2 Apr 2026 12:51:46 +0200
+Subject: [PATCH] Windows: Use /Z7 compiler flag to enable parallel builds
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+MSVC compilation on Windows cannot be reliably parallelized
+with tools like jom (an nmake replacement) due to contention
+on shared .pdb files used for debug info. Writes to a shared
+.pdb must be serialized.
+
+The /FS compiler flag serializes concurrent compiler writes,
+but does not resolve contention when the compiler and linker
+access the same .pdb file. With shared .pdb files (e.g. app.pdb),
+the makefile does not prevent races between the linker and
+compilation of multiple targets.
+
+This can be resolved either by restructuring the makefile
+to introduce sentinel dependencies that serialize the conflicting
+steps, or by eliminating the shared .pdb entirely.
+
+This patch takes the latter approach: it replaces /Zi with /Z7,
+which embeds debug info directly into each .obj file and avoids
+any shared-file contention. /Z7 is supported by all MSVC versions.
+
+The linker-generated .pdb is unaffected.
+
+Side effects: object files are slightly larger, and all .pdb files
+are now named after their target — the shared app.pdb, ossl_static.pdb,
+and dso.pdb no longer exist.
+
+With this change, jom can be used to parallelize the build.
+
+Fixes: issue 9931
+
+Signed-off-by: Milan Broz
+
+Reviewed-by: Neil Horman
+Reviewed-by: Norbert Pocs
+MergeDate: Mon Apr 13 08:46:20 2026
+(Merged from https://github.com/openssl/openssl/pull/30703)
+---
+ Configurations/10-main.conf          | 6 +++---
+ Configurations/windows-makefile.tmpl | 4 +---
+ 2 files changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/Configurations/10-main.conf b/Configurations/10-main.conf
+index 76cbf0ffa0c1b..c7002eff39273 100644
+--- a/Configurations/10-main.conf
++++ b/Configurations/10-main.conf
+@@ -1541,10 +1541,10 @@ my %targets = (
+                                 "UNICODE", "_UNICODE",
+                                 "_CRT_SECURE_NO_DEPRECATE",
+                                 "_WINSOCK_DEPRECATED_NO_WARNINGS"),
+-        lib_cflags       => add("/Zi /Fdossl_static.pdb"),
++        lib_cflags       => add("/Z7"),
+         lib_defines      => add("L_ENDIAN"),
+-        dso_cflags       => "/Zi /Fddso.pdb",
+-        bin_cflags       => "/Zi /Fdapp.pdb",
++        dso_cflags       => "/Z7",
++        bin_cflags       => "/Z7",
+         # def_flag made to empty string so a .def file gets generated
+         shared_defflag   => '',
+         shared_ldflag    => "/dll",
+diff --git a/Configurations/windows-makefile.tmpl b/Configurations/windows-makefile.tmpl
+index a3c52ac19d44e..16fed4670d8e5 100644
+--- a/Configurations/windows-makefile.tmpl
++++ b/Configurations/windows-makefile.tmpl
+@@ -450,7 +450,7 @@ uninstall: {- "uninstall_docs" if !$disabled{docs}; -} uninstall_sw {- $disabled
+ 
+ libclean:
+ 	"$(PERL)" -e "map { m/(.*)\.dll$$/; unlink glob """{.,apps,test,fuzz}/$$1.*"""; } @ARGV" $(SHLIBS)
+-	-del /Q /F $(LIBS) libcrypto.* libssl.* ossl_static.pdb
++	-del /Q /F $(LIBS) libcrypto.* libssl.*
+ 
+ clean: libclean
+ 	{- join("\n\t", map { "-if exist $_ del /Q /F $_" } @HTMLDOCS1) || "\@rem" -}
+@@ -545,8 +545,6 @@ install_dev: install_runtime_libs
+ 				       "$(INSTALLTOP)\include\openssl"
+ 	@"$(PERL)" "$(SRCDIR)\util\mkdir-p.pl" "$(libdir)"
+ 	@"$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_LIBS) "$(libdir)"
+-	@if "$(SHLIBS)"=="" \
+-	 "$(PERL)" "$(SRCDIR)\util\copy.pl" ossl_static.pdb "$(libdir)"
+ 	@"$(PERL)" "$(SRCDIR)\util\mkdir-p.pl" "$(CMAKECONFIGDIR)"
+ 	@"$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_EXPORTERS_CMAKE) "$(CMAKECONFIGDIR)"
+ 

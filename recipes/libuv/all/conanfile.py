@@ -100,3 +100,5 @@ class LibuvConan(ConanFile):
             self.cpp_info.system_libs = ["iphlpapi", "psapi", "userenv", "ws2_32"]
             if Version(self.version) >= "1.45.0":
                 self.cpp_info.system_libs.append("dbghelp")
+            if Version(self.version) >= "1.53.0":
+                self.cpp_info.system_libs.append("synchronization")

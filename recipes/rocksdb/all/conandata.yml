@@ -1,8 +1,12 @@
 sources:
-  "10.5.1":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v10.5.1.tar.gz"
-    sha256: "7EC942BAAB802B2845188D02BC5D4E42C29236E61BCBC08F5B3A6BDD92290C22"
+  "11.1.1":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v11.1.1.tar.gz"
+    sha256: "63F11183FE40725A0E89A9E392F2C86C94B90064F1D95F5173A02CFE40DE13F7"
+  "10.10.1":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v10.10.1.tar.gz"
+    sha256: "df2ff348f3fac8578fd4b727eee7267aaf90cd403c99b55e898d1db63fa8cff5"
 patches:
-  "10.5.1":
-    - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
-      patch_description: "Do not include thirdparty.inc"
+  "11.1.1":
+    - patch_file: "patches/11.x-01-use-find-package-for-dependencies-msvc.patch"
+  "10.10.1":
+    - patch_file: "patches/10.x-01-use-find-package-for-dependencies-msvc.patch"

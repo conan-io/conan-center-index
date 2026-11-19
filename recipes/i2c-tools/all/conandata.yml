@@ -1,4 +1,4 @@
 sources:
-  "4.3":
-    url: "https://mirrors.edge.kernel.org/pub/software/utils/i2c-tools/i2c-tools-4.3.tar.gz"
-    sha256: "eec464e42301d93586cbeca3845ed61bff40f560670e5b35baec57301d438148"
+  "4.4":
+    url: "https://mirrors.edge.kernel.org/pub/software/utils/i2c-tools/i2c-tools-4.4.tar.gz"
+    sha256: "04d1e3b0cd88df8fb96e7709f374dd0b3561191b4c0363eaf873a074b8b7cb22"

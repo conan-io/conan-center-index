@@ -9,6 +9,7 @@ required_conan_version = ">=1.50.0"
 
 class XorgConan(ConanFile):
     name = "xorg"
+    version = "system"
     package_type = "shared-library"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
@@ -69,10 +70,10 @@ class XorgConan(ConanFile):
                               "libxss", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
                               "libxxf86vm", "libxv", "xcb-util", "util-linux-libs", "xcb-util-cursor"], update=True, check=True)
 
-        package_manager.Pkg(self).install(["libX11", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
-                           "libxdamage", "libxdmcp", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
+        package_manager.Pkg(self).install(["libX11", "libfontenc", "libICE", "libSM", "libXaw", "libXcomposite", "libXcursor",
+                           "libXdamage", "libXdmcp", "libXtst", "libXinerama", "libxkbfile", "libXrandr", "libXres",
                            "libXScrnSaver", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
-                           "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "xcb-util-cursor"], update=True, check=True)
+                           "libXxf86vm", "libXv", "xkeyboard-config", "xcb-util", "xcb-util-cursor"], update=True, check=True)
 
         if Version(conan_version) >= "2.0.10":
             alpine = package_manager.Apk(self)
@@ -99,16 +100,16 @@ class XorgConan(ConanFile):
                      "xcb-dri3", "xcb-cursor", "xcb-dri2", "xcb-dri3", "xcb-glx", "xcb-present",
                      "xcb-composite", "xcb-ewmh", "xcb-res"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             pkg_config = PkgConfig(self, name)
-            pkg_config.fill_cpp_info(
-                self.cpp_info.components[name], is_system=self.settings.os != "FreeBSD")
+            pkg_config.fill_cpp_info(self.cpp_info.components[name])
             self.cpp_info.components[name].version = pkg_config.version
             self.cpp_info.components[name].set_property(
                 "pkg_config_name", name)
             self.cpp_info.components[name].set_property(
                 "component_version", pkg_config.version)
             self.cpp_info.components[name].bindirs = []
-            self.cpp_info.components[name].includedirs = []
-            self.cpp_info.components[name].libdirs = []
+            if self.settings.os == "Linux":
+                self.cpp_info.components[name].includedirs = []
+                self.cpp_info.components[name].libdirs = []
             self.cpp_info.components[name].set_property("pkg_config_custom_content",
                                                         "\n".join(f"{key}={value}" for key, value in pkg_config.variables.items() if key not in ["pcfiledir","prefix", "includedir"]))
 

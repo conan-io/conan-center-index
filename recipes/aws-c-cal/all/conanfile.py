@@ -37,7 +37,7 @@ class AwsCCal(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.12.5", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-common/0.14.5", transitive_headers=True, transitive_libs=True)
         if self._needs_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
@@ -81,7 +81,7 @@ class AwsCCal(ConanFile):
 
         if self._needs_openssl:
             self.cpp_info.requires.append("openssl::crypto")
-            if not self.dependencies["openssl"].options.shared:
+            if not self.dependencies["openssl"].package_type == "shared-library":
                 # aws-c-cal does not statically link to openssl and searches dynamically for openssl symbols .
                 # Mark these as undefined so the linker will include them.
                 # This avoids dynamical look-up for a system crypto library.

@@ -1,4 +1,7 @@
 sources:
+  "0.8.2":
+    url: "https://github.com/xtensor-stack/xtl/archive/0.8.2.tar.gz"
+    sha256: "8fb38d6a5856aab5740d2ccb3d791d289f648d4cc506b94a1338fe5fce100c11"
   "0.8.0":
     url: "https://github.com/xtensor-stack/xtl/archive/0.8.0.tar.gz"
     sha256: "ee38153b7dd0ec84cee3361f5488a4e7e6ddd26392612ac8821cbc76e740273a"

@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rm, rmdir, replace_in_file, collect_libs
+from conan.tools.files import get, copy, rm, rmdir, replace_in_file, collect_libs, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.meson import Meson, MesonToolchain
@@ -35,17 +35,16 @@ class PistacheConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    @property
-    def _supports_libevent(self):
-        return Version(self.version) >= "0.4.25"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux" or not self._supports_libevent:
+        if self.settings.os != "Linux":
             del self.options.with_libevent
 
     def requirements(self):
@@ -72,6 +71,7 @@ class PistacheConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)
@@ -79,7 +79,7 @@ class PistacheConan(ConanFile):
         tc.project_options["PISTACHE_BUILD_EXAMPLES"] = False
         tc.project_options["PISTACHE_BUILD_TESTS"] = False
         tc.project_options["PISTACHE_BUILD_DOCS"] = False
-        if self.settings.os == "Linux" and self._supports_libevent:
+        if self.settings.os == "Linux":
             tc.project_options["PISTACHE_FORCE_LIBEVENT"] = bool(self.options.with_libevent)
         tc.generate()
         deps = PkgConfigDeps(self)
@@ -115,6 +115,7 @@ class PistacheConan(ConanFile):
         self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson"]
         if  self.settings.os != "Linux" or self.options.get_safe("with_libevent"):
             self.cpp_info.components["libpistache"].requires.append("libevent::libevent")
+            self.cpp_info.components["libpistache"].defines = ["PISTACHE_FORCE_LIBEVENT"]
         self.cpp_info.components["libpistache"].requires.append("date::date")
         if self.options.with_ssl:
             self.cpp_info.components["libpistache"].requires.append("openssl::openssl")

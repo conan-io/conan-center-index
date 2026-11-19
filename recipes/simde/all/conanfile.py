@@ -5,7 +5,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class SIMEeConan(ConanFile):
@@ -28,7 +28,7 @@ class SIMEeConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("meson/[>=1.3.1 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

@@ -1,0 +1,35 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cda82b013..7a56806bc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -141,11 +141,13 @@ set_local_or_system_option(
+ # Whether the libavif library uses c++ indirectly (e.g. through linking to libyuv).
+ set(AVIF_LIB_USE_CXX OFF)
+ 
++if(0)
+ if(APPLE)
+     set(XCRUN xcrun)
+ else()
+     set(XCRUN)
+ endif()
++endif()
+ 
+ # This is also needed to get shared libraries (e.g. pixbufloader-avif) to compile against a static libavif.
+ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+@@ -267,6 +269,8 @@ check_avif_option(AVIF_LIBXML2 TARGET LibXml2::LibXml2 PKG_NAME LibXml2)
+ 
+ # ---------------------------------------------------------------------------------------
+ 
++add_library(avif_enable_warnings INTERFACE)
++if(0)
+ # Enable all warnings
+ include(CheckCCompilerFlag)
+ # avif_enable_warnings is a CMake interface library. It has no source files.
+@@ -322,6 +326,7 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "GNU")
+ else()
+     message(FATAL_ERROR "libavif: Unknown compiler, bailing out")
+ endif()
++endif()
+ 
+ if(AVIF_ENABLE_WERROR)
+     # Warnings as errors

@@ -1,0 +1,4 @@
+sources:
+  "4.28":
+    url: "https://github.com/rabauke/trng4/archive/refs/tags/v4.28.tar.gz"
+    sha256: "50432094f8a4b079bcf1c4a9075691c34f4ed5be54835d7ea1a38ccb00ebc89e"

@@ -35,7 +35,7 @@ class ThrustConan(ConanFile):
         self.requires("cub/1.17.2")
 
         if self.options.device_system == "tbb":
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/[>=2021.10.0 <2024]")
 
         if self.options.device_system in ["cuda", "omp"]:
             dev = str(self.options.device_system).upper()
@@ -72,3 +72,7 @@ class ThrustConan(ConanFile):
         self.cpp_info.defines = [f"THRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_{dev}"]
         # Since CUB and Thrust are provided separately, their versions are not guaranteed to match
         self.cpp_info.defines += ["THRUST_IGNORE_CUB_VERSION_CHECK=1"]
+
+        self.cpp_info.requires = ["cub::cub"]
+        if self.options.device_system == "tbb":
+            self.cpp_info.requires.append("onetbb::libtbb")

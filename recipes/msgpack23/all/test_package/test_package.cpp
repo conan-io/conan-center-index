@@ -1,13 +1,10 @@
 #include <msgpack23/msgpack23.h>
+#include <vector>
+#include <iostream>
 
 int main(void) {
-	
-    msgpack23::Packer packer {};
-	std::uint8_t const expected = 42;
-	auto data = packer(expected);
-	msgpack23::Unpacker unpacker {data};
-	std::int8_t actual {};
-	unpacker(actual);
-	
+	std::vector<std::byte> packedData{};
+	msgpack23::Unpacker unpacker(packedData);
+	std::cout << "msgpack23 test package" << std::endl;
     return EXIT_SUCCESS;
 }

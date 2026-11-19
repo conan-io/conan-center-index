@@ -3,11 +3,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.files import get, copy, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 class TrantorConan(ConanFile):
     name = "trantor"
@@ -32,29 +31,12 @@ class TrantorConan(ConanFile):
         "spdlog/*:header_only": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "5",
-            "Visual Studio": "15",
-            "msvc": "191",
-            "clang": "5",
-            "apple-clang": "10",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "1.5.15":
-            del self.options.with_spdlog
-            del self.default_options["spdlog/*:header_only"]
 
     def configure(self):
         if self.options.shared:
@@ -66,19 +48,12 @@ class TrantorConan(ConanFile):
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.25.0")
+            self.requires("c-ares/[>=1.25 <2]")
         if self.options.get_safe("with_spdlog"):
-            self.requires("spdlog/1.13.0")
+            self.requires("spdlog/[>=1.13 <2]")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 14)
 
         # TODO: Compilation succeeds, but execution of test_package fails on Visual Studio with MDd
         if is_msvc(self) and self.options.shared and "MDd" in msvc_runtime_flag(self):
@@ -89,19 +64,6 @@ class TrantorConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        # TODO: support other tls providers
-        tc.variables["TRANTOR_USE_TLS"] = "openssl"
-        tc.variables["BUILD_C-ARES"] = self.options.with_c_ares
-        tc.variables["USE_SPDLOG"] = self.options.get_safe("with_spdlog")
-        tc.generate()
-
-        tc = CMakeDeps(self)
-        tc.generate()
-
-    def _patch_sources(self):
         apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # fix c-ares imported target
@@ -109,8 +71,18 @@ class TrantorConan(ConanFile):
         # Cleanup rpath in shared lib
         replace_in_file(self, cmakelists, "set(CMAKE_INSTALL_RPATH \"${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}\")", "")
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        # TODO: support other tls providers
+        tc.cache_variables["TRANTOR_USE_TLS"] = "openssl"
+        tc.cache_variables["BUILD_C-ARES"] = self.options.with_c_ares
+        tc.cache_variables["USE_SPDLOG"] = self.options.get_safe("with_spdlog")
+        tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
+
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -131,7 +103,3 @@ class TrantorConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("m")
-
-        #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Trantor"
-        self.cpp_info.names["cmake_find_package_multi"] = "Trantor"

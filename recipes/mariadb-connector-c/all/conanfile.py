@@ -64,7 +64,7 @@ class MariadbConnectorcConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if Version(self.version) >= "3.3":
             # INFO: https://mariadb.com/kb/en/mariadb-connector-c-330-release-notes
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5 <1.6]")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
@@ -74,6 +74,7 @@ class MariadbConnectorcConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -125,7 +126,6 @@ class MariadbConnectorcConan(ConanFile):
                             "find_package(ZSTD REQUIRED CONFIG)")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

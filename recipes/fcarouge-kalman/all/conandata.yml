@@ -1,0 +1,4 @@
+sources:
+  "0.5.3":
+    url: "https://github.com/FrancoisCarouge/Kalman/archive/refs/tags/0.5.3.tar.gz"
+    sha256: "bad4fd1ebfaca443c6ff6d3f00c880970773f21afe6e3d64a3f27b04f6fa9954"

@@ -1,0 +1,4 @@
+sources:
+  "0.17.3":
+    url: "https://github.com/pantor/ruckig/archive/refs/tags/v0.17.3.tar.gz"
+    sha256: "8464bfc7d39b30265a474d74ac8860570089f143b82baa4e28390e8a2bb90919"

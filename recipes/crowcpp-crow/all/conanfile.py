@@ -2,10 +2,9 @@ from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 class CrowConan(ConanFile):
     name = "crowcpp-crow"
@@ -27,37 +26,21 @@ class CrowConan(ConanFile):
         "with_compression": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        if Version(self.version) >= "1.2.1":
-            return 17
-        return 11
-
-    def configure(self):
-        if Version(self.version) < "1.0":
-            del self.options.with_ssl
-            del self.options.with_compression
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) < "1.1.0":
-            self.requires("boost/1.83.0")
-        else:
-            self.requires("asio/1.29.0", transitive_headers=True)
-        if Version(self.version) >= "1.0":
-            if self.options.with_ssl:
-                self.requires("openssl/[>=1.1 <3]")
-            if self.options.with_compression:
-                self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("asio/1.29.0", transitive_headers=True)
+        if self.options.with_ssl:
+            self.requires("openssl/[>=1.1 <3]")
+        if self.options.with_compression:
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def package_id(self):
         self.info.settings.clear()
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -65,23 +48,16 @@ class CrowConan(ConanFile):
     def generate(self):
         if self.options.amalgamation:
             tc = CMakeToolchain(self)
-            if Version(self.version) < "1.0":
-                tc.variables["BUILD_EXAMPLES"] = False
-                tc.variables["BUILD_TESTING"] = False
-            else:
-                tc.variables["CROW_BUILD_EXAMPLES"] = False
-                tc.variables["CROW_BUILD_TESTS"] = False
-                tc.variables["CROW_AMALGAMATE"] = True
+            tc.cache_variables["CROW_BUILD_EXAMPLES"] = False
+            tc.cache_variables["CROW_BUILD_TESTS"] = False
+            tc.cache_variables["CROW_AMALGAMATE"] = True
             tc.generate()
 
     def build(self):
         if self.options.amalgamation:
             cmake = CMake(self)
             cmake.configure()
-            if Version(self.version) < "1.0":
-                cmake.build(target="amalgamation")
-            else:
-                cmake.build(target="crow_amalgamated")
+            cmake.build(target="crow_amalgamated")
 
 
     def package(self):
@@ -112,10 +88,7 @@ class CrowConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        if Version(self.version) < "1.1.0":
-            self.cpp_info.requires.append("boost::headers")
-        else:
-            self.cpp_info.requires.append("asio::asio")
+        self.cpp_info.requires.append("asio::asio")
 
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread"]
@@ -125,10 +98,9 @@ class CrowConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Crow")
         self.cpp_info.set_property("cmake_target_name", "Crow::Crow")
 
-        if Version(self.version) >= "1.0":
-            if self.options.with_ssl:
-                self.cpp_info.defines.append("CROW_ENABLE_SSL")
-                self.cpp_info.requires.append("openssl::ssl")
-            if self.options.with_compression:
-                self.cpp_info.defines.append("CROW_ENABLE_COMPRESSION")
-                self.cpp_info.requires.append("zlib::zlib")
+        if self.options.with_ssl:
+            self.cpp_info.defines.append("CROW_ENABLE_SSL")
+            self.cpp_info.requires.append("openssl::ssl")
+        if self.options.with_compression:
+            self.cpp_info.defines.append("CROW_ENABLE_COMPRESSION")
+            self.cpp_info.requires.append("zlib::zlib")

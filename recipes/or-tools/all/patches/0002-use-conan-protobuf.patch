@@ -1,0 +1,18 @@
+OR Tools uses its own helper to find Protoc
+
+This patch makes sure will be consuming Conan's protoc,
+even when cross-building
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9b688b8..2515941 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -435,7 +435,7 @@ include(system_deps)
+ add_subdirectory(cmake/dependencies dependencies)
+ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_BINARY_DIR}/dependencies/install)
+ 
+-include(host)
++set(PROTOC_PRG protobuf::protoc)
+ # verify deps
+ include(check_deps)
+ 

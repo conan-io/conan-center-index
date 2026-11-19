@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
@@ -47,7 +46,7 @@ class SDLImageConan(ConanFile):
     def requirements(self):
         self.requires("sdl/[>=3.2.20 <4]", transitive_headers=True)
         if self.options.with_libtiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.6.0 <5]")
         if self.options.with_libjpeg:
             self.requires("libjpeg/[>=9e]")
         if self.options.with_libpng:

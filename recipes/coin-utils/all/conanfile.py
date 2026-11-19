@@ -2,14 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2"
 
 
 class CoinUtilsConan(ConanFile):
@@ -34,19 +34,17 @@ class CoinUtilsConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.shared
+            self.package_type = "static-library"
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
@@ -58,12 +56,10 @@ class CoinUtilsConan(ConanFile):
         # TODO: add blas and lapack support
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-utils does not provide a shared library on Windows")
         # FIXME: This issue likely comes from very old autotools versions used to produce configure.
         #        It might be fixed by calling autoreconf, but https://github.com/coin-or-tools/BuildTools
         #        should be packaged and added to build requirements.
-        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
+        if cross_building(self) and self.options.get_safe("shared"):
             raise ConanInvalidConfiguration("coin-utils shared not supported yet when cross-building")
 
     def build_requirements(self):
@@ -71,17 +67,16 @@ class CoinUtilsConan(ConanFile):
             self.tool_requires("automake/1.16.5")
         else:
             self.tool_requires("gnu-config/[*]")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -141,7 +136,6 @@ class CoinUtilsConan(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if not is_msvc(self):
             for gnu_config in [
                 self.conf.get("user.gnu-config:config_guess", check_type=str),
@@ -170,7 +164,7 @@ class CoinUtilsConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "coinutils")
         self.cpp_info.libs = ["CoinUtils"]
         self.cpp_info.includedirs.append(os.path.join("include", "coin"))
-        if not self.options.shared:
+        if not self.options.get_safe("shared"):
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.system_libs = ["m"]
             if is_apple_os(self):

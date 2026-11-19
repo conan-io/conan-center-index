@@ -335,7 +335,6 @@ class BoostDependencyBuilder(object):
 
     def do_create_libraries(self, boost_dependencies: BoostDependencies):
         libraries = {}
-        module_provides_extra = {}
 
         #  Look for the names of libraries in Jam build files
         for buildable in boost_dependencies.buildables:
@@ -361,14 +360,9 @@ class BoostDependencyBuilder(object):
                 buildable_libs.remove(buildable)
             else:
                 libraries[buildable] = []
-            module_provides_extra[buildable] = buildable_libs
             for buildable_dep in buildable_libs:
                 boost_dependencies.export.dependencies[buildable_dep] = [buildable]
                 libraries[buildable_dep] = [f"boost_{buildable_dep}"]
-
-        # Boost.Test: unit_test_framework depends on all libraries of Boost.Test
-        if "unit_test_framework" in boost_dependencies.export.dependencies and "test" in module_provides_extra:
-            boost_dependencies.export.dependencies["unit_test_framework"].extend(module_provides_extra["test"].difference({"unit_test_framework"}))
 
         # python and numpy have a version suffix. Add it here.
         if "python" in libraries:

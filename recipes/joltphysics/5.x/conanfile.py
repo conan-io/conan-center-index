@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, rm, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, rm, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -46,6 +46,7 @@ class JoltPhysicsConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "Jolt", "Jolt.cmake"), "set(CMAKE_CXX_STANDARD 17)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -61,6 +62,10 @@ class JoltPhysicsConan(ConanFile):
         tc.cache_variables["OVERRIDE_CXX_FLAGS"] = False
         tc.cache_variables["DEBUG_RENDERER_IN_DEBUG_AND_RELEASE"] = False
         tc.cache_variables["PROFILER_IN_DEBUG_AND_RELEASE"] = False
+        # INFO: GPU compute backends added in 5.6.0 depend on dxc and SDKs installed on the build machine
+        tc.cache_variables["JPH_USE_DX12"] = False
+        tc.cache_variables["JPH_USE_VK"] = False
+        tc.cache_variables["JPH_USE_MTL"] = False
         if is_msvc(self):
             tc.cache_variables["USE_STATIC_MSVC_RUNTIME_LIBRARY"] = is_msvc_static_runtime(self)
         tc.generate()
@@ -74,6 +79,9 @@ class JoltPhysicsConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        # Upstream does not install the shader headers used by HairSettings.h
+        copy(self, "*.h", src=os.path.join(self.source_folder, "Jolt", "Shaders"),
+             dst=os.path.join(self.package_folder, "include", "Jolt", "Shaders"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rm(self, "*.cmake", os.path.join(self.package_folder, "include", "Jolt"))
 
@@ -83,14 +91,18 @@ class JoltPhysicsConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Jolt::Jolt")
         # INFO: The CMake option ENABLE_OBJECT_STREAM is enabled by default and defines JPH_OBJECT_STREAM as public
         # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Build/CMakeLists.txt#L95C8-L95C28
-        self.cpp_info.defines = ["JPH_OBJECT_STREAM"]
+        self.cpp_info.defines = ["JPH_OBJECT_STREAM", "JPH_USE_CPU_COMPUTE"]
         # INFO: Public defines exposed in include/Jolt/Jolt.cmake
         # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Build/CMakeLists.txt#L51
         if self.settings.arch in ["x86_64", "x86"]:
             self.cpp_info.defines.extend(["JPH_USE_AVX2", "JPH_USE_AVX", "JPH_USE_SSE4_1",
                                           "JPH_USE_SSE4_2", "JPH_USE_LZCNT", "JPH_USE_TZCNT",
                                           "JPH_USE_F16C", "JPH_USE_FMADD"])
-        if is_msvc(self):
+            if not is_msvc(self):
+                # INFO: GCC and Clang reject Jolt's always_inline intrinsics in consumers without these flags
+                self.cpp_info.cxxflags.extend(["-mavx2", "-mbmi", "-mpopcnt", "-mlzcnt", "-mf16c", "-mfma",
+                                               "-mfpmath=sse"])
+        if is_msvc(self) and self.settings.build_type in ("Debug", "Release"):
             # INFO: Floating point exceptions are enabled by default
             # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Build/CMakeLists.txt#L37
             # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Jolt/Jolt.cmake#L529

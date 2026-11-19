@@ -13,7 +13,7 @@ class PackageConan(ConanFile):
     name = "msgpack23"
     description = "A modern, header-only C++ library for MessagePack serialization and deserialization."
     license = "MIT"
-    url = "https://github.com/rwindegger/msgpack23"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rwindegger/msgpack23"
     topics = ("msgpack", "serialization", "MessagePack")
     package_type = "header-library"
@@ -38,7 +38,8 @@ class PackageConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.generate()
 
     def build(self):

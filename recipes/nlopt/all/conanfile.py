@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, rm, rmdir
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2"
 
 
 class NloptConan(ConanFile):
@@ -24,11 +23,13 @@ class NloptConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_cxx_routines": [True, False],
+        "enable_luksan": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_cxx_routines": True,
+        "enable_luksan": True,
     }
 
     def config_options(self):
@@ -41,9 +42,14 @@ class NloptConan(ConanFile):
         if not self.options.enable_cxx_routines:
             self.settings.rm_safe("compiler.cppstd")
             self.settings.rm_safe("compiler.libcxx")
+        if not self.options.enable_luksan:
+            self.license = "MIT"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.18]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -56,20 +62,14 @@ class NloptConan(ConanFile):
         tc.variables["NLOPT_OCTAVE"] = False
         tc.variables["NLOPT_MATLAB"] = False
         tc.variables["NLOPT_GUILE"] = False
+        tc.variables["NLOPT_JAVA"] = False
         tc.variables["NLOPT_SWIG"] = False
+        tc.variables["NLOPT_LUKSAN"] = self.options.enable_luksan
         tc.variables["NLOPT_TESTS"] = False
         tc.variables["WITH_THREADLOCAL"] = True
         tc.generate()
 
-    def _patch_sources(self):
-        # don't force PIC
-        if Version(self.version) < Version("2.8.0"):
-            cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-            replace_in_file(self, cmakelists, "set (CMAKE_C_FLAGS \"-fPIC ${CMAKE_C_FLAGS}\")", "")
-            replace_in_file(self, cmakelists, "set (CMAKE_CXX_FLAGS \"-fPIC ${CMAKE_CXX_FLAGS}\")", "")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -82,11 +82,12 @@ class NloptConan(ConanFile):
             {"subdir": "cobyla", "license_name": "COPYRIGHT"},
             {"subdir": "direct", "license_name": "COPYING"  },
             {"subdir": "esch"  , "license_name": "COPYRIGHT"},
-            {"subdir": "luskan", "license_name": "COPYRIGHT"},
             {"subdir": "newuoa", "license_name": "COPYRIGHT"},
             {"subdir": "slsqp" , "license_name": "COPYRIGHT"},
             {"subdir": "stogo" , "license_name": "COPYRIGHT"},
         ]
+        if self.options.enable_luksan:
+            algs_licenses.append({"subdir": "luksan", "license_name": "COPYRIGHT"})
         for alg_license in algs_licenses:
             copy(self, alg_license["license_name"],
                       src=os.path.join(self.source_folder, "src", "algs", alg_license["subdir"]),
@@ -103,10 +104,6 @@ class NloptConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "NLopt::nlopt")
         self.cpp_info.set_property("pkg_config_name", "nlopt")
 
-        self.cpp_info.names["cmake_find_package"] = "NLopt"
-        self.cpp_info.names["cmake_find_package_multi"] = "NLopt"
-        self.cpp_info.components["nloptlib"].names["cmake_find_package"] = "nlopt"
-        self.cpp_info.components["nloptlib"].names["cmake_find_package_multi"] = "nlopt"
         self.cpp_info.components["nloptlib"].set_property("cmake_target_name", "NLopt::nlopt")
         self.cpp_info.components["nloptlib"].set_property("pkg_config_name", "nlopt")
 

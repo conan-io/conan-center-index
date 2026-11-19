@@ -1,3 +1,4 @@
+#include <ogdf/basic/internal/config_autogen.h>
 #include <ogdf/basic/graph_generators.h>
 #include <ogdf/layered/DfsAcyclicSubgraph.h>
 #include <ogdf/fileformats/GraphIO.h>

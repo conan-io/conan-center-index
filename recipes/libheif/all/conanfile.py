@@ -64,7 +64,7 @@ class LibheifConan(ConanFile):
         if self.options.with_libde265:
             self.requires("libde265/[>=1.0.12 <2]")
         if self.options.with_x265:
-            self.requires("libx265/[>=3.4 <4]")
+            self.requires("libx265/[>=3.4 <5]")
         if self.options.with_libaomav1:
             self.requires("libaom-av1/[>=3.6.1 <4]")
         if self.options.with_dav1d:
@@ -98,9 +98,12 @@ class LibheifConan(ConanFile):
         tc.cache_variables["WITH_LIBSHARPYUV"] = False
         tc.cache_variables["WITH_LIBDE265"] = self.options.with_libde265
         tc.cache_variables["WITH_X265"] = self.options.with_x265
-        tc.cache_variables["WITH_AOM"] = self.options.with_libaomav1
+        tc.cache_variables["WITH_X264"] = False
         tc.cache_variables["WITH_AOM_DECODER"] = self.options.with_libaomav1
         tc.cache_variables["WITH_AOM_ENCODER"] = self.options.with_libaomav1
+        if self.options.with_libaomav1:
+            tc.cache_variables["AOM_ENCODER_FOUND"] = "YES"
+            tc.cache_variables["AOM_DECODER_FOUND"] = "YES"
         tc.cache_variables["WITH_RAV1E"] = False
         tc.cache_variables["WITH_DAV1D"] = self.options.with_dav1d
         tc.cache_variables["WITH_EXAMPLES"] = False
@@ -111,8 +114,8 @@ class LibheifConan(ConanFile):
         tc.cache_variables["WITH_OpenJPEG_DECODER"] = self.options.get_safe("with_openjpeg", False)
         tc.cache_variables["WITH_OpenJPEG_ENCODER"] = self.options.get_safe("with_openjpeg", False)
         tc.cache_variables["WITH_OPENJPH_ENCODER"] = self.options.get_safe("with_openjph", False)
-        tc.cache_variables["WITH_OPENH264_DECODER"] = self.options.get_safe("with_openh264", False)
-        
+        tc.cache_variables["WITH_OpenH264_DECODER"] = self.options.get_safe("with_openh264", False)
+
         if Version(self.version) == "1.16.2":
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         # Disable finding possible Doxygen in system, so no docs are built

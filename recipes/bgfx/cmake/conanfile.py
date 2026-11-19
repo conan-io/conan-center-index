@@ -1,10 +1,9 @@
 from conan import ConanFile
-from conan.tools.files import copy, get, rmdir, rm
+from conan.tools.files import copy, get, rmdir, rm, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.apple import is_apple_os
 from conan.tools.microsoft import is_msvc
-from conan.errors import ConanInvalidConfiguration
 import os
 
 
@@ -38,17 +37,18 @@ class bgfxConan(ConanFile):
             self.requires("xorg/system")
             self.requires("opengl/system")
             # INFO: Wayland is optional, but we enable it by default on Linux - CMakeLists.txt:46
-            self.requires("wayland/1.23.92")
+            self.requires("wayland/[>=1.22.0 <2]")
         # INFO: miniz, tinyexr and libsquish are vendored in bgfx as well
         self.requires("miniz/3.0.2")
-        if not self.options.shared:
-            # INFO: bimg_encode and bimg_decode are only built for static bgfx
+        if not self.options.shared or self.options.tools:
+            # INFO: bimg_encode and bimg_decode are only installed for static bgfx
+            # The tool texturec requires bimg_encode and bimg_decode
             self.requires("tinyexr/1.0.7")
             self.requires("libsquish/1.15")
         # INFO: glflags and spirv-tools are vendored only. No need to add them as dependencies
 
     def validate(self):
-        check_min_cppstd(self, 17)
+        check_min_cppstd(self, 20)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -77,6 +77,13 @@ class bgfxConan(ConanFile):
         deps.generate()
 
     def build(self):
+        # INFO: Use Conan's miniz instead of the vendored one
+        replace_in_file(self, os.path.join(self.source_folder, "bimg/src/image_decode.cpp"), "<miniz/miniz.c>", "<miniz/miniz.h>")
+        if self.options.shared and not self.options.tools:
+            # INFO: bimg_encode and bimg_decode are only installed for static bgfx or consumed by tools.
+            # Remove them from CMakeLists.txt to avoid need extra dependencies for shared bgfx without tools
+            replace_in_file(self, os.path.join(self.source_folder, "cmake/bimg/CMakeLists.txt"), "include(bimg_decode.cmake)", "")
+            replace_in_file(self, os.path.join(self.source_folder, "cmake/bimg/CMakeLists.txt"), "include(bimg_encode.cmake)", "")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -93,6 +100,14 @@ class bgfxConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "bgfx")
         bgfx_tools_utils = os.path.join(self.package_folder, "lib", "cmake", "bgfx", "bgfxToolUtils.cmake")
+        self.cpp_info.set_property(
+            "cmake_extra_variables",
+            {
+                # This is used by bgfx shader compiler and tools to be able to, for example,
+                # find bgfx_shader.sh as part of bgfxToolUtils.cmake utils
+                "BGFX_SHADER_INCLUDE_PATH": os.path.join(self.package_folder, "include", "bgfx").replace("\\", "/")
+            },
+        )
         self.cpp_info.set_property("cmake_build_modules", [bgfx_tools_utils])
 
         self.cpp_info.components["bx"].set_property("cmake_target_name", "bgfx::bx")
@@ -122,6 +137,14 @@ class bgfxConan(ConanFile):
             self.cpp_info.components["encode"].set_property("cmake_target_name", "bgfx::bimg_encode")
             self.cpp_info.components["encode"].libs = ["bimg_encode"]
             self.cpp_info.components["encode"].requires = ["bx", "libsquish::libsquish", "tinyexr::tinyexr"]
+        elif self.options.shared and self.options.tools:
+            self.cpp_info.components["decode"].libdirs = []
+            self.cpp_info.components["decode"].includedirs = []
+            self.cpp_info.components["decode"].requires = ["bx", "miniz::miniz", "tinyexr::tinyexr"]
+
+            self.cpp_info.components["encode"].libdirs = []
+            self.cpp_info.components["encode"].includedirs = []
+            self.cpp_info.components["encode"].requires = ["bx", "libsquish::libsquish", "tinyexr::tinyexr"]
 
         self.cpp_info.components["bgfx"].set_property("cmake_target_name", "bgfx::bgfx")
         self.cpp_info.components["bgfx"].libs = ["bgfx"]
@@ -140,6 +163,9 @@ class bgfxConan(ConanFile):
             for tool in ["bin2c", "texturec", "texturev", "geometryc", "geometryv", "shaderc"]:
                 self.cpp_info.components[tool].set_property("cmake_target_name", f"bgfx::{tool}")
                 # INFO: .exe requires CMakeConfigDeps generator
-                self.cpp_info.components[tool].exe = os.path.join(self.package_folder, "bin", tool)
+                self.cpp_info.components[tool].exe = tool
+                self.cpp_info.components[tool].location = os.path.join(self.package_folder, "bin", tool)
                 self.cpp_info.components[tool].libdirs = []
                 self.cpp_info.components[tool].includedirs = []
+                if tool == "texturec":
+                    self.cpp_info.components[tool].requires = ["bimg", "decode", "encode"]
