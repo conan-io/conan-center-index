@@ -4,7 +4,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=2.1"
 
 
 class AmgclConan(ConanFile):
