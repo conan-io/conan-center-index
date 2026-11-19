@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.51.1"
@@ -23,10 +22,6 @@ class AmgclConan(ConanFile):
     no_copy_source = True
     options = { 'with_boost': [True, False] }
     default_options = { 'with_boost': True }
-
-    def config_options(self):
-        if Version(self.version) < "1.4.4":
-            del self.options.with_boost
 
     def layout(self):
         basic_layout(self, src_folder="src")
