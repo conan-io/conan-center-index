@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
@@ -28,10 +28,6 @@ class GeosConan(ConanFile):
         "utils": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return "17" if Version(self.version) >= "3.14.0" else "14"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -44,10 +40,11 @@ class GeosConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, "17" if Version(self.version) >= "3.14.0" else "14")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -56,7 +53,8 @@ class GeosConan(ConanFile):
         tc.cache_variables["BUILD_DOCUMENTATION"] = False
         tc.cache_variables["BUILD_ASTYLE"] = False
         tc.cache_variables["BUILD_GEOSOP"] = self.options.utils
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) == "3.12.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
@@ -67,7 +65,6 @@ class GeosConan(ConanFile):
                             "set(CMAKE_BUILD_TYPE ${DEFAULT_BUILD_TYPE})", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -79,6 +76,8 @@ class GeosConan(ConanFile):
         copy(self, "geos.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # geos-config hardcodes the absolute install prefix, so it is not relocatable
+        rm(self, "geos-config", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "geos")
@@ -90,8 +89,6 @@ class GeosConan(ConanFile):
         # GEOS::geos_cxx_flags
         self.cpp_info.components["geos_cxx_flags"].set_property("cmake_target_name", "GEOS::geos_cxx_flags")
         self.cpp_info.components["geos_cxx_flags"].defines.append("USE_UNSTABLE_GEOS_CPP_API")
-        if self.settings.os == "Windows":
-            self.cpp_info.components["geos_cxx_flags"].defines.append("TTMATH_NOASM")
 
         # GEOS::geos
         self.cpp_info.components["geos_cpp"].set_property("cmake_target_name", "GEOS::geos")
