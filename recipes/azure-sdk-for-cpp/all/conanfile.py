@@ -161,7 +161,7 @@ class AzureSDKForCppConan(ConanFile):
         self.cpp_info.components["azure-identity"].libs = ["azure-identity"]
         self.cpp_info.components["azure-identity"].requires = ["azure-core"]
         if self.settings.os == "Windows":
-            self.cpp_info.components["azure-identity"].system_requires = ["bcrypt", "crypt32"]
+            self.cpp_info.components["azure-identity"].system_libs = ["bcrypt", "crypt32"]
         else:
             self.cpp_info.components["azure-identity"].requires.append("openssl::openssl")
 
