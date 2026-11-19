@@ -144,7 +144,9 @@ class AzureSDKForCppConan(ConanFile):
         self.cpp_info.components["azure-storage-common"].set_property("cmake_target_name", "Azure::azure-storage-common")
         self.cpp_info.components["azure-storage-common"].libs = ["azure-storage-common"]
         self.cpp_info.components["azure-storage-common"].requires = ["azure-core"]
-        if not self.settings.os == "Windows":
+        if self.settings.os == "Windows":
+            self.cpp_info.components["azure-storage-common"].system_libs = ["bcrypt", "webservices"]
+        else:
             self.cpp_info.components["azure-storage-common"].requires.extend(["openssl::openssl", "libxml2::libxml2"])
 
         self.cpp_info.components["azure-storage-blobs"].set_property("cmake_target_name", "Azure::azure-storage-blobs")
