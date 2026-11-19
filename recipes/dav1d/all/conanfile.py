@@ -25,7 +25,6 @@ class Dav1dConan(ConanFile):
         "bit_depth": ["all", 8, 16],
         "with_tools": [True, False],
         "assembly": [True, False],
-        "with_avx512": ["deprecated", True, False],
     }
     default_options = {
         "shared": False,
@@ -33,7 +32,6 @@ class Dav1dConan(ConanFile):
         "bit_depth": "all",
         "with_tools": True,
         "assembly": True,
-        "with_avx512": "deprecated",
     }
 
     def config_options(self):
@@ -51,13 +49,6 @@ class Dav1dConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def package_id(self):
-        del self.info.options.with_avx512
-
-    def validate(self):
-        if self.options.with_avx512 != "deprecated":
-            self.output.warning("The 'with_avx512' option is deprecated and has no effect")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.4.0 <2]")
