@@ -66,6 +66,9 @@ class InfluxdbCxxConan(ConanFile):
         tc.cache_variables["INFLUXCXX_TESTING"] = False
         tc.cache_variables["INFLUXCXX_WITH_BOOST"] = self.options.boost
         tc.cache_variables["INFLUXCXX_WERROR"] = False
+        # Upstream builds OBJECT libraries that get linked into the shared library, so PIC must be set
+        # explicitly (the fPIC option is removed for shared builds)
+        tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         if self.options.shared:
             # See https://github.com/offa/influxdb-cxx/issues/194
             # Feedback pending: https://github.com/offa/influxdb-cxx/pull/245
