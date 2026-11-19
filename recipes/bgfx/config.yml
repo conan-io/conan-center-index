@@ -1,3 +1,5 @@
 versions:
+  "1.168.9637-616":
+    folder: cmake
   "1.146.9306-550":
     folder: cmake
