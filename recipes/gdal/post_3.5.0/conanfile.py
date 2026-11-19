@@ -262,7 +262,7 @@ class GdalConan(ConanFile):
         if self.options.with_pcre:
             self.requires("pcre/8.45")
         if self.options.with_pcre2:
-            self.requires("pcre2/[>=10.42 <11]")
+            self.requires("pcre2/[>=10.43 <11]")
         if self.options.with_pg:
             self.requires("libpq/[>=14.9 <18]")
         if self.options.with_png:
