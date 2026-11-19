@@ -1,16 +1,7 @@
 sources:
-  "2.5.8":
-    url: "https://github.com/mongodb/mongo-c-driver/releases/download/2.5.8/mongo-c-driver-2.5.8.tar.gz"
-    sha256: "ea63ec9535f1a425b288b2d72ac3a57c7f3b5d606afde73ff532a175a0774f55"
-  "2.5.7":
-    url: "https://github.com/mongodb/mongo-c-driver/releases/download/2.5.7/mongo-c-driver-2.5.7.tar.gz"
-    sha256: "fdd7c23b3d95f1ea08400e5a72e48419ce03d478aa12b28b4b66066867ee35ee"
-  "2.5.5":
-    url: "https://github.com/mongodb/mongo-c-driver/releases/download/2.5.5/mongo-c-driver-2.5.5.tar.gz"
-    sha256: "fa255802fe748b98d4464e07223e87a44c88c02c35398d7607b2f02e967395b1"
-  "2.5.4":
-    url: "https://github.com/mongodb/mongo-c-driver/releases/download/2.5.4/mongo-c-driver-2.5.4.tar.gz"
-    sha256: "9ddca33cfad97af34f264895f0e9c687d851f5e12f951ecb5794f95e9f5c5fb3"
+  "2.5.9":
+    url: "https://github.com/mongodb/mongo-c-driver/releases/download/2.5.9/mongo-c-driver-2.5.9.tar.gz"
+    sha256: "bc7e4a7a1949fa7e8ed8e2223569224d1db492da43cf8659d01cc359d80b70a7"
   "1.30.11":
     url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.30.11/mongo-c-driver-1.30.11.tar.gz"
     sha256: "85765da33342c6ecd018ea9fccc587871c0f7278e4ade4a8a51812867149ee28"
