@@ -73,7 +73,6 @@ class GeosConan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        copy(self, "geos.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         # geos-config hardcodes the absolute install prefix, so it is not relocatable
