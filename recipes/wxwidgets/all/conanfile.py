@@ -134,7 +134,7 @@ class wxWidgetsConan(ConanFile):
         self.requires("libtiff/[>=4.6.0 <5]")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("expat/[>=2.6.2 <3]")
-        self.requires("pcre2/10.42")
+        self.requires("pcre2/[>=10.42 <11]")
         self.requires("nanosvg/cci.20231025")
         if Version(self.version) >= "3.3.0":
             self.requires("libwebp/[>=1.6.0 <2]")

@@ -350,7 +350,7 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.42")
+            self.requires("pcre2/[>=10.42 <11]")
         if self.options.get_safe("with_vulkan"):
             # Note: the versions of vulkan-loader and moltenvk
             #       must be exactly part of the same Vulkan SDK version
