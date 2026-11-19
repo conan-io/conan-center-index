@@ -12,7 +12,7 @@ required_conan_version = ">=1.52.0"
 class SqliteOrmConan(ConanFile):
     name = "sqlite_orm"
     description = "SQLite ORM light header only library for modern C++."
-    license = "BSD-3-Clause"
+    license = "AGPL-3.0-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/fnc12/sqlite_orm"
     topics = ("sqlite", "sql", "database", "orm", "header-only")
