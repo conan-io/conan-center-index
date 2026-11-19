@@ -115,6 +115,7 @@ class CprConan(ConanFile):
         tc.variables["CPR_FORCE_WINSSL_BACKEND"] = (self.options.with_ssl == "winssl")
         tc.variables["CMAKE_USE_OPENSSL"] = (self.options.with_ssl == "openssl")
         tc.variables["CPR_ENABLE_SSL"] = bool(self.options.with_ssl)
+        tc.cache_variables["CPR_WARNINGS_AS_ERRORS"] = False
 
         if self.options.get_safe("verbose_logging", False):
             tc.variables["CURL_VERBOSE_LOGGING"] = True
