@@ -55,5 +55,5 @@ class AmgclConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "amgcl::amgcl")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        if self.options.get_safe("with_boost", True) == False:
+        if not self.options.with_boost:
             self.cpp_info.defines = ["AMGCL_NO_BOOST"]
