@@ -1,0 +1,9 @@
+sources:
+  "0.11.0":
+    "stdexec":
+      url: "https://github.com/NVIDIA/stdexec/archive/refs/tags/v0.11.0.tar.gz"
+      sha256: "6dbc47da4cbc0ca50bbcf6812eb63a195de298f5091ffbc55d30074d81ee91a4"
+    # upstream downloads rapids-cmake at configure time, provided here so the build works offline
+    "rapids-cmake":
+      url: "https://github.com/rapidsai/rapids-cmake/archive/refs/tags/v24.02.00.tar.gz"
+      sha256: "5cd5570b07e36727e19a02cd01f08cb1aef46faa96bef17a2d69556b7c2483fd"

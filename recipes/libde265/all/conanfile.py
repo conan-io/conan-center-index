@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -48,6 +48,9 @@ class Libde265Conan(ConanFile):
         if not self.options.get_safe("avx2"):
             self.options.rm_safe("avx512")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -64,6 +67,7 @@ class Libde265Conan(ConanFile):
         # Don't force the C++ standard, it is controlled by the compiler.cppstd setting
         replace_in_file(self, cmakelists, "set(CMAKE_CXX_STANDARD 17)", "")
         replace_in_file(self, cmakelists, "set(CMAKE_CXX_EXTENSIONS OFF)", "")
+        apply_conandata_patches(self)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16]")

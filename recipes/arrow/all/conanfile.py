@@ -151,8 +151,7 @@ class ArrowConan(ConanFile):
         if Version(self.version) >= "26.0.0":
             # Parquet (and its encryption) moved to simdjson, rapidjson is only used by the JSON module
             return self.options.with_json
-        return (self.options.with_json or self.options.encryption or
-                (Version(self.version) >= "21.0.0" and self.options.parquet))
+        return (self.options.with_json or self.options.encryption or self.options.parquet)
 
     def _requires_simdjson(self):
         return Version(self.version) >= "26.0.0" and (self.options.with_json or self.options.parquet)
@@ -195,7 +194,7 @@ class ArrowConan(ConanFile):
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/[~1.11]")
         if self.options.with_brotli:
-            self.requires("brotli/1.1.0")
+            self.requires("brotli/[>=1.1.1 <2]")
         if self.options.with_bz2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lz4:
@@ -280,14 +279,9 @@ class ArrowConan(ConanFile):
             raise ConanInvalidConfiguration("arrow:encryption requires arrow:with_openssl")
 
     def build_requirements(self):
+        self.tool_requires("cmake/[>=3.26]")
         if self.options.with_protobuf:
             self.tool_requires("protobuf/<host_version>")
-        if Version(self.version) >= "22.0.0":
-            self.tool_requires("cmake/[>=3.26 <4]")
-        elif Version(self.version) >= "20.0.0":
-            self.tool_requires("cmake/[>=3.25 <4]")
-        else:
-            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -479,11 +473,11 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libacero"].set_property("cmake_target_name", f"ArrowAcero::arrow_acero_{cmake_suffix}")
             self.cpp_info.components["libacero"].libs = [f"arrow_acero{suffix}"]
             self.cpp_info.components["libacero"].requires = ["libarrow"]
-            if Version(self.version) >= "21.0.0" and self.options.compute:
+            if self.options.compute:
                 # libacero depends on compute
                 self.cpp_info.components["libacero"].requires.append("libarrow_compute")
 
-        if Version(self.version) >= "21.0.0" and self.options.compute:
+        if self.options.compute:
             self.cpp_info.components["libarrow_compute"].set_property("pkg_config_name", "arrow_compute")
             self.cpp_info.components["libarrow_compute"].set_property("cmake_target_name", f"ArrowCompute::arrow_compute_{cmake_suffix}")
             self.cpp_info.components["libarrow_compute"].libs = [f"arrow_compute{suffix}"]
@@ -521,12 +515,10 @@ class ArrowConan(ConanFile):
 
         if self.options.with_boost:
             if self.options.gandiva:
-                # FIXME: only filesystem component is used
-                self.cpp_info.components["libgandiva"].requires.append("boost::boost")
+                self.cpp_info.components["libgandiva"].requires.append("boost::headers")
             if self.options.parquet and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < Version("4.9"):
                 self.cpp_info.components["libparquet"].requires.append("boost::boost")
-            # FIXME: only headers components is used
-            self.cpp_info.components["libarrow"].requires.append("boost::boost")
+            self.cpp_info.components["libarrow"].requires.append("boost::headers")
         if self.options.with_openssl:
             self.cpp_info.components["libarrow"].requires.append("openssl::openssl")
         if self.options.with_gflags:

@@ -1,4 +1,7 @@
 sources:
+  "4.16.0":
+    url: "https://github.com/Z3Prover/z3/releases/download/z3-4.16.0/z3_solver-4.16.0.0.tar.gz"
+    sha256: "263d9ad668966e832c2b246ba0389298a599637793da2dc01cc5e4ef4b0b6c78"
   "4.15.4":
     url: "https://github.com/Z3Prover/z3/releases/download/z3-4.15.4/z3_solver-4.15.4.0.tar.gz"
     sha256: "928c29b58c4eb62106da51c1914f6a4a55d0441f8f48a81b9da07950434a8946"

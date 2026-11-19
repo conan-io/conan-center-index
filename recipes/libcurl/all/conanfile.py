@@ -160,7 +160,7 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires(f"openssl/[>=3 <4]")
+            self.requires("openssl/[>=3 <4]")
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/[>=3.5 <4]")
         elif self.options.with_ssl == "wolfssl":
@@ -194,8 +194,9 @@ class LibcurlConan(ConanFile):
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl/*:no_des=False")
-        if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
-            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl/*:with_curl=True")
+        if self.options.with_ssl == "wolfssl" and not (self.dependencies["wolfssl"].options.with_curl and 
+                                                       (self.dependencies["wolfssl"].options.tls13 or self.dependencies["wolfssl"].options.with_quic)):
+            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl/*:with_curl=True and either wolfssl/*:tls13=True or wolfssl/*:with_quic=True")
         if self.options.get_safe("with_apple_sectrust") and self.options.with_ssl != "openssl":
             raise ConanInvalidConfiguration("Apple SecTrust is only supported for OpenSSL/GnuTLS builds")
 
