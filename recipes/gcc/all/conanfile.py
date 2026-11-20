@@ -7,6 +7,7 @@ from conan.tools.files import copy, get, replace_in_file, rmdir, rm
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.55.0"
@@ -59,13 +60,12 @@ class GccConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Windows builds aren't currently supported. Contributions to support this are welcome."
             )
-        if self.settings.os == "Macos":
-            # FIXME: This recipe should largely support Macos, however the following
-            # errors are present when building using the c3i CI:
-            # clang: error: unsupported option '-print-multi-os-directory'
-            # clang: error: no input files
+        if self.settings.os == "Macos" and Version(self.version) < "16.1.0":
+            # Only gcc >= 16.1.0 is verified on Macos. Older releases fail to
+            # build against recent macOS SDKs (libsanitizer). Contributions to
+            # support them are welcome.
             raise ConanInvalidConfiguration(
-                "Macos builds aren't currently supported. Contributions to support this are welcome."
+                "Macos builds aren't currently supported for gcc < 16.1.0. Contributions to support this are welcome."
             )
         if cross_building(self):
             raise ConanInvalidConfiguration(
@@ -96,6 +96,10 @@ class GccConan(ConanFile):
         tc.configure_args.append(f"--with-bugurl={self.url}/issues")
 
         if self.settings.os == "Macos":
+            # libsanitizer is unsupported by gcc on modern darwin (up to
+            # darwin21/macOS 12 in gcc 16) and fails to compile against newer
+            # SDK headers (mach/message.h xnu_static_assert_*)
+            tc.configure_args.append("--disable-libsanitizer")
             xcrun = XCRun(self)
             tc.configure_args.append(f"--with-sysroot={xcrun.sdk_path}")
             # Set native system header dir to ${{sysroot}}/usr/include to
