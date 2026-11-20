@@ -1,8 +1,15 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
 
 find_package(ECM REQUIRED NO_MODULE)
+# ECMConfig.cmake must derive ECM_PREFIX from its own location: an absolute build prefix
+# looks right on the build machine (Conan builds into the final package folder) and only
+# breaks once the package is downloaded somewhere else
+file(STRINGS "${ECM_DIR}/ECMConfig.cmake" _ecm_prefix_line REGEX "^set\\(ECM_PREFIX ")
+if(NOT _ecm_prefix_line MATCHES "^set\\(ECM_PREFIX \"\\\${PACKAGE_PREFIX_DIR}\"\\)$")
+    message(FATAL_ERROR "ECMConfig.cmake hard-codes ECM_PREFIX: ${_ecm_prefix_line}")
+endif()
 list(APPEND CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 include(ECMGenerateHeaders)
 

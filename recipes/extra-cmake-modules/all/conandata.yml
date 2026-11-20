@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/0001-fix-find_package-qt.patch"
       patch_description: "fix find_package qt"
       patch_type: "portability"
+    - patch_file: "patches/0002-relocatable-prefix.patch"
+      patch_description: "ECM_PREFIX from PACKAGE_PREFIX_DIR, no ECM-chosen default install prefix"
+      patch_type: "conan"
