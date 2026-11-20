@@ -1,0 +1,4 @@
+sources:
+  "2026.11.1":
+    url: "https://github.com/cryptopp-modern/cryptopp-modern/releases/download/2026.11.1/cryptopp-modern-2026.11.1.tar.gz"
+    sha256: "2665ecb8395370fbae2b8ebbc9a32084e3f7a1da567fde1d6c9cc5caaba5097c"
