@@ -47,10 +47,10 @@ class libdatachannelConan(ConanFile):
                 self.requires("nettle/3.9.1")
         self.requires("plog/1.1.10")
         self.requires("usrsctp/0.9.5.0")
-        self.requires("libsrtp/2.6.0")
+        self.requires("libsrtp/2.8.1")
         if self.options.with_nice:
             self.requires("libnice/0.1.23")
-        self.requires("libjuice/1.7.0", transitive_headers=True, transitive_libs=True)
+        self.requires("libjuice/1.7.4", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
