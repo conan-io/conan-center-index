@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/CatalinSerafimescu/async_mutex/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "5fbaa3b421d1cda96bd3f5a45b4a111c449ff51cab5a4f6cc0817d76818d14ed"
