@@ -1,0 +1,4 @@
+sources:
+  "11.0.5":
+    url: "https://github.com/Loki-Astari/ThorsAnvil/archive/refs/tags/11.0.5.tar.gz"
+    sha256: "a315f6f2323b6cbba109776632b50245b7d853cfe6b92f4c2dbc8b0a2c765d7d"
