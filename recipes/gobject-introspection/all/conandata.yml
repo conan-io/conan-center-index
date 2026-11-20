@@ -1,4 +1,7 @@
 sources:
+  "1.86.0":
+    url: "https://download.gnome.org/sources/gobject-introspection/1.86/gobject-introspection-1.86.0.tar.xz"
+    sha256: "920d1a3fcedeadc32acff95c2e203b319039dd4b4a08dd1a2dfd283d19c0b9ae"
   "1.78.1":
     url: "https://download.gnome.org/sources/gobject-introspection/1.78/gobject-introspection-1.78.1.tar.xz"
     sha256: "bd7babd99af7258e76819e45ba4a6bc399608fe762d83fde3cac033c50841bb4"
