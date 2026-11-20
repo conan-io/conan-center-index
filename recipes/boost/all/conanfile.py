@@ -742,7 +742,7 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe(f"without_{lib}"):
                     raise ConanInvalidConfiguration(f"Boost '{lib}' library requires multi threading")
 
-        if is_msvc(self) and self._shared and is_msvc_static_runtime(self):
+        if (is_msvc(self) or self._toolset == "clang-win") and self._shared and "MT" in msvc_runtime_flag(self):
             raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
 
         # FIXME: In 1.84.0, there are compilation errors on msvc shared build for boost.fiber. https://github.com/boostorg/fiber/issues/314
@@ -1328,9 +1328,11 @@ class BoostConan(ConanFile):
         for define in self.conf.get("tools.build:defines", default=[], check_type=list):
             flags.append(f"define={define}")
 
-        if is_msvc(self):
-            flags.append(f"runtime-link={'static' if is_msvc_static_runtime(self) else 'shared'}")
-            flags.append(f"runtime-debugging={'on' if 'd' in msvc_runtime_flag(self) else 'off'}")
+        # clang-win follows the Microsoft CRT settings only when compiler.runtime is set
+        if is_msvc(self) or (self._toolset == "clang-win" and self.settings.get_safe("compiler.runtime")):
+            runtime = msvc_runtime_flag(self)
+            flags.append(f"runtime-link={'static' if 'MT' in runtime else 'shared'}")
+            flags.append(f"runtime-debugging={'on' if 'd' in runtime else 'off'}")
 
         # For details https://boostorg.github.io/build/manual/master/index.html
         flags.append(f"threading={'single' if not self.options.multithreading else 'multi'}")
@@ -1687,6 +1689,8 @@ class BoostConan(ConanFile):
         }.get(str(self.settings.compiler), str(self.settings.compiler))
         if (self.settings.compiler, self.settings.os) == ("gcc", "Windows"):
             compiler = "mgw"
+        if self.settings.compiler == "clang" and self._toolset == "clang-win":
+            compiler = "clangw"
         os_ = ""
         if self.settings.os == "Macos":
             os_ = "darwin"
@@ -1713,7 +1717,7 @@ class BoostConan(ConanFile):
         if self.settings.os == "Emscripten" and not self.options.header_only:
             self._create_emscripten_libs()
 
-        if is_msvc(self) and self._shared:
+        if (is_msvc(self) or self._toolset == "clang-win") and self._shared:
             # Some boost releases contain both static and shared variants of some libraries (if shared=True)
             all_libs = set(collect_libs(self, "lib"))
             static_libs = set(l for l in all_libs if l.startswith("lib"))
@@ -1909,10 +1913,12 @@ class BoostConan(ConanFile):
                 "ach": "",
                 "version": "",
             }
-            if is_msvc(self):  # FIXME: mingw?
+            # clang-win follows the Microsoft CRT settings only when compiler.runtime is set
+            if is_msvc(self) or (self._toolset == "clang-win" and self.settings.get_safe("compiler.runtime")):  # FIXME: mingw?
                 # FIXME: add 'y' when using cpython cci package and when python is built in debug mode
-                static_runtime_key = "s" if is_msvc_static_runtime(self) else ""
-                debug_runtime_key = "g" if "d" in msvc_runtime_flag(self) else ""
+                runtime = msvc_runtime_flag(self)
+                static_runtime_key = "s" if "MT" in runtime else ""
+                debug_runtime_key = "g" if "d" in runtime else ""
                 debug_key = "d" if self.settings.build_type == "Debug" else ""
                 abi = static_runtime_key + debug_runtime_key + debug_key
                 if abi:
@@ -1943,9 +1949,7 @@ class BoostConan(ConanFile):
             def add_libprefix(n):
                 """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
                 libprefix = ""
-                if is_msvc(self) and (not self._shared or n in self._dependencies["static_only"]):
-                    libprefix = "lib"
-                elif self._toolset == "clang-win":
+                if (is_msvc(self) or self._toolset == "clang-win") and (not self._shared or n in self._dependencies["static_only"]):
                     libprefix = "lib"
                 return libprefix + n
 
