@@ -120,10 +120,7 @@ class libdatachannelConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        suffix = ""
-        if is_msvc(self) and self.settings.build_type == "Debug":
-            suffix = "d"
-        self.cpp_info.libs = ["datachannel" + suffix]
+        self.cpp_info.libs = ["datachannel"]
         self.cpp_info.set_property("cmake_file_name", "LibDataChannel")
         self.cpp_info.set_property("cmake_target_name", "LibDataChannel::LibDataChannel")
 
