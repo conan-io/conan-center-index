@@ -1,0 +1,22 @@
+--- a/include/mosquitto/libcommon.h
++++ b/include/mosquitto/libcommon.h
+@@ -26,11 +26,15 @@
+ extern "C" {
+ #endif
+ 
+ #ifdef WIN32
+-#  ifdef libmosquitto_common_EXPORTS
+-#    define libmosqcommon_EXPORT __declspec(dllexport)
++#  ifndef LIBMOSQUITTO_STATIC
++#    ifdef libmosquitto_common_EXPORTS
++#      define libmosqcommon_EXPORT __declspec(dllexport)
++#    else
++#      define libmosqcommon_EXPORT  __declspec(dllimport)
++#    endif
+ #  else
+-#    define libmosqcommon_EXPORT  __declspec(dllimport)
++#    define libmosqcommon_EXPORT
+ #  endif
+ #else
+ #  define libmosqcommon_EXPORT
+ #endif

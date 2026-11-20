@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -48,10 +48,15 @@ class Mosquitto(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.clients:
+        # mosquitto 2.1 dropped the WITH_CJSON option and links cJSON into
+        # libmosquitto_common unconditionally, so the option is meaningless there.
+        if Version(self.version) >= "2.1" or not self.options.clients:
             self.options.rm_safe("cjson")
         if not self.options.broker:
             self.options.rm_safe("websockets")
@@ -65,7 +70,10 @@ class Mosquitto(ConanFile):
     def requirements(self):
         if self.options.ssl:
             self.requires("openssl/[>=1.1 <4]")
-        if self.options.get_safe("cjson"):
+        if Version(self.version) >= "2.1":
+            # mosquitto.h pulls in mosquitto/libcommon.h, which includes <cjson/cJSON.h>
+            self.requires("cjson/1.7.16", transitive_headers=True)
+        elif self.options.get_safe("cjson"):
             self.requires("cjson/1.7.16")
         if self.options.get_safe("websockets"):
             self.requires("libwebsockets/4.3.2")
@@ -78,11 +86,18 @@ class Mosquitto(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         deps = CMakeDeps(self)
         if self.options.get_safe("threading") and self.settings.os == "Windows" and Version(self.version) >= "2.0.21":
             deps.set_property("pthreads4w", "cmake_target_aliases", ["PThreads4W::PThreads4W"])
+        if Version(self.version) >= "2.1":
+            # mosquitto 2.1 links a bare `cJSON` target (see libcommon/CMakeLists.txt),
+            # which is normally provided by its bundled cmake/FindcJSON.cmake. Alias
+            # Conan's cjson target to that name so the include dirs propagate when the
+            # Conan config package is used instead of the module finder.
+            deps.set_property("cjson", "cmake_target_aliases", ["cJSON"])
         deps.generate()
 
         tc = CMakeToolchain(self)
@@ -92,7 +107,7 @@ class Mosquitto(ConanFile):
         tc.variables["WITH_CLIENTS"] = self.options.clients
         if Version(self.version) < "2.0.6":
             tc.variables["CMAKE_DISABLE_FIND_PACKAGE_cJSON"] = not self.options.get_safe("cjson")
-        else:
+        elif Version(self.version) < "2.1":
             tc.variables["WITH_CJSON"] = self.options.get_safe("cjson")
         tc.variables["WITH_BROKER"] = self.options.broker
         tc.variables["WITH_APPS"] = self.options.apps
@@ -105,9 +120,19 @@ class Mosquitto(ConanFile):
             tc.variables["WITH_THREADING"] = self.options.threading
         tc.variables["WITH_WEBSOCKETS"] = self.options.get_safe("websockets", False)
         tc.variables["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.dependencies["libwebsockets"].options.shared
-        tc.variables["DOCUMENTATION"] = False
+        tc.variables["WITH_DOCS"] = False
+        tc.variables["WITH_TESTS"] = False
         tc.variables["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res").replace("\\", "/")
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if Version(self.version) >= "2.1":
+            # mosquitto 2.1's static library target (libmosquitto_static) omits the
+            # bundled-deps include dir that only the shared target adds via
+            # `if(WITH_BUNDLED_DEPS)` in lib/CMakeLists.txt. As a result headers like
+            # utlist.h/uthash.h from deps/ aren't found when building the static lib.
+            # Add the include dir explicitly for all targets.
+            deps_dir = os.path.join(self.source_folder, "deps").replace("\\", "/")
+            tc.extra_cflags.append(f"-I{deps_dir}")
+            tc.extra_cxxflags.append(f"-I{deps_dir}")
         tc.generate()
 
     def build(self):
@@ -141,11 +166,17 @@ class Mosquitto(ConanFile):
         lib_suffix = "" if self.options.shared else "_static"
         self.cpp_info.components["libmosquitto"].set_property("pkg_config_name", "libmosquitto")
         self.cpp_info.components["libmosquitto"].libs = [f"mosquitto{lib_suffix}"]
+        if self.settings.os == "Windows" and self.options.shared and Version(self.version) >= "2.1":
+            # libcommon is a separate DLL on Windows, and its API is part of the public headers
+            self.cpp_info.components["libmosquitto"].libs.append("mosquitto_common")
         self.cpp_info.components["libmosquitto"].resdirs = ["res"]
         if not self.options.shared:
             self.cpp_info.components["libmosquitto"].defines = ["LIBMOSQUITTO_STATIC"]
         if self.options.ssl:
             self.cpp_info.components["libmosquitto"].requires = ["openssl::openssl"]
+        if Version(self.version) >= "2.1":
+            # public header mosquitto/libcommon.h includes <cjson/cJSON.h>
+            self.cpp_info.components["libmosquitto"].requires.append("cjson::cjson")
         if self.settings.os == "Linux":
             self.cpp_info.components["libmosquitto"].system_libs = ["pthread", "m"]
         elif self.settings.os == "Windows":
@@ -178,5 +209,5 @@ class Mosquitto(ConanFile):
                 self.cpp_info.components[option_comp_name].libdirs = []
                 self.cpp_info.components[option_comp_name].includedirs = []
                 self.cpp_info.components[option_comp_name].requires = ["openssl::openssl", "libmosquitto"]
-                if self.options.cjson:
+                if self.options.get_safe("cjson") or Version(self.version) >= "2.1":
                     self.cpp_info.components[option_comp_name].requires.append("cjson::cjson")
