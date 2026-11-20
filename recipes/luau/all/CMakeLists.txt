@@ -34,6 +34,19 @@ install(
 )
 install(DIRECTORY "${LUAU_SRC_DIR}/Config/include/Luau" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
+# Luau.Bytecode (0.718) is linked by Luau.Compiler; Luau.Inliner (0.727) builds on it.
+foreach(_luau_lib Bytecode Inliner)
+    if(TARGET Luau.${_luau_lib})
+        install(
+            TARGETS Luau.${_luau_lib}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+        install(DIRECTORY "${LUAU_SRC_DIR}/${_luau_lib}/include/" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+    endif()
+endforeach()
+
 install(
     TARGETS Luau.Compiler
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
