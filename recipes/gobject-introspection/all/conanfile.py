@@ -137,6 +137,12 @@ class GobjectIntrospectionConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                             "get_option('python'), modules: ['setuptools'])",
                             "get_option('python'))")
+        if Version(self.version) < "1.86.0":
+            # INFO: setuptools distutils has no msvccompiler module, use compiler_type like 1.86.0 does
+            ccompiler_py = os.path.join(self.source_folder, "giscanner", "ccompiler.py")
+            replace_in_file(self, ccompiler_py, "from distutils.msvccompiler import MSVCCompiler\n", "")
+            replace_in_file(self, ccompiler_py, "return isinstance(self.compiler, MSVCCompiler)", "return self.compiler.compiler_type == \"msvc\"")
+            replace_in_file(self, ccompiler_py, "if isinstance(self.compiler, MSVCCompiler):", "if self.check_is_msvc():")
         if self.options.build_introspection_data:
             # INFO: Static libraries (e.g. glib) are not listed by ldd, do not abort g-ir-scanner when they are not resolved
             replace_in_file(self, os.path.join(self.source_folder, "giscanner", "shlibs.py"),
