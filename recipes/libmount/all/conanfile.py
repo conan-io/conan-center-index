@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -52,11 +53,12 @@ class LibmountConan(ConanFile):
             "--disable-all-programs",
             "--enable-libmount",
             "--enable-libblkid",
-            # Don't link libsystemd (libmount, 2.42+) or libeconf (libblkid)
-            # just because pkg-config finds them on the build machine
-            "--without-systemd",
-            "--without-econf",
         ])
+        if Version(self.version) >= "2.42":
+            tc.configure_args.extend([
+                "--without-systemd",
+                "--without-econf",
+            ])
         tc.generate()
 
     def build(self):
