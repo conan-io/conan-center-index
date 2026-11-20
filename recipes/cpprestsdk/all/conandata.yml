@@ -1,4 +1,7 @@
 sources:
+  "2.10.20+cpprest-lts":
+    url: "https://github.com/cpprest-lts/cpprestsdk/archive/refs/tags/v2.10.20+cpprest-lts.tar.gz"
+    sha256: "5fa1ef8920e87bcc6b7947d16775cfae5ee6343bcafcbe8b91ae2e3c85a76f50"
   "2.10.19":
     url: "https://github.com/microsoft/cpprestsdk/archive/refs/tags/v2.10.19.tar.gz"
     sha256: "4b0d14e5bfe77ce419affd253366e861968ae6ef2c35ae293727c1415bd145c8"
