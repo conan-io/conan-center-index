@@ -1,0 +1,9 @@
+sources:
+  "1.3.1":
+    url: "https://gitlab.mpi-magdeburg.mpg.de/koehlerm/qrupdate-ng/-/archive/v1.3.1/qrupdate-ng-v1.3.1.tar.bz2"
+    sha256: "3877a52ff7bedd1edd746fed82f8347a8d1c4f48e59ebfbde7841eea79db87ee"
+patches:
+  "1.3.1":
+    - patch_file: "patches/0001-use-openblas-and-skip-tests.patch"
+      patch_description: "Use the BLAS and LAPACK provided by OpenBLAS (Conan) instead of the CMake FindBLAS/FindLAPACK modules, and do not build the examples and the tests"
+      patch_type: "conan"
