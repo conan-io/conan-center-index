@@ -21,10 +21,12 @@ class LibfuseConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "header_only": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "header_only": False,
     }
 
     def config_options(self):
@@ -32,13 +34,20 @@ class LibfuseConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
+        if self.options.header_only:
+            self.options.rm_safe("shared")
+            self.options.rm_safe("fPIC")
+        elif self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        if self.info.options.header_only:
+            self.info.clear()
 
     def validate(self):
         if self.settings.os not in ("Linux", "FreeBSD"):
@@ -63,18 +72,31 @@ class LibfuseConan(ConanFile):
     def build(self):
         meson = Meson(self)
         meson.configure()
-        meson.build()
+        if not self.options.header_only:
+            meson.build()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        meson = Meson(self)
-        meson.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.options.header_only:
+            # The headers that include/meson.build installs, plus libfuse_config.h, which
+            # meson configure generates in newer versions (fuse_common.h includes it)
+            include_folder = os.path.join(self.package_folder, "include", "fuse3")
+            for header in ("fuse.h", "fuse_common.h", "fuse_lowlevel.h", "fuse_opt.h", "cuse_lowlevel.h", "fuse_log.h"):
+                copy(self, header, src=os.path.join(self.source_folder, "include"), dst=include_folder)
+            copy(self, "libfuse_config.h", src=self.build_folder, dst=include_folder)
+        else:
+            meson = Meson(self)
+            meson.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "fuse3")
-        self.cpp_info.libs = ["fuse3"]
         self.cpp_info.includedirs = [os.path.join("include", "fuse3")]
-        self.cpp_info.system_libs = ["pthread"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["dl", "rt"])
+        if self.options.header_only:
+            self.cpp_info.bindirs = []
+            self.cpp_info.libdirs = []
+        else:
+            self.cpp_info.libs = ["fuse3"]
+            self.cpp_info.system_libs = ["pthread"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.extend(["dl", "rt"])
