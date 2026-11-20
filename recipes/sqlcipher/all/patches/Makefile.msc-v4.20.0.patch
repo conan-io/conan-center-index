@@ -12,7 +12,7 @@ Custom patch provided by the Conan Center Index.
 +SQLITE3DLL = sqlcipher.dll
  !ELSE
 -SQLITE3DLL = sqlite3.dll
-+SQLITE3DLL = sqlcipher.lib
++SQLITE3DLL = sqlcipher.dll
  !ENDIF
  !ENDIF
  
