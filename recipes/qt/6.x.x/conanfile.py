@@ -317,6 +317,10 @@ class QtConan(ConanFile):
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
 
+        # https://github.com/qt/qt3d/blob/v6.12.0/CMakeLists.txt#L36-L37: Qt skips qt3d without OpenGL
+        if self.options.get_safe("qt3d") and self.options.get_safe("opengl", "no") == "no":
+            raise ConanInvalidConfiguration("option qt:qt3d requires OpenGL, it cannot be used with qt:opengl=no")
+
         if self.options.get_safe("with_fontconfig", False) and not self.options.get_safe("with_freetype", False):
             raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
 
