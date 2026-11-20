@@ -1,0 +1,4 @@
+sources:
+  "2.0.0":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "7e89053255046bfb26afbd7f524a2fb84df7dbef496aa911ea35e4a1182fdc00"
