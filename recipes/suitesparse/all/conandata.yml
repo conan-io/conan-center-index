@@ -1,0 +1,4 @@
+sources:
+  "7.14.1":
+    url: "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v7.14.1.tar.gz"
+    sha256: "81e560e1f74546df139edb765b3f5bc865866da23062312ffe8fd821063c8397"
