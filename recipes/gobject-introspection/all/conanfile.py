@@ -64,7 +64,7 @@ class GobjectIntrospectionConan(ConanFile):
             # FIXME: tools/g-ir-scanner', '--output=gir/GLib-2.0.gir' ... ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
             # FIXME: g-ir-scanner fails to find libgnuintl
             # giscanner/_giscanner.cpython-37m-darwin.so, 0x0002): Library not loaded: /lib/libgnuintl.8.dylib
-            raise ConanInvalidConfiguration(f"{self.ref} fails to run g-ir-scanner due glib loaded as shared. Use -o 'glib/*:shared=False'. Contributions to fix this are welcome.")
+            raise ConanInvalidConfiguration(f"{self.ref} build_introspection_data is not supported on {self.settings.os}. Use '&:build_introspection_data=False'. Contributions to fix this are welcome.")
         if self.options.build_introspection_data and cross_building(self):
             raise ConanInvalidConfiguration(f"{self.ref} build_introspection_data is not supported when cross-building. Use '&:build_introspection_data=False'.")
 
