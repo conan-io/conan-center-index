@@ -1,0 +1,20 @@
+--- libs/process/build/Jamfile
++++ libs/process/build/Jamfile
+@@ -41,12 +41,9 @@
+    ;
+
+-if [ os.name ] = NT
+-{
+-  lib shell32 ;
+-  lib advapi32 ;
+-  lib ntdll ;
+-  lib user32 ;
+-  explicit shell32 advapi32 ntdll user32 ;
+-}
++lib shell32 ;
++lib advapi32 ;
++lib ntdll ;
++lib user32 ;
++explicit shell32 advapi32 ntdll user32 ;
+
+ lib boost_process
