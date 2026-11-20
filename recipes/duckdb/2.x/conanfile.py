@@ -109,23 +109,23 @@ class DuckdbConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "duckdb")
         if self.options.shared:
             self.cpp_info.libs = ["duckdb"]
+            core = self.cpp_info
         else:
-            self.cpp_info.set_property("cmake_target_aliases", ["duckdb_static"])
+            core = self.cpp_info.components["duckdb_static"]
+            core.set_property("cmake_target_name", "duckdb_static")
+            core.libs = ["duckdb_static"]
             if self.settings.os == "Windows":
-                self.cpp_info.defines.append("DUCKDB_STATIC_BUILD")
-            self.cpp_info.libs = [
-                "core_functions_extension",
-                "parquet_extension",
-                "json_extension",
-                "icu_extension",
-                "duckdb_httplib",
-                "duckdb_loadable_extensions",
-                "duckdb_static",
-            ]
+                core.defines.append("DUCKDB_STATIC_BUILD")
+            # Consumers must register these with duckdb_register_static_extension(). Upstream does not
+            # install the loader it generates for its own programs: https://github.com/duckdb/duckdb/issues/27644
+            for lib in ["core_functions_extension", "parquet_extension", "json_extension", "icu_extension",
+                        "duckdb_httplib", "duckdb_loadable_extensions"]:
+                self.cpp_info.components[lib].set_property("cmake_target_name", lib)
+                self.cpp_info.components[lib].libs = [lib]
+                self.cpp_info.components[lib].requires = ["duckdb_static"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "dl", "m"])
+            core.system_libs.extend(["pthread", "dl", "m"])
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
-            self.cpp_info.system_libs.extend(["rstrtmgr", "bcrypt"])
+            core.system_libs.extend(["ws2_32", "rstrtmgr", "bcrypt"])
