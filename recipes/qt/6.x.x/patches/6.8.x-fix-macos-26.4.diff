@@ -24,7 +24,7 @@ diff --git a/src/corelib/thread/qyieldcpu.h b/src/corelib/thread/qyieldcpu.h
 index c30374f00..c1c85dea5 100644
 --- a/src/corelib/thread/qyieldcpu.h
 +++ b/src/corelib/thread/qyieldcpu.h
-@@ -31,7 +31,9 @@ void qYieldCpu(void)
+@@ -32,7 +32,9 @@ void qYieldCpu(void)
      noexcept
  #endif
  {
@@ -35,7 +35,7 @@ index c30374f00..c1c85dea5 100644
      __yield();              // Generic
  #elif defined(_YIELD_PROCESSOR) && defined(Q_CC_MSVC)
      _YIELD_PROCESSOR();     // Generic; MSVC's <atomic>
-@@ -46,8 +48,6 @@ void qYieldCpu(void)
+@@ -47,8 +49,6 @@ void qYieldCpu(void)
  #elif defined(Q_PROCESSOR_X86)
      __asm__("pause");           // hopefully asm() works in this compiler
  
