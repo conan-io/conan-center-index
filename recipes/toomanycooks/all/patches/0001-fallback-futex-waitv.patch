@@ -1,0 +1,188 @@
+Fall back to portable wait when futex_waitv is unavailable (older kernels/headers)
+
+https://github.com/tzcnt/TooManyCooks/issues/279
+https://github.com/tzcnt/TooManyCooks/commit/e6db2f6fdd9b0760437556d946ed7cbd7b01a5dd
+
+diff --git a/include/tmc/detail/ex_cpu_st.ipp b/include/tmc/detail/ex_cpu_st.ipp
+--- a/include/tmc/detail/ex_cpu_st.ipp
++++ b/include/tmc/detail/ex_cpu_st.ipp
+@@ -18,7 +18,7 @@
+ 
+ #include <coroutine>
+ 
+-#ifdef __linux__
++#ifdef TMC_USE_FUTEX_WAITV
+ #include <cstdint>
+ #include <linux/futex.h>
+ #include <sys/syscall.h>
+@@ -162,7 +162,7 @@
+ {
+   initialized.store(false, std::memory_order_seq_cst);
+   wait_count.store(0, std::memory_order_relaxed);
+-#ifndef __linux__
++#ifndef TMC_USE_FUTEX_WAITV
+   wake_wait.store(0, std::memory_order_relaxed);
+ #endif
+ }
+@@ -222,7 +222,7 @@
+     // it should set this to true.
+     bool didWait[TMC_MAX_PRIORITY_COUNT]{};
+ 
+-#ifdef __linux__
++#ifdef TMC_USE_FUTEX_WAITV
+     struct futex_waitv waiters[TMC_MAX_PRIORITY_COUNT + 1];
+     for (size_t i = 0; i < PRIORITY_COUNT; ++i) {
+       waiters[i].val = task_queue_t::WAIT_VALUE;
+@@ -259,7 +259,7 @@
+ 
+       previousPrio = NO_TASK_RUNNING;
+ 
+-#ifndef __linux__
++#ifndef TMC_USE_FUTEX_WAITV
+       auto waitValue = wake_wait.load(std::memory_order_seq_cst);
+ #endif
+ 
+@@ -275,7 +275,7 @@
+           goto TOP;
+         }
+         didWait[prio] = true;
+-#ifdef __linux__
++#ifdef TMC_USE_FUTEX_WAITV
+         waiters[prio].uaddr = reinterpret_cast<uintptr_t>(queueWait);
+ #endif
+       }
+@@ -286,11 +286,11 @@
+       }
+       // Producers count every wake attempt that observed WAITING, so keep
+       // didWait set here and account it when the item is consumed.
+-#ifdef __linux__
++#ifdef TMC_USE_FUTEX_WAITV
+       syscall(SYS_futex_waitv, waiters, PRIORITY_COUNT + 1, 0, nullptr, 0);
+ #else
+-      // Non-Linux platforms don't provide a futex_waitv equivalent. Use a
+-      // shared wake word for all queues.
++      // Non-Linux platforms (and older Linux kernels) don't provide
++      // futex_waitv. Use a shared wake word for all queues.
+       if (ThreadStopToken.stop_requested()) [[unlikely]] {
+         break;
+       }
+@@ -364,7 +364,7 @@
+   thread_state_data.yield_priority = NO_TASK_RUNNING;
+   stop_wait.store(0, std::memory_order_relaxed);
+   wait_count.store(0, std::memory_order_relaxed);
+-#ifndef __linux__
++#ifndef TMC_USE_FUTEX_WAITV
+   wake_wait.store(0, std::memory_order_relaxed);
+   for (size_t i = 0; i < PRIORITY_COUNT; ++i) {
+     work_queues[i].set_wake_wait(wake_wait);
+@@ -449,7 +449,7 @@
+   // Stop and join the single worker thread
+   thread_stopper.request_stop();
+   stop_wait.store(1, std::memory_order_release);
+-#ifdef __linux__
++#ifdef TMC_USE_FUTEX_WAITV
+   syscall(
+     SYS_futex, reinterpret_cast<tmc::detail::atomic_waker_t*>(&stop_wait),
+     FUTEX_WAKE_PRIVATE, 1, nullptr, nullptr, 0
+diff --git a/include/tmc/detail/qu_mpsc_blocking.hpp b/include/tmc/detail/qu_mpsc_blocking.hpp
+--- a/include/tmc/detail/qu_mpsc_blocking.hpp
++++ b/include/tmc/detail/qu_mpsc_blocking.hpp
+@@ -41,6 +41,15 @@
+ #include <unistd.h>
+ #endif
+ 
++// futex_waitv requires Linux 5.16+ and matching kernel headers. If the headers
++// don't provide it, fall back to the portable implementation, which waits on a
++// single std::atomic shared by all queues. Define TMC_NO_FUTEX_WAITV to force
++// the fallback when building against newer headers for an older kernel.
++#if defined(__linux__) && defined(SYS_futex_waitv) && defined(FUTEX_32) &&     \
++  !defined(TMC_NO_FUTEX_WAITV)
++#define TMC_USE_FUTEX_WAITV
++#endif
++
+ namespace tmc {
+ namespace detail {
+ // Allocates elements without constructing them, to be constructed later using
+@@ -218,7 +227,7 @@
+   data_block* pending_reclaim_new_head;
+   size_t pending_reclaim_cutoff;
+ 
+-#ifndef __linux__
++#ifndef TMC_USE_FUTEX_WAITV
+   std::atomic<tmc::detail::atomic_wait_t>* wake_wait;
+ #endif
+ 
+@@ -231,15 +240,15 @@
+   class aw_pull;
+ 
+   // Used as a reference count to prevent racing between producer syscall and
+-  // consumer teardown. On Linux, counts only "failed wakes" - producer wake
++  // consumer teardown. With futex_waitv, counts only "failed wakes" - producer wake
+   // operations that observed a waiting consumer but woke no kernel waiter. The
+   // single consumer accounts for these before running the corresponding item;
+   // owners may wait for both sides to match before destroying the queue
+-  // storage. On other OSes, counts all wakes, since the OS APIs don't provide
+-  // the necessary information, AND the OS APIs don't support user-space
+-  // multi-wait, instead requiring the use of kernel objects. So we just use
+-  // C++20 standard std::atomic::wait on a single value shared across multiple
+-  // queues.
++  // storage. Otherwise (non-Linux, or Linux without futex_waitv), counts all
++  // wakes, since the OS APIs don't provide the necessary information, AND the
++  // OS APIs don't support user-space multi-wait, instead requiring the use of
++  // kernel objects. So we just use C++20 standard std::atomic::wait on a single
++  // value shared across multiple queues.
+   std::atomic<size_t> wake_ref_count;
+ 
+   qu_mpsc_blocking() noexcept {
+@@ -259,7 +268,7 @@
+     pending_reclaim_old_head = nullptr;
+     pending_reclaim_new_head = nullptr;
+     pending_reclaim_cutoff = 0;
+-#ifndef __linux__
++#ifndef TMC_USE_FUTEX_WAITV
+     wake_wait = nullptr;
+ #endif
+     wake_ref_count.store(0, std::memory_order_relaxed);
+@@ -511,10 +520,10 @@
+   bool write_element(element* Elem, Args&&... ConstructArgs) noexcept {
+     Elem->data.emplace(std::forward<Args>(ConstructArgs)...);
+ 
+-    // On non-Linux, producer does store data -> load waiters on non-Linux. A
++    // Without futex_waitv, producer does store data -> load waiters. A
+     // StoreLoad barrier is required in between to prevent lost wakeups, hence
+     // the seq_cst ordering.
+-    // On Linux, the futex provides the necessary barrier, but in practice
++    // With futex_waitv, the futex provides the necessary barrier, but in practice
+     // seq_cst and acq_rel exchanges are identical on modern x86/ARM, so we
+     // use a single ordering for consistency.
+     tmc::detail::atomic_wait_t prev =
+@@ -523,7 +532,7 @@
+       return false;
+     }
+ 
+-#ifdef __linux__
++#ifdef TMC_USE_FUTEX_WAITV
+     long wokenCount = syscall(
+       SYS_futex, reinterpret_cast<tmc::detail::atomic_wait_t*>(&Elem->flags),
+       FUTEX_WAKE_PRIVATE, 1, nullptr, nullptr, 0
+@@ -571,7 +580,7 @@
+   using wait_ptr = tmc::detail::atomic_wait_t*;
+   static constexpr tmc::detail::atomic_wait_t WAIT_VALUE = element::WAIT_VALUE;
+ 
+-#ifndef __linux__
++#ifndef TMC_USE_FUTEX_WAITV
+   void
+   set_wake_wait(std::atomic<tmc::detail::atomic_wait_t>& WakeWait) noexcept {
+     wake_wait = &WakeWait;
+diff --git a/include/tmc/ex_cpu_st.hpp b/include/tmc/ex_cpu_st.hpp
+--- a/include/tmc/ex_cpu_st.hpp
++++ b/include/tmc/ex_cpu_st.hpp
+@@ -58,7 +58,7 @@
+   // Count the total number of consumer-published waits. Destructor waits for
+   // the number of producer-published wakes to match this before finalizing.
+   std::atomic<size_t> wait_count;
+-#ifndef __linux__
++#ifndef TMC_USE_FUTEX_WAITV
+   std::atomic<tmc::detail::atomic_wait_t> wake_wait;
+ #endif
+ 
