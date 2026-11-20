@@ -131,6 +131,11 @@ class GobjectIntrospectionConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "tools", "meson.build"),
                             "if not python.full_path().startswith('/usr/bin')",
                             "if false")
+        if Version(self.version) >= "1.86.0" and not self.options.build_introspection_data:
+            # Avoid setuptools when build_introspection_data is disabled - checked by g-ir-scanner setup
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                            "get_option('python'), modules: ['setuptools'])",
+                            "get_option('python'))")
 
     def build(self):
         self._patch_sources()
