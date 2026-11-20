@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -11,7 +12,7 @@ class WebsocketPPConan(ConanFile):
     description = "Header only C++ library that implements RFC6455 The WebSocket Protocol"
     topics = ("websocketpp", "websocket", "network", "web", "rfc6455", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/zaphoyd/websocketpp"
+    homepage = "https://github.com/cpprest-lts/websocketpp"
     license = "BSD-3-Clause"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
@@ -40,9 +41,15 @@ class WebsocketPPConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True)
 
         if self.options.asio == "standalone":
-            self.requires("asio/1.28.1", transitive_headers=True)
+            if Version(self.version) >= "0.8.4":
+                self.requires("asio/1.38.2", transitive_headers=True)
+            else:
+                self.requires("asio/1.28.1", transitive_headers=True)
         elif self.options.asio == "boost":
-            self.requires("boost/1.83.0", transitive_headers=True)
+            if Version(self.version) >= "0.8.4":
+                self.requires("boost/1.91.0", transitive_headers=True)
+            else:
+                self.requires("boost/1.83.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
