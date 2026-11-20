@@ -78,8 +78,10 @@ Prefix = {path}""")
                 bin_macos_path = os.path.join(self.cpp.build.bindirs[0], "test_macos_bundle.app", "Contents", "MacOS", "test_macos_bundle")
                 self.run(bin_macos_path, env="conanrun")
 
-        # Check that the directory exposed in the configuration exists and includes moc
-        qt_tools_dir = self.dependencies.host["qt"].conf_info.get("user.qt:tools_directory")
+        # Check that the directory exposed in the configuration exists and includes moc.
+        # When cross building, the tools come from the build context
+        qt = self.dependencies.build["qt"] if "qt" in self.dependencies.build else self.dependencies.host["qt"]
+        qt_tools_dir = qt.conf_info.get("user.qt:tools_directory")
         assert os.path.isdir(qt_tools_dir)
-        moc = os.path.join(qt_tools_dir, "moc.exe" if self.settings.os == "Windows" else "moc")
+        moc = os.path.join(qt_tools_dir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
         assert os.path.exists(moc)
