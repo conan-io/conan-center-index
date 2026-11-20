@@ -842,6 +842,10 @@ class QtConan(ConanFile):
     def _cmake_qt6_private_file(self, module):
         return os.path.join("lib", "cmake", f"Qt6{module}", f"conan_qt_qt6_{module.lower()}private.cmake")
 
+    @property
+    def _cmake_qt6_metatypes_file(self):
+        return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_qt6_metatypes.cmake")
+
     def package(self):
         if self.settings.os == "Macos":
             save(self, ".qmake.stash", "")
@@ -975,6 +979,26 @@ class QtConan(ConanFile):
             save(self, os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
 
         _create_private_module("Core", ["Core"])
+
+        # Qt's own target files list each module's metatypes JSON as an interface source, which
+        # qmltyperegistrar reads as foreign types; the CMakeDeps-generated targets do not
+        save(self, os.path.join(self.package_folder, self._cmake_qt6_metatypes_file), textwrap.dedent("""\
+            get_property(_conan_qt_targets DIRECTORY PROPERTY IMPORTED_TARGETS)
+            foreach(_conan_qt_target IN LISTS _conan_qt_targets)
+                if(NOT _conan_qt_target MATCHES "^Qt6::(.+)$")
+                    continue()
+                endif()
+                string(TOLOWER "${CMAKE_MATCH_1}" _conan_qt_module)
+                get_filename_component(_conan_qt_file
+                    "${CMAKE_CURRENT_LIST_DIR}/../../../metatypes/qt6${_conan_qt_module}_metatypes.json" ABSOLUTE)
+                get_target_property(_conan_qt_done ${_conan_qt_target} _conan_qt_metatypes)
+                if(EXISTS "${_conan_qt_file}" AND NOT _conan_qt_done)
+                    set_property(TARGET ${_conan_qt_target} APPEND PROPERTY INTERFACE_SOURCES
+                        "$<$<BOOL:$<TARGET_PROPERTY:QT_CONSUMES_METATYPES>>:${_conan_qt_file}>")
+                    set_property(TARGET ${_conan_qt_target} PROPERTY _conan_qt_metatypes TRUE)
+                endif()
+            endforeach()
+            """))
 
         if self.options.gui:
             _create_private_module("Gui", ["CorePrivate", "Gui"])
@@ -1128,6 +1152,7 @@ class QtConan(ConanFile):
             core_reqs.append("openssl::openssl") # used by QCryptographicHash
 
         _create_module("Core", core_reqs)
+        _add_build_module("qtCore", self._cmake_qt6_metatypes_file)
         pkg_config_vars = [
             "bindir=${prefix}/bin",
             "libexecdir=${prefix}/libexec",
