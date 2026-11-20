@@ -69,7 +69,7 @@ class NcbiCxxToolkit(ConanFile):
         self.requires("bzip2/1.0.8")
         self.requires("lzo/2.10")
         self.requires("zstd/[>=1.5.2 <1.6]")
-        self.requires("pcre2/[>=10.42 <11]")
+        self.requires("pcre2/[>=10.43 <11]")
         self.requires("libuv/[>=1.45.0 <2]")
         self.requires("libnghttp2/[>=1.66.0 <2]")
         self.requires("libiconv/[>=1.17 <2]")
