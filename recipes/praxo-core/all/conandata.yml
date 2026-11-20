@@ -1,0 +1,4 @@
+sources:
+  "0.13.0":
+    url: "https://api.github.com/repos/axisvela/praxo-core/tarball/c/v0.13.0"
+    sha256: "5862b3f7a7ab82fa5535834aaba253faf0e5ede4999190afa422be647843c079"
