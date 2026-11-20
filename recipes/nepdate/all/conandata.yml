@@ -1,0 +1,4 @@
+sources:
+  "0.1.0-beta.1":
+    url: "https://github.com/sanamhub/nepdate-cpp/archive/refs/tags/v0.1.0-beta.1.tar.gz"
+    sha256: "c2229885a84c0acaf2a59e844598dedf981d4454f7c9d78d651c47a08c4b716d"
