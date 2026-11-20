@@ -2090,7 +2090,7 @@ class BoostConan(ConanFile):
 
             if not self.options.get_safe("without_process"):
                 if self.settings.os == "Windows":
-                    self.cpp_info.components["process"].system_libs.extend(["ntdll", "shell32", "advapi32", "user32"])
+                    self.cpp_info.components["process"].system_libs.extend(["ntdll", "shell32", "advapi32", "user32", "ws2_32"])
                 if self._shared:
                     self.cpp_info.components["process"].defines.append("BOOST_PROCESS_DYN_LINK")
 
