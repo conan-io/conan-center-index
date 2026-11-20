@@ -40,9 +40,9 @@ class DuckdbConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        # https://github.com/duckdb/duckdb/issues/27645
         if is_msvc(self) and self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC Debug builds")
+            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC Debug builds "
+                                            "(https://github.com/duckdb/duckdb/issues/27645)")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
