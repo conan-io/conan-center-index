@@ -476,6 +476,8 @@ class AwsSdkCppConan(ConanFile):
             "shared": [True, False],
             "fPIC": [True, False],
             "min_size": [True, False],
+            # Use the CRT HTTP client instead of the platform default (WinHttp on Windows, libcurl elsewhere)
+            "use_crt_http_client": [True, False],
         },
         **{sdk_name: [None, True, False] for sdk_name in _sdks},
     }
@@ -483,7 +485,8 @@ class AwsSdkCppConan(ConanFile):
         **{
             "shared": False,
             "fPIC": True,
-            "min_size": False
+            "min_size": False,
+            "use_crt_http_client": False,
         },
         **{sdk_name: None for sdk_name in _sdks},
         # Overrides
@@ -562,8 +565,9 @@ class AwsSdkCppConan(ConanFile):
         if self.settings.os != "Windows":
             # Used transitively in core/utils/crypto/openssl/CryptoImpl.h public header
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
-            # Used transitively in core/http/curl/CurlHandleContainer.h public header
-            self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
+            if not self.options.use_crt_http_client:
+                # Used transitively in core/http/curl/CurlHandleContainer.h public header
+                self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
         if self.settings.os == "Linux":
             # Pulseaudio -> libcap, libalsa only support linux, don't use pulseaudio on other platforms
             if self.options.get_safe("text-to-speech"):
@@ -617,6 +621,7 @@ class AwsSdkCppConan(ConanFile):
         tc.cache_variables["ENABLE_TESTING"] = False
         tc.cache_variables["AUTORUN_UNIT_TESTS"] = False
         tc.cache_variables["BUILD_DEPS"] = False
+        tc.cache_variables["USE_CRT_HTTP_CLIENT"] = bool(self.options.use_crt_http_client)
         if self.settings.os != "Windows":
             tc.cache_variables["USE_OPENSSL"] = True
             tc.cache_variables["ENABLE_OPENSSL_ENCRYPTION"] = True
@@ -735,7 +740,9 @@ class AwsSdkCppConan(ConanFile):
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].system_libs.append("winmm")
         else:
-            self.cpp_info.components["core"].requires.extend(["libcurl::curl", "openssl::openssl"])
+            self.cpp_info.components["core"].requires.append("openssl::openssl")
+            if not self.options.use_crt_http_client:
+                self.cpp_info.components["core"].requires.append("libcurl::curl")
 
         if self.settings.os == "Linux":
             if self.options.get_safe("text-to-speech"):
