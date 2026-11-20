@@ -30,10 +30,11 @@ class SerializeConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", self.source_folder,
              os.path.join(self.package_folder, "licenses"))
-        # The single header lives at the repo root. Upstream's CMake install rule
-        # would place it in include/ exactly the same way, so running CMake for
-        # one file is skipped entirely.
+        # Public headers live at the repo root (serialize.h, plus serialize_utf.h in 2.x).
+        # Upstream CMake installs them to include/ the same way.
         copy(self, "serialize.h", self.source_folder,
+             os.path.join(self.package_folder, "include"))
+        copy(self, "serialize_utf.h", self.source_folder,
              os.path.join(self.package_folder, "include"))
 
     def package_info(self):
@@ -43,4 +44,3 @@ class SerializeConan(ConanFile):
         # so find_package(serialize) consumers are source-compatible.
         self.cpp_info.set_property("cmake_file_name", "serialize")
         self.cpp_info.set_property("cmake_target_name", "serialize::serialize")
-
