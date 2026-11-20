@@ -3,6 +3,7 @@ project(test_package LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11_json REQUIRED CONFIG)
 
 add_executable(test_package test_package.cpp)
