@@ -1,0 +1,4 @@
+sources:
+  "0.0.0.cci.20160622":
+    url: "https://github.com/cyrilcode/fft-real/archive/c6da77695a8b1e1302a10f42efe0b210c2871aa9.tar.gz"
+    sha256: "6cfaf0ddf656d8e2cb3bacb486bf59f3e5d3fb705750f905c89a3e56a3386707"
