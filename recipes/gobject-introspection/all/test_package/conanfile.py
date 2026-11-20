@@ -5,6 +5,7 @@ from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.files import save, load
 from conan.tools.apple import is_apple_os
+from conan.errors import ConanException
 
 
 class TestPackageConan(ConanFile):
@@ -44,7 +45,7 @@ class TestPackageConan(ConanFile):
                     if os.path.exists(tool_path):
                         self.run(f"{tool_path} --version", env="conanrun")
                     else:
-                        raise Exception(f"Tool {tool} not found in {gobject_introspection_bin}")
+                        raise ConanException(f"Tool {tool} not found in {gobject_introspection_bin}")
                 tool_path = os.path.join(gobject_introspection_bin, "g-ir-inspect")
                 if os.path.exists(tool_path):
                     self.run(f"{tool_path} -h", env="conanrun")
