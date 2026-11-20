@@ -7,7 +7,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class Dav1dConan(ConanFile):
@@ -18,6 +18,8 @@ class Dav1dConan(ConanFile):
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
+    languages = "C"
+    implements = ["auto_shared_fpic"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,7 +27,6 @@ class Dav1dConan(ConanFile):
         "bit_depth": ["all", 8, 16],
         "with_tools": [True, False],
         "assembly": [True, False],
-        "with_avx512": ["deprecated", True, False],
     }
     default_options = {
         "shared": False,
@@ -33,7 +34,6 @@ class Dav1dConan(ConanFile):
         "bit_depth": "all",
         "with_tools": True,
         "assembly": True,
-        "with_avx512": "deprecated",
     }
 
     def config_options(self):
@@ -43,21 +43,8 @@ class Dav1dConan(ConanFile):
             # debug builds with assembly often causes linker hangs or LNK1000
             self.options.assembly = False
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
-
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def package_id(self):
-        del self.info.options.with_avx512
-
-    def validate(self):
-        if self.options.with_avx512 != "deprecated":
-            self.output.warning("The 'with_avx512' option is deprecated and has no effect")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.4.0 <2]")
@@ -84,12 +71,8 @@ class Dav1dConan(ConanFile):
             tc.project_options["bitdepths"] = str(self.options.bit_depth)
         tc.generate()
 
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                              "subdir('doc')", "")
 
     def build(self):
-        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
