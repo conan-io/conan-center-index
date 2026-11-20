@@ -69,8 +69,6 @@ class Dav1dConan(ConanFile):
             tc.project_options["bitdepths"] = "8,16"
         else:
             tc.project_options["bitdepths"] = str(self.options.bit_depth)
-        # https://code.videolan.org/videolan/dav1d/-/blob/master/meson_options.txt
-        tc.project_options["enable_docs"] = False
         tc.generate()
 
 
