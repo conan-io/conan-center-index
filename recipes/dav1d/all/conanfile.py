@@ -7,7 +7,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class Dav1dConan(ConanFile):
