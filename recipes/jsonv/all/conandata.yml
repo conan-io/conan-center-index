@@ -1,0 +1,4 @@
+sources:
+  "2.0.0":
+    url: "https://github.com/tgockel/json-voorhees/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "06bec8647bec305ea65cdc883275f34130de8db7e2bdccbeaa863d6bb2d0eab9"
