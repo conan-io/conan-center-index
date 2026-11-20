@@ -2,14 +2,16 @@ import configparser
 import glob
 import os
 import platform
+import re
 import textwrap
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
+from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
+from conan.tools.files import copy, get, load, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
@@ -74,6 +76,7 @@ class QtConan(ConanFile):
         "device": [None, "ANY"],
         "cross_compile": [None, "ANY"],
         "sysroot": [None, "ANY"],
+        "android_sdk": [None, "ANY"],
         "multiconfiguration": [True, False],
         "disabled_features": [None, "ANY"],
     }
@@ -116,6 +119,7 @@ class QtConan(ConanFile):
         "device": None,
         "cross_compile": None,
         "sysroot": None,
+        "android_sdk": None,
         "multiconfiguration": False,
         "disabled_features": "",
     }
@@ -126,6 +130,16 @@ class QtConan(ConanFile):
     short_paths = True
 
     _submodules_tree = None
+
+    @property
+    def _is_mobile(self):
+        # Android, iOS, tvOS, watchOS, and visionOS: Qt cannot build or run its tools there
+        return self.settings.os == "Android" or (is_apple_os(self) and self.settings.os != "Macos")
+
+    @property
+    def _android_egl(self):
+        # Qt's egl feature needs OpenGL
+        return self.settings.os == "Android" and self.options.get_safe("opengl", "no") != "no"
 
     @property
     def _get_module_tree(self):
@@ -170,6 +184,8 @@ class QtConan(ConanFile):
             del self.options.with_x11
             del self.options.with_egl
 
+        if self.settings.os != "Android":
+            del self.options.android_sdk
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
             del self.options.with_gssapi
@@ -265,8 +281,16 @@ class QtConan(ConanFile):
         # no_copy_source causes long relative paths, hitting Window's PATH limit when building Qt WebEngine.
         self.no_copy_source = not (self.settings_build.os == "Windows" and self.options.get_safe("qtwebengine"))
 
+    @property
+    def _android_sdk(self):
+        # The android_sdk option, else the SDK the environment names, as Android Studio and the SDK tools use
+        return self.options.get_safe("android_sdk") or os.getenv("ANDROID_SDK_ROOT") or os.getenv("ANDROID_HOME")
+
     def validate_build(self):
         check_min_cppstd(self, 17)
+        if self.settings.os == "Android" and not self._android_sdk:
+            raise ConanInvalidConfiguration("Building Qt for Android needs the Android SDK: set qt/*:android_sdk, "
+                                            "or ANDROID_SDK_ROOT in the environment.")
 
     def validate(self):
         skip_ci_reason = self.conf.get("user.conancenter:skip_ci_build", check_type=str)
@@ -530,6 +554,8 @@ class QtConan(ConanFile):
             tc.variables["INPUT_dbus"] = "linked"
         else:
             tc.variables["FEATURE_dbus"] = "OFF"
+            # qtbase looks for DBus even with the feature off, and would find the build machine's
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapDBus1"] = "ON"
         tc.variables["CMAKE_FIND_DEBUG_MODE"] = "FALSE"
 
         if not self.options.with_zstd:
@@ -558,6 +584,10 @@ class QtConan(ConanFile):
                               ("with_egl", "egl"),
                               ("with_gstreamer", "gstreamer")]:
             tc.variables[f"FEATURE_{conf_arg}"] = ("ON" if self.options.get_safe(opt, False) else "OFF")
+        if self._android_egl:
+            # Android has no with_egl option, but its OpenGL windows are EGL surfaces; without EGL the
+            # Android platform plugin cannot create them
+            tc.variables["FEATURE_egl"] = "ON"
 
 
         for opt, conf_arg in [
@@ -601,6 +631,7 @@ class QtConan(ConanFile):
             tc.variables["FEATURE_framework"] = "OFF"
         elif self.settings.os == "Android":
             tc.variables["CMAKE_ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
+            tc.variables["ANDROID_SDK_ROOT"] = str(self._android_sdk).replace("\\", "/")
             tc.variables["ANDROID_ABI"] = {"armv7": "armeabi-v7a",
                                            "armv8": "arm64-v8a",
                                            "x86": "x86",
@@ -622,10 +653,12 @@ class QtConan(ConanFile):
         if cross_building(self):
             # Mainly to locate Qt6HostInfoConfig.cmake
             tc.cache_variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
-            # Stand-in for Qt6CoreTools - which is loaded for the executable targets
-            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(self.dependencies.direct_build["qt"].package_folder, self._cmake_executables_file)
-            # Ensure tools for host are always built
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
+            # Stand-in for Qt6<Module>Tools - which is loaded for the executable targets
+            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = self._generate_host_tools_file()
+            if not self._is_mobile:
+                # Ensure tools for host are always built. Mobile platforms cannot run them, and there Qt
+                # builds executables as app libraries, so building the tools fails configure.
+                tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.get_safe("build_type") == "Debug" and not self.options.shared:
@@ -654,7 +687,8 @@ class QtConan(ConanFile):
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Wayland"] = not with_wayland
         tc.variables["FEATURE_wayland"] = with_wayland
 
-        with_egl = self.options.get_safe("with_egl", False)
+        # Android has no with_egl option, but its OpenGL ES windows need the NDK's EGL
+        with_egl = self.options.get_safe("with_egl", False) or self._android_egl
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_EGL"] = not with_egl
 
         tc.generate()
@@ -668,9 +702,43 @@ class QtConan(ConanFile):
                 for bindir in dep.cpp_info.bindirs:
                     copy(self, pattern="*.dll", src=bindir, dst=dest_folder, keep_path=False)
 
+    def _generate_host_tools_file(self):
+        # Without QT_FORCE_BUILD_TOOLS, Qt looks up every tool it would build in the host Qt, so give
+        # each executable the host Qt ships an imported target, not only those in its executables file.
+        # Apps (Designer, Assistant, ...) are built for the target instead, so they keep their names free.
+        apps = set()
+        for cmakelists in glob.glob(os.path.join(self.source_folder, "**", "CMakeLists.txt"), recursive=True):
+            apps.update(re.findall(r"qt_internal_add_app\(\s*([A-Za-z0-9_-]+)", load(self, cmakelists)))
+        host_folder = self.dependencies.direct_build["qt"].package_folder
+        extension = ".exe" if self.settings_build.os == "Windows" else ""
+        executables_file = os.path.join(host_folder, self._cmake_executables_file).replace("\\", "/")
+        contents = f'include("{executables_file}")\n'
+        for subfolder in ["bin", "libexec"]:
+            for path in sorted(glob.glob(os.path.join(host_folder, subfolder, f"*{extension}"))):
+                if not os.path.isfile(path) or not os.access(path, os.X_OK):
+                    continue
+                name = os.path.basename(path)[:len(os.path.basename(path)) - len(extension)]
+                if not re.fullmatch(r"[A-Za-z0-9_-]+", name) or name in apps:
+                    continue
+                location = path.replace("\\", "/")
+                # Qt's own Tools packages define both names; some modules check the versionless one.
+                for target in [f"Qt6::{name}", f"Qt::{name}"]:
+                    contents += textwrap.dedent(f"""\
+                        if(NOT TARGET {target})
+                            add_executable({target} IMPORTED)
+                            set_target_properties({target} PROPERTIES IMPORTED_LOCATION "{location}")
+                        endif()
+                        """)
+        tools_file = os.path.join(self.generators_folder, "conan_qt_host_tools.cmake")
+        save(self, tools_file, contents)
+        return tools_file.replace("\\", "/")
+
     def package_id(self):
         del self.info.options.cross_compile
         del self.info.options.sysroot
+        if self.info.settings.os == "Android":
+            # A path on the build machine, which does not change the binary
+            del self.info.options.android_sdk
         if self.info.options.multiconfiguration:
             if self.info.settings.compiler == "Visual Studio":
                 if "MD" in self.info.settings.compiler.runtime:
@@ -927,6 +995,38 @@ class QtConan(ConanFile):
             targets.append("repc")
         if self.options.get_safe("qtscxml"):
             targets.append("qscxmlc")
+        if cross_building(self) and self._is_mobile:
+            # The tools are not built for these platforms (see QT_FORCE_BUILD_TOOLS): consumers run
+            # the host Qt's, which the qt tool_requires exposes through QT_HOST_PATH.
+            filecontents += textwrap.dedent("""\
+                if(NOT QT_HOST_PATH AND DEFINED ENV{QT_HOST_PATH})
+                    file(TO_CMAKE_PATH "$ENV{QT_HOST_PATH}" QT_HOST_PATH)
+                endif()
+                if(NOT QT_HOST_PATH)
+                    message(FATAL_ERROR "Qt for this platform runs the host Qt's tools: add qt/<host_version> to your tool_requires, or set QT_HOST_PATH.")
+                endif()
+                """)
+            filecontents += f'include("${{QT_HOST_PATH}}/{self._cmake_executables_file.replace(os.sep, "/")}")\n'
+            # The host Qt's executables file lists only some tools, and deployment also needs others
+            # (androiddeployqt, qmldom, ...), so give every host Qt executable a target. Qt looks tools up
+            # by their per-configuration location, so set IMPORTED_LOCATION_RELEASE as well.
+            filecontents += textwrap.dedent("""\
+                file(GLOB __qt_host_executables LIST_DIRECTORIES false
+                    "${QT_HOST_PATH}/bin/*${CMAKE_HOST_EXECUTABLE_SUFFIX}"
+                    "${QT_HOST_PATH}/libexec/*${CMAKE_HOST_EXECUTABLE_SUFFIX}")
+                foreach(__qt_host_executable IN LISTS __qt_host_executables)
+                    get_filename_component(__qt_tool "${__qt_host_executable}" NAME_WE)
+                    if(NOT TARGET Qt6::${__qt_tool})
+                        add_executable(Qt6::${__qt_tool} IMPORTED)
+                        set_target_properties(Qt6::${__qt_tool} PROPERTIES IMPORTED_LOCATION "${__qt_host_executable}")
+                    endif()
+                    get_target_property(__qt_location Qt6::${__qt_tool} IMPORTED_LOCATION)
+                    if(__qt_location)
+                        set_target_properties(Qt6::${__qt_tool} PROPERTIES IMPORTED_LOCATION_RELEASE "${__qt_location}")
+                    endif()
+                endforeach()
+                """)
+            targets = []
         for target in targets:
             exe_path = None
             for path_ in [f"bin/{target}{extension}",
@@ -1044,7 +1144,14 @@ class QtConan(ConanFile):
         self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
         self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
 
-        self.buildenv_info.define("QT_HOST_PATH", self.package_folder)
+        if not self._is_mobile:
+            # A mobile Qt has no tools, so it is never a host Qt: its consumers take the tools
+            # from a qt tool_requires, which tells them where it is
+            self.buildenv_info.define("QT_HOST_PATH", self.package_folder)
+            if conan_version >= "2.4":
+                # Also when CMake runs outside the Conan build environment
+                self.conf_info.update("tools.cmake.cmaketoolchain:extra_variables",
+                                      {"QT_HOST_PATH": self.package_folder.replace("\\", "/")})
 
         build_modules = {}
         def _add_build_module(component, module):
@@ -1058,6 +1165,9 @@ class QtConan(ConanFile):
                 libsuffix = "d"
             if is_apple_os(self):
                 libsuffix = "_debug"
+        if self.settings.os == "Android":
+            # Qt for Android names every library after its ABI, e.g. libQt6Core_arm64-v8a.so
+            libsuffix += f"_{android_abi(self)}"
 
         def _get_corrected_reqs(requires):
             reqs = []
@@ -1653,6 +1763,11 @@ class QtConan(ConanFile):
                 if os.path.isfile(module):
                     _add_build_module(component_name, module)
 
+                # Qt6QmlConfig.cmake, deleted above, includes Qt6AndroidQmlMacros.cmake on Android (QML imports for the APK)
+                module = os.path.join("lib", "cmake", m, f"Qt6Android{m[len('Qt6'):]}Macros.cmake")
+                if self.settings.os == "Android" and os.path.isfile(module):
+                    _add_build_module(component_name, module)
+
                 module = os.path.join("lib", "cmake", m, f"{m}ConfigExtras.cmake")
                 if os.path.isfile(module):
                     _add_build_module(component_name, module)
@@ -1662,7 +1777,8 @@ class QtConan(ConanFile):
                     _add_build_module(component_name, module)
 
                 cmake_dir = os.path.join(self.package_folder, "lib", "cmake", m)
-                helper_modules = glob.glob(os.path.join(cmake_dir, "QtPublic*Helpers.cmake"))
+                # Also QtPublicPluginHelpers_v2.cmake (Qt >= 6.9), which the Android deployment finalizer uses
+                helper_modules = glob.glob(os.path.join(cmake_dir, "QtPublic*Helpers*.cmake"))
 
                 # QtPublicCMakeIncludeGuardHelpers.cmake (Qt >= 6.11.2) defines __qt_internal_cmake_include_guard,
                 # which the other helpers use, so it must be included first (as upstream's QtConfig.cmake.in does)
