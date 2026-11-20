@@ -13,7 +13,8 @@ class TestPackageConan(ConanFile):
         return ["azure-core",
                 "azure-storage-common",
                 "azure-storage-blobs",
-                "azure-storage-files-shares"]
+                "azure-storage-files-shares",
+                "azure-identity"]
 
     def layout(self):
         cmake_layout(self)

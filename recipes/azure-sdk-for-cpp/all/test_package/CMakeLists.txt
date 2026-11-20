@@ -15,3 +15,6 @@ target_link_libraries(test_azure-storage-blobs PRIVATE Azure::azure-core Azure::
 
 add_executable(test_azure-storage-files-shares test_azure-storage-files-shares.cc)
 target_link_libraries(test_azure-storage-files-shares PRIVATE Azure::azure-core Azure::azure-storage-common Azure::azure-storage-files-shares)
+
+add_executable(test_azure-identity test_azure-identity.cc)
+target_link_libraries(test_azure-identity PRIVATE Azure::azure-core Azure::azure-identity)

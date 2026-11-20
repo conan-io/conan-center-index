@@ -48,8 +48,14 @@ class AzureSDKForCppConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
+        # Outside Windows, openssl is used by azure-core, azure-identity and azure-storage-common.
+        # On Windows, they use bcrypt/crypt32 instead, but openssl is still needed: the whole SDK
+        # is built from its root CMakeLists, and azure-security-attestation requires openssl on
+        # every OS. Its lib is packaged but not declared as a component in package_info()
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("libxml2/[>=2.12.5 <3]")
+        if self.settings.os != "Windows":
+            # On Windows, the storage SDK parses XML with the Windows Web Services API
+            self.requires("libxml2/[>=2.12.5 <3]")
 
         if self.settings.os == "Windows":
             # wil is always required on windows since azure-identity can't be disabled via cmake.
@@ -133,18 +139,28 @@ class AzureSDKForCppConan(ConanFile):
         self.cpp_info.components["azure-core"].set_property("cmake_target_name", "Azure::azure-core")
         self.cpp_info.components["azure-core"].libs = ["azure-core"]
 
-        self.cpp_info.components["azure-core"].requires.extend(["openssl::openssl", "libxml2::libxml2"])
+        # On Windows, azure-core uses bcrypt/crypt32, not openssl. openssl is still referenced
+        # here because Conan requires every direct dependency to be used by a component, and
+        # azure-security-attestation, the only lib needing it on Windows, is not declared as one
+        # (see requirements())
+        self.cpp_info.components["azure-core"].requires.append("openssl::openssl")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["azure-core"].system_libs = ["bcrypt", "crypt32"]
 
         if self.settings.os == "Windows" and self.options.get_safe("transport_winhttp"):
             self.cpp_info.components["azure-core"].requires.append("wil::wil")
-            self.cpp_info.components["azure-core"].system_libs = ["winhttp"]
+            self.cpp_info.components["azure-core"].system_libs.append("winhttp")
         if self.options.transport_curl:
             self.cpp_info.components["azure-core"].requires.append("libcurl::libcurl")
+            if self.settings.os == "Windows":
+                self.cpp_info.components["azure-core"].system_libs.append("ws2_32")
 
         self.cpp_info.components["azure-storage-common"].set_property("cmake_target_name", "Azure::azure-storage-common")
         self.cpp_info.components["azure-storage-common"].libs = ["azure-storage-common"]
         self.cpp_info.components["azure-storage-common"].requires = ["azure-core"]
-        if not self.settings.os == "Windows":
+        if self.settings.os == "Windows":
+            self.cpp_info.components["azure-storage-common"].system_libs = ["bcrypt", "webservices"]
+        else:
             self.cpp_info.components["azure-storage-common"].requires.extend(["openssl::openssl", "libxml2::libxml2"])
 
         self.cpp_info.components["azure-storage-blobs"].set_property("cmake_target_name", "Azure::azure-storage-blobs")
@@ -159,7 +175,7 @@ class AzureSDKForCppConan(ConanFile):
         self.cpp_info.components["azure-identity"].libs = ["azure-identity"]
         self.cpp_info.components["azure-identity"].requires = ["azure-core"]
         if self.settings.os == "Windows":
-            self.cpp_info.components["azure-identity"].system_requires = ["bcrypt", "crypt32"]
+            self.cpp_info.components["azure-identity"].system_libs = ["bcrypt", "crypt32"]
         else:
             self.cpp_info.components["azure-identity"].requires.append("openssl::openssl")
 
