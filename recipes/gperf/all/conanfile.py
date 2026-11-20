@@ -27,7 +27,10 @@ class GperfConan(ConanFile):
         self.folders.build = self.folders.source
 
     def package_id(self):
-        del self.info.settings.compiler
+        # only the compiler.libcxx setting is relevant,
+        # but we can't delete only the compiler name itself.
+        self.info.settings.rm_safe("compiler.version")
+        self.info.settings.rm_safe("compiler.cppstd")
 
     def build_requirements(self):
         if self.settings_build.os == "Windows":
