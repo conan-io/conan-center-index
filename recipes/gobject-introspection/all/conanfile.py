@@ -45,9 +45,6 @@ class GobjectIntrospectionConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if self.options.get_safe("build_introspection_data"):
-            # INFO: g-ir-scanner looks for dynamic glib and gobject libraries when running
-            self.options["glib"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -63,11 +60,6 @@ class GobjectIntrospectionConan(ConanFile):
             # fatal error LNK1104: cannot open file 'python37_d.lib'
             raise ConanInvalidConfiguration(
                 f"{self.ref} debug build on Windows is disabled due to debug version of Python libs likely not being available. Contributions to fix this are welcome.")
-        if self.options.build_introspection_data and not self.dependencies["glib"].options.shared:
-            # FIXME: tools/g-ir-scanner fails to load glib
-            # tools/g-ir-scanner --output=gir/GLib-2.0.gir ...
-            # ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
-            raise ConanInvalidConfiguration(f"{self.ref} requires shared glib to be built as shared. Use -o 'glib/*:shared=True'.")
         if self.options.build_introspection_data and self.settings.os in ["Windows", "Macos"]:
             # FIXME: tools/g-ir-scanner', '--output=gir/GLib-2.0.gir' ... ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
             # FIXME: g-ir-scanner fails to find libgnuintl
@@ -136,6 +128,15 @@ class GobjectIntrospectionConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                             "get_option('python'), modules: ['setuptools'])",
                             "get_option('python'))")
+        if self.options.build_introspection_data:
+            # INFO: Static libraries (e.g. glib) are not listed by ldd, do not abort g-ir-scanner when they are not resolved
+            replace_in_file(self, os.path.join(self.source_folder, "giscanner", "shlibs.py"),
+                            '''        raise SystemExit(
+            "ERROR: can't resolve libraries to shared libraries: " +
+            ", ".join(patterns.keys()))''',
+                            '''        sys.stderr.write(
+            "WARNING: can't resolve libraries to shared libraries: " +
+            ", ".join(patterns.keys()) + "\\n")''')
 
     def build(self):
         self._patch_sources()
