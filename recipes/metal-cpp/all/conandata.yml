@@ -1,4 +1,10 @@
 sources:
+  "27.0.1":
+    url: "https://github.com/apple/metal-cpp/archive/refs/tags/release/metal-cpp_macOS27.0.1_iOS27.0.1.tar.gz"
+    sha256: "3a2f456c5373748e1b8de0896d1dbe53d6e0a1d3b8b9e5235c1a8abae6f373f5"
+  "26.4":
+    url: "https://github.com/apple/metal-cpp/archive/refs/tags/release/metal-cpp_macOS26.4_iOS26.4.tar.gz"
+    sha256: "65a1a2ec3490eac7c5fa16039e1f92471ed24c1912109b0c9591850e74d0c790"
   "26":
     url: "https://developer.apple.com/metal/cpp/files/metal-cpp_26.zip"
     sha256: "4df3c078b9aadcb516212e9cb03004cbc5ce9a3e9c068fa3144d021db585a3a4"
@@ -21,10 +27,21 @@ sources:
     url: "https://developer.apple.com/metal/cpp/files/metal-cpp_macOS13_iOS16.zip"
     sha256: "6f741894229e9c750add1afc3797274fc008c7507e2ae726370c17c34b7c6a68"
 minimum_os_version:
+  "27.0.1":
+    "Macos": "27"
+    "iOS": "27"
+    "tvOS": "27"
+    "visionOS": "27"
+  "26.4":
+    "Macos": "26.4"
+    "iOS": "26.4"
+    "tvOS": "26.4"
+    "visionOS": "26.4"
   "26":
     "Macos": "26"
     "iOS": "26"
     "tvOS": "26"
+    "visionOS": "26"
   "15.2":
     "Macos": "15.2"
     "iOS": "18.2"
