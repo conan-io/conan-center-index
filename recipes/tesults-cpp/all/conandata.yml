@@ -1,0 +1,4 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/tesults/cpp/archive/refs/tags/v1.0.2.tar.gz"
+    sha256: "be0c4713699ce122c7185c3d2ff30055406def324eebbaae0dca2cf10d34a107"
