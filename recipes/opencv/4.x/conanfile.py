@@ -113,6 +113,7 @@ class OpenCVConan(ConanFile):
         "with_cufft": [True, False],
         "with_cudnn": [True, False],
         "cuda_arch_bin": [None, "ANY"],
+        "cuda_arch_ptx": [None, "ANY"],
         "cpu_baseline": [None, "ANY"],
         "cpu_dispatch": [None, "ANY"],
         "world": [True, False],
@@ -172,6 +173,7 @@ class OpenCVConan(ConanFile):
         "with_cufft": False,
         "with_cudnn": False,
         "cuda_arch_bin": None,
+        "cuda_arch_ptx": None,
         "cpu_baseline": None,
         "cpu_dispatch": None,
         "world": False,
@@ -1019,6 +1021,7 @@ class OpenCVConan(ConanFile):
             self.options.rm_safe("with_cufft")
             self.options.rm_safe("dnn_cuda")
             self.options.rm_safe("cuda_arch_bin")
+            self.options.rm_safe("cuda_arch_ptx")
         if not self.options.text:
             self.options.rm_safe("with_tesseract")
 
@@ -1472,6 +1475,8 @@ class OpenCVConan(ConanFile):
             tc.variables["CUDA_NVCC_FLAGS"] = "--expt-relaxed-constexpr"
             if self.options.cuda_arch_bin:
                 tc.variables["CUDA_ARCH_BIN"] = self.options.cuda_arch_bin
+            if self.options.cuda_arch_ptx:
+                tc.variables["CUDA_ARCH_PTX"] = self.options.cuda_arch_ptx
         tc.variables["WITH_CUBLAS"] = self.options.get_safe("with_cublas", False)
         tc.variables["WITH_CUFFT"] = self.options.get_safe("with_cufft", False)
         tc.variables["WITH_CUDNN"] = self.options.get_safe("with_cudnn", False)
