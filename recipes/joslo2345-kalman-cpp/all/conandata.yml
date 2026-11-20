@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/joslo2345/kalman-cpp/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "7c529ee2d0e74fe5c4a8a80cbfb67e99013c342021ee63387f62c5ca3df1c69a"
