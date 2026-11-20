@@ -5,6 +5,7 @@ option(LIBRAW_BUILD_THREAD_SAFE "Build raw_r library with -pthread enabled" OFF)
 option(LIBRAW_WITH_JPEG "Build with libjpeg" ON)
 option(LIBRAW_WITH_LCMS "Build with LCMS" ON)
 option(LIBRAW_WITH_JASPER "Build with Jasper" ON)
+option(LIBRAW_BUILD_UTILITIES "Build the unprocessed_raw, raw-identify and dcraw_emu samples" OFF)
 
 if(RAW_LIB_VERSION_STRING VERSION_LESS 0.21)
     set(libraw_LIB_SRCS ${LIBRAW_SRC_DIR}/internal/dcraw_common.cpp
@@ -72,6 +73,18 @@ if(LIBRAW_BUILD_THREAD_SAFE)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
+endif()
+
+if(LIBRAW_BUILD_UTILITIES)
+    # Upstream sample programs, linked against the library built here.
+    foreach(_util unprocessed_raw raw-identify dcraw_emu)
+        add_executable(${_util} "${LIBRAW_SRC_DIR}/samples/${_util}.cpp")
+        target_link_libraries(${_util} PRIVATE raw)
+        if(NOT WIN32)
+            target_link_libraries(${_util} PRIVATE m)
+        endif()
+        install(TARGETS ${_util} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    endforeach()
 endif()
 
 install(DIRECTORY "${LIBRAW_SRC_DIR}/libraw" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

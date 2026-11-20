@@ -24,6 +24,7 @@ class LibRawConan(ConanFile):
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_lcms": [True, False],
         "with_jasper": [True, False],
+        "build_utilities": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,6 +33,11 @@ class LibRawConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_lcms": True,
         "with_jasper": True,
+        "build_utilities": False,
+    }
+    options_description = {
+        "build_utilities": "Also build and package upstream's unprocessed_raw, raw-identify and dcraw_emu "
+                           "sample programs, linked against this library",
     }
     exports_sources = ["CMakeLists.txt"]
 
@@ -81,6 +87,7 @@ class LibRawConan(ConanFile):
         tc.variables["LIBRAW_WITH_JPEG"] = bool(self.options.with_jpeg)
         tc.variables["LIBRAW_WITH_LCMS"] = self.options.with_lcms
         tc.variables["LIBRAW_WITH_JASPER"] = self.options.with_jasper
+        tc.variables["LIBRAW_BUILD_UTILITIES"] = self.options.build_utilities
         tc.generate()
 
         deps = CMakeDeps(self)
