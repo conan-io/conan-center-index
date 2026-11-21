@@ -32,6 +32,8 @@ class TaoCPPPEGTLConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["PEGTL_BUILD_EXAMPLES"] = False
+        tc.cache_variables["PEGTL_BUILD_TESTS"] = False
         tc.generate()
 
     def package(self):
