@@ -1,7 +1,16 @@
 sources:
+  "3.0.cci20260819":
+    url: "https://github.com/Nicoshev/rapidhash/archive/1ae7842f59f25929a338e5a76e3fa350673e48e1.tar.gz"
+    sha256: "af11d54a8dd9c0a85d132efad91f15281d0a0f6d72876a5aa2c4b1d0a76af246"
   "3.0":
-    url: "https://github.com/Nicoshev/rapidhash/archive/refs/tags/rapidhash_v3.tar.gz"
-    sha256: "645084e192a28fedfb2be80066a7849c4e3dd2443f686fb266d1a284b7a01eb9"
+    url: "https://github.com/Nicoshev/rapidhash/archive/bbaf1a70775b785f11dab29dc7d9bd717b4eb6a6.tar.gz"
+    sha256: "48c3cf8464deeeb1eb1023fd132c3e19d00c37d7931816fb1bd09eec8f4db00e"
   "1.0":
     url: "https://github.com/Nicoshev/rapidhash/archive/refs/tags/rapidhash_v1.0.tar.gz"
     sha256: "d295e66eec6745cc0e0c8c65fb8b5edf08ab3af83b0a503c54c6705144b53848"
+patches:
+  "3.0":
+    - patch_file: "patches/0001-fix-3-0-msvc-build.patch"
+      patch_description: "Fix broken msvc build & C++11 build"
+      patch_type: "portability"
+      patch_source: "https://github.com/Nicoshev/rapidhash/commit/3f525283155155a590936d0d0497255164fdf73e"
