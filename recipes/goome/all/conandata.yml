@@ -1,4 +1,4 @@
 sources:
-  "0.5.3":
-    url: "https://github.com/goome-ui/c-goome/archive/refs/tags/v0.5.3.tar.gz"
-    sha256: "e6487f9843a002ce75184aa07a8926df92a4ca1810f26a60e5a777786e998f3f"
+  "0.5.5":
+    url: "https://github.com/goome-ui/c-goome/archive/refs/tags/v0.5.5.tar.gz"
+    sha256: "3bb4116beeeecf0fd18734cf35f2477623412cf88332a07e061fe847a53dbb9c"
