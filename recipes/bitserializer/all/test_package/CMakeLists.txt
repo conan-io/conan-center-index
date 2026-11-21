@@ -17,6 +17,9 @@ endif()
 if(WITH_MSGPACK)
     list(APPEND BITSERIALIZER_COMPONENTS msgpack-archive)
 endif()
+if(WITH_JSON)
+    list(APPEND BITSERIALIZER_COMPONENTS json-archive)
+endif()
 
 find_package(bitserializer CONFIG REQUIRED
     COMPONENTS ${BITSERIALIZER_COMPONENTS}
@@ -31,6 +34,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<$<BOOL:${WITH_RAPIDYAML}>:BitSerializer::rapidyaml-archive>
     $<$<BOOL:${WITH_CSV}>:BitSerializer::csv-archive>
     $<$<BOOL:${WITH_MSGPACK}>:BitSerializer::msgpack-archive>
+    $<$<BOOL:${WITH_JSON}>:BitSerializer::json-archive>
 )
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<BOOL:${WITH_RAPIDJSON}>:"WITH_RAPIDJSON">
@@ -38,4 +42,5 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<BOOL:${WITH_RAPIDYAML}>:"WITH_RAPIDYAML">
     $<$<BOOL:${WITH_CSV}>:"WITH_CSV">
     $<$<BOOL:${WITH_MSGPACK}>:"WITH_MSGPACK">
+    $<$<BOOL:${WITH_JSON}>:"WITH_JSON">
 )

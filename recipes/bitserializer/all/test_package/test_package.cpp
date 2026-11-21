@@ -18,6 +18,9 @@
 #ifdef WITH_MSGPACK
 #include <bitserializer/msgpack_archive.h>
 #endif
+#ifdef WITH_JSON
+#include <bitserializer/json_archive.h>
+#endif
 
 #include <iostream>
 #include <sstream>
@@ -98,5 +101,8 @@ int main() {
 #endif
 #ifdef WITH_MSGPACK
 	TestArchive<BitSerializer::MsgPack::MsgPackArchive>("MsgPack archive (built-in implementation)");
+#endif
+#ifdef WITH_JSON
+	TestArchive<BitSerializer::Json::JsonArchive>("JSON archive (built-in implementation)");
 #endif
 }

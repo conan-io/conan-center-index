@@ -1,4 +1,7 @@
 sources:
+  "0.91":
+    url: "https://github.com/PavelKisliak/BitSerializer/releases/download/v0.91/bitserializer_v0.91_src.tar.gz"
+    sha256: "aac2e464c6b049ef2fb10eb24d5e3a16331d9bb7f757f351b4fe4f8098dc7e4f"
   "0.85":
     url: "https://github.com/PavelKisliak/BitSerializer/archive/v0.85.tar.gz"
     sha256: "4d031af8ed6bdbb3a54c8ff50101738507504d995aaeaae3b3689c668f36d2b6"
