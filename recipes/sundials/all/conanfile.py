@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, mkdir, rmdir
 from conan.tools.apple import fix_apple_shared_install_name
 import glob
@@ -12,10 +12,12 @@ required_conan_version = ">=1.53.0"
 class SundialsConan(ConanFile):
     name = "sundials"
     license = "BSD-3-Clause"
-    description = ("SUNDIALS is a family of software packages implemented"
-                   " with the goal of providing robust time integrators "
-                   "and nonlinear solvers that can easily be incorporated"
-                   "into existing simulation codes.")
+    description = (
+        "SUNDIALS is a family of software packages implemented"
+        " with the goal of providing robust time integrators "
+        "and nonlinear solvers that can easily be incorporated"
+        "into existing simulation codes."
+    )
     topics = ("integrators", "ode", "non-linear solvers")
     homepage = "https://github.com/LLNL/sundials"
     url = "https://github.com/conan-io/conan-center-index"
@@ -30,6 +32,7 @@ class SundialsConan(ConanFile):
         "build_ida": [True, False],
         "build_idas": [True, False],
         "build_kinsol": [True, False],
+        "with_klu": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,6 +43,7 @@ class SundialsConan(ConanFile):
         "build_ida": True,
         "build_idas": True,
         "build_kinsol": True,
+        "with_klu": False,
     }
 
     short_paths = True
@@ -57,6 +61,12 @@ class SundialsConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if self.options.with_klu:
+            self.requires(
+                "suitesparse/[^7.14.1]", transitive_headers=True, transitive_libs=True
+            )
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18]")
 
@@ -64,6 +74,11 @@ class SundialsConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        deps = CMakeDeps(self)
+        if self.options.with_klu:
+            deps.set_property("suitesparse", "cmake_file_name", "KLU")
+            deps.set_property("suitesparse::klu", "cmake_target_name", "SUNDIALS::KLU")
+        deps.generate()
         tc = CMakeToolchain(self)
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["BUILD_ARKODE"] = self.options.build_arkode
@@ -72,6 +87,9 @@ class SundialsConan(ConanFile):
         tc.variables["BUILD_IDA"] = self.options.build_ida
         tc.variables["BUILD_IDAS"] = self.options.build_idas
         tc.variables["BUILD_KINSOL"] = self.options.build_kinsol
+        tc.variables["ENABLE_KLU"] = self.options.with_klu
+        if self.options.with_klu:
+            tc.variables["KLU_WORKS"] = True
         tc.variables["EXAMPLES_ENABLE_C"] = False
         tc.variables["EXAMPLES_INSTALL"] = False
         tc.generate()
@@ -82,24 +100,42 @@ class SundialsConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "LICENSE",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         if self.settings.os == "Windows" and self.options.shared:
             mkdir(self, os.path.join(self.package_folder, "bin"))
-            for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
-                shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
+            for dll_path in glob.glob(
+                os.path.join(self.package_folder, "lib", "*.dll")
+            ):
+                shutil.move(
+                    dll_path,
+                    os.path.join(
+                        self.package_folder, "bin", os.path.basename(dll_path)
+                    ),
+                )
         fix_apple_shared_install_name(self)
 
     def package_info(self):
 
         def _add_library(name):
             # SundialsAddLibrary.cmake#377, where the first branch is always taken.
-            library_suffix = "_static" if not self.options.shared and self.settings.compiler == "msvc" else ""
+            library_suffix = (
+                "_static"
+                if not self.options.shared and self.settings.compiler == "msvc"
+                else ""
+            )
             self.cpp_info.components[name].libs = ["sundials_" + name + library_suffix]
             target_suffix = "_shared" if self.options.shared else "_static"
-            self.cpp_info.components[name].set_property("cmake_target_name", f"SUNDIALS::{name}{target_suffix}")
+            self.cpp_info.components[name].set_property(
+                "cmake_target_name", f"SUNDIALS::{name}{target_suffix}"
+            )
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components[name].system_libs.append("m")
             return self.cpp_info.components[name]
@@ -113,6 +149,12 @@ class SundialsConan(ConanFile):
         _add_library("sundomeigestpower").requires = ["core"]
         _add_library("sunlinsoldense").requires = ["core", "sunmatrixdense"]
         _add_library("sunlinsolband").requires = ["core", "sunmatrixband"]
+        if self.options.with_klu:
+            _add_library("sunlinsolklu").requires = [
+                "core",
+                "sunmatrixsparse",
+                "suitesparse::klu",
+            ]
         _add_library("sunlinsolpcg").requires = ["core"]
         _add_library("sunlinsolspbcgs").requires = ["core"]
         _add_library("sunlinsolspfgmr").requires = ["core"]
