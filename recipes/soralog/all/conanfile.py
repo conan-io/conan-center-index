@@ -96,7 +96,6 @@ class SoralogConan(ConanFile):
             component.bindirs = []
             if is_library:
                 component.libs = [name]
-                component.libdirs = [os.path.join("lib", "soralog")]
             else:
                 component.libdirs = []
             return component
