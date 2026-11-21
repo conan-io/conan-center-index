@@ -1,0 +1,15 @@
+submodules:
+  "6.6.0":
+    modules/common:
+      url: "https://github.com/aerospike/aerospike-common/archive/88eff22f1cd35243e9167a9b306b63476432e336.zip"
+      sha256: "05003efe60420a79562f2d24006982cf5d95ca82ec63595c75cfc8498e94a0f6"
+    modules/mod-lua:
+      url: "https://github.com/aerospike/aerospike-mod-lua/archive/16da7372589ea9fcc40312526ffb8bc37a136dcc.zip"
+      sha256: "759a8e7c8d22e5ddf1d429b79c79cf09f67ee4a31396ed569d2be9dc4a97f9b1"
+  "7.2.1":
+    modules/common:
+      url: "https://github.com/aerospike/aerospike-common/archive/814081ba9145d7d95266721ea5ba3d15a228b578.zip"
+      sha256: "a7f15a3dcba743923759c35cb90564e2ae204d02c9b0e8817fe16055cecdc32e"
+    modules/mod-lua:
+      url: "https://github.com/aerospike/aerospike-mod-lua/archive/0bd5641cb57e3d2f98a74f2e8e82deb50ba3f2d8.zip"
+      sha256: "ea4263489c885dc1e0a5ae4313e3d12f3979d424bb562fd6385be064b01f671e"
