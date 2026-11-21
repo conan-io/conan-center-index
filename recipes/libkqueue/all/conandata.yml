@@ -1,0 +1,4 @@
+sources:
+  "2.7.0":
+    url: "https://github.com/mheily/libkqueue/archive/refs/tags/v2.7.0.zip"
+    sha256: "27b63c0809e68941c0ac6ab86ce5bac0d97674bd857f2fb418a0c5ca3fce578b"
