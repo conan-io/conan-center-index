@@ -1,4 +1,4 @@
 sources:
   "0.4.0":
-    url: "https://github.com/xDimon/soralog/archive/46301b9481d33f138aa7bb181bf85ea21a155a58.tar.gz"
-    sha256: "37189982fc74d4586fd88cbf98a530dde0fd72a7cccea2e0419833b34a211770"
+    url: "https://github.com/xDimon/soralog/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "ac8657a1cbe34873032b30e24037a40abaf19a50523942dc97e248ed270197da"
