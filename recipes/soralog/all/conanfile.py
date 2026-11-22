@@ -39,6 +39,7 @@ class SoralogConan(ConanFile):
             "gcc": "10",
             "clang": "15",
             "apple-clang": "15",
+            "msvc": "193",
         }
 
     def layout(self):
@@ -50,9 +51,9 @@ class SoralogConan(ConanFile):
         self.requires("yaml-cpp/0.9.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        # Upstream build accepts only GCC and Clang, and sinks use POSIX APIs (syslog)
-        if self.settings.os == "Windows" or str(self.settings.compiler) not in self._compilers_minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} supports only GCC and Clang on POSIX systems")
+        # Upstream build accepts only GCC, Clang and MSVC
+        if str(self.settings.compiler) not in self._compilers_minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} supports only GCC, Clang and MSVC")
         check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version[str(self.settings.compiler)]
         if Version(self.settings.compiler.version) < minimum_version:
@@ -93,25 +94,35 @@ class SoralogConan(ConanFile):
             component = self.cpp_info.components[name]
             component.set_property("cmake_target_name", f"soralog::{name}")
             component.requires = requires
-            component.bindirs = []
             if is_library:
                 component.libs = [name]
             else:
                 component.libdirs = []
+                component.bindirs = []
             return component
 
-        _component("sink", ["fmt::fmt"], is_library=False)
+        # Upstream builds the syslog sink everywhere but on Windows,
+        # and the Event Log sink on Windows only
+        if self.settings.os == "Windows":
+            system_sink = "sink_to_eventlog"
+        else:
+            system_sink = "sink_to_syslog"
+
+        threaded = [_component("sink", ["fmt::fmt"])]
         _component("sink_to_nowhere", ["sink"])
-        for name in ("sink_to_console", "sink_to_file", "sink_to_syslog"):
-            component = _component(name, ["sink"])
-            if self.settings.os in ["Linux", "FreeBSD"]:
+        for name in ("sink_to_console", "sink_to_file", system_sink):
+            threaded.append(_component(name, ["sink"]))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            for component in threaded:
                 component.system_libs = ["pthread"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["sink_to_eventlog"].system_libs = ["advapi32"]
         _component("multisink", ["sink"])
         _component("logging_system", ["sink", "sink_to_nowhere"])
         _component("group", ["logging_system"], is_library=False)
         _component("logger", ["logging_system"], is_library=False)
         _component("configurator", ["sink_to_nowhere", "sink_to_console", "sink_to_file",
-                                     "sink_to_syslog", "multisink"], is_library=False)
+                                     system_sink, "multisink"], is_library=False)
         _component("configurator_yaml", ["yaml-cpp::yaml-cpp", "configurator", "logging_system"]) \
             .set_property("cmake_target_aliases", ["soralog::yaml"])
         _component("fallback_configurator", ["configurator", "logging_system"]) \
