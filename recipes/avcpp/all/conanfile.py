@@ -66,7 +66,7 @@ class AvcppConan(ConanFile):
         tc.cache_variables["AV_ENABLE_SHARED"] = self.options.shared
         tc.cache_variables["AV_ENABLE_STATIC"] = not self.options.shared
         tc.cache_variables["AV_BUILD_EXAMPLES"] = False
-
+        tc.cache_variables["AV_ENABLE_STATIC_PIC"] = self.options.get_safe("fPIC")
         ffmpeg_opts = self.dependencies["ffmpeg"].options
         # Disables wrappers for avformat, but also avfilter and avdevice.
         tc.cache_variables["AV_DISABLE_AVFORMAT"] = not ffmpeg_opts.get_safe("avformat")
