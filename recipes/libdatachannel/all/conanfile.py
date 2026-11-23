@@ -6,7 +6,6 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
-from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=2.1"
 
@@ -50,7 +49,7 @@ class libdatachannelConan(ConanFile):
         self.requires("libsrtp/2.8.1")
         if self.options.with_nice:
             self.requires("libnice/0.1.23")
-        self.requires("libjuice/1.7.4", transitive_headers=True, transitive_libs=True)
+        self.requires("libjuice/1.7.5", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
