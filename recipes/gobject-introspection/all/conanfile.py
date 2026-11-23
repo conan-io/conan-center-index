@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -85,6 +85,9 @@ class GobjectIntrospectionConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
         tc = MesonToolchain(self)
         if cross_building(self):
             tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
@@ -94,12 +97,6 @@ class GobjectIntrospectionConan(ConanFile):
             tc.project_options["tests"] = False
         tc.generate()
         deps = PkgConfigDeps(self)
-        # INFO: glib tools need to load glib shared libraries at runtime, point their pkg-config bindir to the build context binary directory
-        glib_build_context_bindir = self.dependencies.build["glib"].cpp_info.bindirs[0]
-        for component in ("glib-2.0", "gio-2.0"):
-            glib_pkg_config_vars = self.dependencies.host["glib"].cpp_info.components[component].get_property("pkg_config_custom_content", None)
-            if glib_pkg_config_vars:
-                deps.set_property(f"glib::{component}", "pkg_config_custom_content", glib_pkg_config_vars.replace("${bindir}", glib_build_context_bindir))
         deps.generate()
         # INFO: g-ir-scanner uses PKG_CONFIG_PATH directly instead of pkg-config Meson module
         env = Environment()
