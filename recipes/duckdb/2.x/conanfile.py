@@ -70,8 +70,6 @@ class DuckdbConan(ConanFile):
             arch = {"x86_64": "amd64", "armv8": "arm64", "x86": "i686"}.get(str(self.settings.arch), str(self.settings.arch))
             postfix = "_android" if self.settings.os == "Android" else ""
             tc.cache_variables["DUCKDB_EXPLICIT_PLATFORM"] = f"{os_name}_{arch}{postfix}"
-        # INFO: third_party/re2/CMakeLists.txt:24 requires CMake 3.4 for MSVC shared builds
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
     def build(self):
