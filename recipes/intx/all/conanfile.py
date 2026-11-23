@@ -28,7 +28,8 @@ class IntxConan(ConanFile):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "11",
+            # GCC 11 fails to compile intx 0.16.0 (overload resolution in udivrem_knuth()).
+            "gcc": "11" if Version(self.version) < "0.16.0" else "12",
             "clang": "13",
             "apple-clang": "14.1",
         }
