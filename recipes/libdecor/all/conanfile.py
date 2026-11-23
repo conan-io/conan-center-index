@@ -1,13 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 import os
 
-required_conan_version = ">=2.31"
+required_conan_version = ">=2.4"
 
 
 class LibdecorConan(ConanFile):
@@ -26,8 +25,7 @@ class LibdecorConan(ConanFile):
     }
     default_options = {
         "with_dbus": True,
-        # Enabled by default upstream, but requires gtk/*:with_wayland=True,
-        # which is not the default in ConanCenter, so it can't be built in CI.
+        # Upstream enables it, but ConanCenter doesn't build gtk with Wayland
         "with_gtk": False,
     }
 
@@ -37,16 +35,17 @@ class LibdecorConan(ConanFile):
     def requirements(self):
         self.requires("wayland/[>=1.18 <2]", transitive_headers=True)
         self.requires("pango/[>=1.50.7 <2]")
+        self.requires("cairo/[>=1.18 <2]")
         if self.options.with_dbus:
-            self.requires("dbus/[>=1.14 <2]")
+            self.requires("dbus/1.15.8")
         if self.options.with_gtk:
-            self.requires("gtk/[>=3.24 <4]")
+            self.requires("gtk/[>=3.24 <4]", options={"with_wayland": True})
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        # INFO: wayland is required due to wayland-scanner build tool
+        # For wayland-scanner
         self.tool_requires("wayland/<host_version>")
         self.tool_requires("wayland-protocols/[>=1.15 <2]")
 
@@ -64,18 +63,14 @@ class LibdecorConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-
         deps = PkgConfigDeps(self)
         deps.build_context_activated = ["wayland-protocols"]
         deps.generate()
 
         tc = MesonToolchain(self)
         tc.project_options["demo"] = False
-        tc.project_options["install_demo"] = False
         tc.project_options["gtk"] = "enabled" if self.options.with_gtk else "disabled"
         tc.project_options["dbus"] = "enabled" if self.options.with_dbus else "disabled"
-        tc.project_options["libdir"] = "lib"
         tc.generate()
 
     def build(self):
@@ -90,20 +85,10 @@ class LibdecorConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "libdecor")
-        self.cpp_info.set_property("cmake_target_name", "libdecor::libdecor")
         self.cpp_info.set_property("pkg_config_name", "libdecor-0")
         self.cpp_info.libs = ["decor-0"]
         self.cpp_info.includedirs = [os.path.join("include", "libdecor-0")]
         self.cpp_info.system_libs = ["dl"]
-        self.cpp_info.requires = ["wayland::wayland-client"]
-
-        # These dependencies are used internally by runtime-loaded decoration plugins and are not part of libdecor's consumer link interface.
-        self.cpp_info.ignored_requires.append("pango")
-        if self.options.with_dbus:
-            self.cpp_info.ignored_requires.append("dbus")
-        if self.options.with_gtk:
-            self.cpp_info.ignored_requires.append("gtk")
 
         plugin_dir = os.path.join(self.package_folder, "lib", "libdecor", "plugins-1")
         self.runenv_info.prepend_path("LIBDECOR_PLUGIN_DIR", plugin_dir)
