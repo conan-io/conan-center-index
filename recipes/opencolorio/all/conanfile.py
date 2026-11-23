@@ -63,10 +63,10 @@ class OpenColorIOConan(ConanFile):
     def validate_build(self):
         minimum_cppstd = 11 if Version(self.version) < "2.5" else 17
         check_min_cppstd(self, minimum_cppstd)
-    
+
     def validate(self):
         check_min_cppstd(self, 11)
-        
+
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6.0":
             raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 6.0")
 
@@ -110,6 +110,12 @@ class OpenColorIOConan(ConanFile):
             # Workaround for: https://github.com/conan-io/conan/issues/13560
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
             tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
+
+        # Workaround for the upstream recipe setting CMAKE_OSX_DEPLOYMENT_TARGET before calling project
+        # which means a non-forced setting from our toolchain is ignored.
+        # See https://github.com/AcademySoftwareFoundation/OpenColorIO/issues/2366
+        if is_apple_os(self) and self.settings.get_safe("os.version"):
+            tc.cache_variables["CMAKE_OSX_DEPLOYMENT_TARGET"] = str(self.settings.os.version)
 
         tc.generate()
 
