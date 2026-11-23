@@ -1,0 +1,4 @@
+sources:
+  "0.9.7":
+    url: "https://github.com/sentomk/patternia/archive/refs/tags/v0.9.7.tar.gz"
+    sha256: "e9a822d06d65a97e9ffb5bd90615a3dd1e4281c56552b12615528bec5341dda3"
