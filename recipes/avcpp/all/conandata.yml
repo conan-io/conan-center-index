@@ -1,4 +1,4 @@
 sources:
-  "3.0.1":
-    url: "https://github.com/h4tr3d/avcpp/archive/refs/tags/v3.0.1.tar.gz"
-    sha256: "27636d3f4a37b982b6a9f779b1a1e72710c60a7c0004949deb578d28306bfb9d"
+  "3.1.0":
+    url: "https://github.com/h4tr3d/avcpp/archive/refs/tags/v3.1.0.tar.gz"
+    sha256: "3fc83e8586a731cdf814043dc7d5cb8d768a1e878c72c1f9630eac50d8a720b8"
