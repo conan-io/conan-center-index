@@ -30,7 +30,7 @@ class GccConan(ConanFile):
         if self.settings.compiler in ["clang", "apple-clang"]:
             # Can't remove this from cxxflags with autotools - so get rid of it
             del self.settings.compiler.libcxx
-            
+
         # https://github.com/gcc-mirror/gcc/blob/6b5248d15c6d10325c6cbb92a0e0a9eb04e3f122/libcody/configure#L2505C11-L2505C25
         del self.settings.compiler.cppstd
 
@@ -60,7 +60,7 @@ class GccConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Windows builds aren't currently supported. Contributions to support this are welcome."
             )
-        if self.settings.os == "Macos" and Version(self.version) < "16.1.0":
+        if self.settings.compiler == "apple-clang" and Version(self.version) < "16.1.0":
             # Only gcc >= 16.1.0 is verified on Macos. Older releases fail to
             # build against recent macOS SDKs (libsanitizer). Contributions to
             # support them are welcome.
@@ -95,7 +95,7 @@ class GccConan(ConanFile):
         tc.configure_args.append(f"--program-suffix=-{self.version}")
         tc.configure_args.append(f"--with-bugurl={self.url}/issues")
 
-        if self.settings.os == "Macos":
+        if self.settings.compiler == "apple-clang":
             # libsanitizer is unsupported by gcc on modern darwin (up to
             # darwin21/macOS 12 in gcc 16) and fails to compile against newer
             # SDK headers (mach/message.h xnu_static_assert_*)
