@@ -55,6 +55,9 @@ class PackageConan(ConanFile):
         elif self.options.with_json == "nlohmann_json":
             self.requires("nlohmann_json/3.11.2")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.22]")
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
