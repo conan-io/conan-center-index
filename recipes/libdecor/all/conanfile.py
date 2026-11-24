@@ -20,11 +20,9 @@ class LibdecorConan(ConanFile):
     languages = "C"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "with_dbus": [True, False],
         "with_gtk": [True, False],
     }
     default_options = {
-        "with_dbus": True,
         # Upstream enables it, but ConanCenter doesn't build gtk with Wayland
         "with_gtk": False,
     }
@@ -36,8 +34,7 @@ class LibdecorConan(ConanFile):
         self.requires("wayland/[>=1.18 <2]", transitive_headers=True)
         self.requires("pango/[>=1.50.7 <2]")
         self.requires("cairo/[>=1.18 <2]")
-        if self.options.with_dbus:
-            self.requires("dbus/1.15.8")
+        self.requires("dbus/1.15.8")
         if self.options.with_gtk:
             self.requires("gtk/[>=3.24 <4]", options={"with_wayland": True})
 
@@ -70,7 +67,6 @@ class LibdecorConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["demo"] = False
         tc.project_options["gtk"] = "enabled" if self.options.with_gtk else "disabled"
-        tc.project_options["dbus"] = "enabled" if self.options.with_dbus else "disabled"
         tc.generate()
 
     def build(self):
@@ -88,7 +84,6 @@ class LibdecorConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libdecor-0")
         self.cpp_info.libs = ["decor-0"]
         self.cpp_info.includedirs = [os.path.join("include", "libdecor-0")]
-        self.cpp_info.system_libs = ["dl"]
 
         plugin_dir = os.path.join(self.package_folder, "lib", "libdecor", "plugins-1")
         self.runenv_info.prepend_path("LIBDECOR_PLUGIN_DIR", plugin_dir)
