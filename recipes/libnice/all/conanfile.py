@@ -24,12 +24,14 @@ class LibniceConan(ConanFile):
         "fPIC": [True, False],
         "crypto_library": ["openssl", "win32"],
         "with_gstreamer": [True, False],
-        "with_gtk_doc": [True, False]}
+        "with_gtk_doc": [True, False],
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_gstreamer": False,
-        "with_gtk_doc": False}
+        "with_gtk_doc": False,
+    }
 
     def config_options(self):
         if self.settings.os == "Windows":
