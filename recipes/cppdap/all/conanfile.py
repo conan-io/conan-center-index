@@ -12,6 +12,7 @@ required_conan_version = ">=1.53.0"
 class PackageConan(ConanFile):
     name = "cppdap"
     description = "Debug Adapter Protocol SDK"
+    deprecated = "this project appears to be abandoned or no longer maintained, use with caution"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/cppdap"
