@@ -79,10 +79,10 @@ class PangoConan(ConanFile):
         if self.options.with_cairo:
             # "pango/pangocairo.h" includes "cairo.h"
             self.requires("cairo/[>=1.18.0 <2]", transitive_headers=True)
-        self.requires("glib/[>=2.82 <3]", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/[>=2.88 <3]", transitive_headers=True, transitive_libs=True)
         self.requires("fribidi/1.0.13")
         # "pango/pango-coverage.h" includes "hb.h"
-        self.requires("harfbuzz/[>=8.4.0]", transitive_headers=True)
+        self.requires("harfbuzz/[>=11]", transitive_headers=True)
 
     def validate(self):
         if (
