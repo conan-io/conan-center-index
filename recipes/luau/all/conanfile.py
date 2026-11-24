@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
 
 import os
 
@@ -89,18 +88,15 @@ class LuauConan(ConanFile):
         # Compiler
         self.cpp_info.components["Compiler"].libs = ["Luau.Compiler"]
         self.cpp_info.components["Compiler"].set_property("cmake_target_name", "Luau::Compiler")
-        self.cpp_info.components["Compiler"].requires = ["Ast"]
-        if Version(self.version) >= "0.718":
-            # Bytecode
-            self.cpp_info.components["Bytecode"].libs = ["Luau.Bytecode"]
-            self.cpp_info.components["Bytecode"].set_property("cmake_target_name", "Luau::Bytecode")
-            self.cpp_info.components["Bytecode"].requires = ["Common"]
-            self.cpp_info.components["Compiler"].requires.append("Bytecode")
-        if Version(self.version) >= "0.727":
-            # Inliner
-            self.cpp_info.components["Inliner"].libs = ["Luau.Inliner"]
-            self.cpp_info.components["Inliner"].set_property("cmake_target_name", "Luau::Inliner")
-            self.cpp_info.components["Inliner"].requires = ["Bytecode", "VM"]
+        self.cpp_info.components["Compiler"].requires = ["Ast", "Bytecode"]
+        # Bytecode
+        self.cpp_info.components["Bytecode"].libs = ["Luau.Bytecode"]
+        self.cpp_info.components["Bytecode"].set_property("cmake_target_name", "Luau::Bytecode")
+        self.cpp_info.components["Bytecode"].requires = ["Common"]
+        # Inliner
+        self.cpp_info.components["Inliner"].libs = ["Luau.Inliner"]
+        self.cpp_info.components["Inliner"].set_property("cmake_target_name", "Luau::Inliner")
+        self.cpp_info.components["Inliner"].requires = ["Bytecode", "VM"]
         # CodeGen
         self.cpp_info.components["CodeGen"].libs = ["Luau.CodeGen"]
         self.cpp_info.components["CodeGen"].set_property("cmake_target_name", "Luau::CodeGen")
