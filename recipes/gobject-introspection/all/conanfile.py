@@ -24,7 +24,7 @@ class GobjectIntrospectionConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/gobject-introspection"
     topics = ("gobject-instrospection",)
-
+    deprecated = True
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
