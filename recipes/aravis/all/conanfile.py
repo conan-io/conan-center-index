@@ -32,7 +32,6 @@ class AravisConan(ConanFile):
         "packet_socket": [True, False],
         "gst_plugin": [True, False],
         "tools": [True, False],
-        "introspection": [True, False],
     }
     default_options = {
         "shared": False,
@@ -41,7 +40,6 @@ class AravisConan(ConanFile):
         "packet_socket": True,
         "gst_plugin": False,
         "tools": True,
-        "introspection": False,
     }
 
     def export_sources(self):
@@ -93,8 +91,6 @@ class AravisConan(ConanFile):
         self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
-        if self.options.introspection:
-            self.tool_requires("gobject-introspection/1.72.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -110,7 +106,7 @@ class AravisConan(ConanFile):
         tc.project_options["usb"] = "enabled" if self.options.usb else "disabled"
         tc.project_options["gst-plugin"] = "enabled" if self.options.gst_plugin else "disabled"
         tc.project_options["packet-socket"] = "enabled" if self.options.get_safe("packet_socket") else "disabled"
-        tc.project_options["introspection"] = "enabled" if self.options.introspection else "disabled"
+        tc.project_options["introspection"] = "disabled"
         tc.project_options["viewer"] = "disabled"
         tc.project_options["tests"] = False
         tc.project_options["documentation"] = "disabled"
