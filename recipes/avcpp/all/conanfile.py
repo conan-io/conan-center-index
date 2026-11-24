@@ -65,6 +65,7 @@ class AvcppConan(ConanFile):
         tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.cache_variables["AV_ENABLE_SHARED"] = self.options.shared
         tc.cache_variables["AV_ENABLE_STATIC"] = not self.options.shared
+        tc.cache_variables["AVCPP_ENABLE_TESTS"] = False
         tc.cache_variables["AV_BUILD_EXAMPLES"] = False
         tc.cache_variables["AV_ENABLE_STATIC_PIC"] = self.options.get_safe("fPIC")
         ffmpeg_opts = self.dependencies["ffmpeg"].options
