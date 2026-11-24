@@ -1,0 +1,10 @@
+--- a/modules/objfmts/coff/coff-objfmt.c
++++ b/modules/objfmts/coff/coff-objfmt.c
+@@ -299,6 +299,7 @@
+     objfmt_coff->done_prolog = 0;
+     objfmt_coff->unwind = NULL;
+     objfmt_coff->ssym_imagebase = NULL;
++    objfmt_coff->def_sym = NULL;
+ 
+     return objfmt_coff;
+ }
