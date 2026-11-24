@@ -32,7 +32,6 @@ class PangoConan(ConanFile):
         "with_xft": [True, False],
         "with_freetype": [True, False],
         "with_fontconfig": [True, False],
-        "with_introspection": [True, False],
     }
     default_options = {
         "shared": False,
@@ -44,7 +43,6 @@ class PangoConan(ConanFile):
         #  it always shows up as detected in meson
         "with_freetype": True,
         "with_fontconfig": True,
-        "with_introspection": False,
     }
 
     def config_options(self):
@@ -128,8 +126,6 @@ class PangoConan(ConanFile):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.78.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -138,14 +134,11 @@ class PangoConan(ConanFile):
         VirtualBuildEnv(self).generate()
 
         deps = PkgConfigDeps(self)
-        if self.options.with_introspection:
-            # gnome.generate_gir() in Meson looks for gobject-introspection-1.0.pc
-            deps.build_context_activated = ["gobject-introspection"]
         deps.generate()
 
         enabled_disabled = lambda opt: "enabled" if opt else "disabled"
         tc = MesonToolchain(self)
-        tc.project_options["introspection"] = enabled_disabled(self.options.with_introspection)
+        tc.project_options["introspection"] = "disabled"
         tc.project_options["libthai"] = enabled_disabled(self.options.with_libthai)
         tc.project_options["cairo"] = enabled_disabled(self.options.with_cairo)
         tc.project_options["xft"] = enabled_disabled(self.options.get_safe("with_xft"))
@@ -181,9 +174,6 @@ class PangoConan(ConanFile):
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
-        if self.options.with_introspection:
-            rename(self, os.path.join(self.package_folder, "share"),
-                      os.path.join(self.package_folder, "res"))
 
         fix_apple_shared_install_name(self)
 
@@ -209,11 +199,6 @@ class PangoConan(ConanFile):
         self.cpp_info.components["pango_"].includedirs = [
             os.path.join(self.package_folder, "include", "pango-1.0")
         ]
-
-        if self.options.with_introspection:
-            self.cpp_info.components["pango_"].resdirs = ["res"]
-            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
-            self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
 
         # From meson.build: "To build pangoft2, we need HarfBuzz, FontConfig and FreeType"
         if self.options.with_freetype and self.options.with_fontconfig:
