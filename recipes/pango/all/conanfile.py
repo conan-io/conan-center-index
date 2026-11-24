@@ -259,8 +259,7 @@ class PangoConan(ConanFile):
             self.cpp_info.components["pangowin32"].set_property("pkg_config_name", "pangowin32")
             self.cpp_info.components["pangowin32"].requires = ["pango_"]
             self.cpp_info.components["pangowin32"].system_libs.append("gdi32")
-            if Version(self.version) >= "1.50.12":
-                self.cpp_info.components["pangowin32"].system_libs.append("dwrite")
+            self.cpp_info.components["pangowin32"].system_libs.append("dwrite")
 
         if is_apple_os(self):
             # https://gitlab.gnome.org/GNOME/pango/-/blob/1.54.0/meson.build#L333-346
