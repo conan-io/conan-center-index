@@ -24,14 +24,12 @@ class LibniceConan(ConanFile):
         "fPIC": [True, False],
         "crypto_library": ["openssl", "win32"],
         "with_gstreamer": [True, False],
-        "with_gtk_doc": [True, False],
-        "with_introspection": [True, False]}
+        "with_gtk_doc": [True, False]}
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_gstreamer": False,
-        "with_gtk_doc": False,
-        "with_introspection": False}
+        "with_gtk_doc": False}
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,8 +69,6 @@ class LibniceConan(ConanFile):
         self.tool_requires("meson/1.2.3")
         self.tool_requires("pkgconf/2.0.3")
         self.tool_requires("glib/<host_version>")  # for glib-mkenums
-        if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.72.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -89,7 +85,7 @@ class LibniceConan(ConanFile):
         tc.project_options["examples"] = "disabled"
         tc.project_options["tests"] = "disabled"
         tc.project_options["gtk_doc"] = "disabled" if self.options.with_gtk_doc else "disabled"
-        tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
+        tc.project_options["introspection"] = "disabled"
         tc.generate()
 
     def build(self):
