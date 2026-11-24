@@ -1,0 +1,4 @@
+sources:
+  "2.5":
+    url: "https://github.com/kjn/lbzip2/releases/download/v2.5/lbzip2-2.5.tar.gz"
+    sha256: "46c75ee93cc95eedc6005625442b2b8e59a2bef3ba80987d0491f055185650e9"
