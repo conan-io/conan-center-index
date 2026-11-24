@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
@@ -37,10 +38,16 @@ class AvcppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("ffmpeg/[>=6.1 <9]", transitive_headers=True)
+        self.requires("ffmpeg/[>=6.1 <10]", transitive_headers=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
+
+        # Some components are optional, three are needed always.
+        ffmpeg_opts = self.dependencies["ffmpeg"].options
+        for component in ("avcodec", "swscale", "swresample"):
+            if not ffmpeg_opts.get_safe(component):
+                raise ConanInvalidConfiguration(f"avcpp requires ffmpeg/*:{component}=True")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.19]")
@@ -58,7 +65,24 @@ class AvcppConan(ConanFile):
         tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.cache_variables["AV_ENABLE_SHARED"] = self.options.shared
         tc.cache_variables["AV_ENABLE_STATIC"] = not self.options.shared
+        tc.cache_variables["AVCPP_ENABLE_TESTS"] = False
         tc.cache_variables["AV_BUILD_EXAMPLES"] = False
+        tc.cache_variables["AV_ENABLE_STATIC_PIC"] = self.options.get_safe("fPIC")
+        ffmpeg_opts = self.dependencies["ffmpeg"].options
+        # Disables wrappers for avformat, but also avfilter and avdevice.
+        tc.cache_variables["AV_DISABLE_AVFORMAT"] = not ffmpeg_opts.get_safe("avformat")
+        # Disables wrappers for avfilter, but also avdevice.
+        tc.cache_variables["AV_DISABLE_AVFILTER"] = not ffmpeg_opts.get_safe("avfilter")
+        tc.cache_variables["AV_DISABLE_AVDEVICE"] = not ffmpeg_opts.get_safe("avdevice")
+
+        # The version 3 needs to detect component versions proerply, which in FFmpegConfig.cmake is skipped.
+        ffmpeg_components = self.dependencies["ffmpeg"].cpp_info.components
+        for component in ("avcodec", "avformat", "avutil", "avfilter", "avdevice", "swscale", "swresample"):
+            if component in ffmpeg_components:
+                version = ffmpeg_components[component].get_property("component_version")
+                if version:
+                    tc.cache_variables[f"{component.upper()}_VERSION"] = version
+
         tc.generate()
 
         deps = CMakeDeps(self)
