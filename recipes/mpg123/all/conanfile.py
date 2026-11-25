@@ -95,7 +95,7 @@ class Mpg123Conan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.0.3")
         if self.settings.arch in ["x86", "x86_64"]:
-            self.tool_requires("nasm/2.16.01")
+            self.tool_requires("yasm/1.3.0")
         if self.settings_build.os == "Windows" and not is_msvc(self):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
