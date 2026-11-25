@@ -1,3 +1,7 @@
+Fix headers install on Windows
+
+https://github.com/igor-krechetov/hsmcpp/pull/42
+
 diff --git a/cmake/target/library/library.cmake b/cmake/target/library/library.cmake
 index 8c2443a..5968008 100644
 --- a/cmake/target/library/library.cmake
