@@ -3,7 +3,6 @@
 #include "luacode.h"
 
 #include <cstdlib>
-#include <string>
 
 int main(int argc, char* argv[]) {
     lua_State* L = luaL_newstate();
