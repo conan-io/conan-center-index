@@ -3,14 +3,6 @@
 #include <iostream>
 #include <cstdlib>
 
-enum class States : hsmcpp::StateID_t {
-    IDLE = 0
-};
-
-enum class Events : hsmcpp::EventID_t {
-    START = 0
-};
-
 int main() {
     auto dispatcher = hsmcpp::HsmEventDispatcherSTD::create();
     dispatcher->stop();
