@@ -47,6 +47,9 @@ class bgfxConan(ConanFile):
             self.requires("libsquish/1.15")
         # INFO: glflags and spirv-tools are vendored only. No need to add them as dependencies
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21]")
+
     def validate(self):
         check_min_cppstd(self, 20)
 
