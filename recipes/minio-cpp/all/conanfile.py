@@ -75,7 +75,7 @@ class MinioCppConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["miniocpp"]
+        self.cpp_info.libs = ["minio"]
 
         self.cpp_info.set_property("cmake_file_name", "miniocpp")
         self.cpp_info.set_property("cmake_target_name", "miniocpp::miniocpp")
