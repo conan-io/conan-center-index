@@ -4,7 +4,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import (
     apply_conandata_patches,
@@ -99,16 +98,12 @@ class SuiteSparseConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("gmp", "cmake_file_name", "GMP")
         deps.set_property("mpfr", "cmake_file_name", "MPFR")
+        deps.set_property("openblas", "cmake_file_name", "BLAS")
         deps.generate()
-        # INFO: FindBLAS does not use CMakeDeps, and its link check misses libm of a static OpenBLAS.
-        # Let it read pkg-config files instead, which list all the libraries. FindBLAS and FindLAPACK
-        # look for "blas" and "lapack" by default, so expose openblas.pc under those names.
-        pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.set_property("openblas", "pkg_config_aliases", ["blas", "lapack"])
-        pkg_config_deps.generate()
+
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
         tc.cache_variables["BLA_VENDOR"] = "OpenBLAS"
-        tc.cache_variables["BLA_PREFER_PKGCONFIG"] = True
         tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.cache_variables["GRAPHBLAS_BUILD_STATIC_LIBS"] = not self.options.shared
         tc.cache_variables["GRAPHBLAS_USE_JIT"] = False
