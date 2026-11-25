@@ -85,6 +85,9 @@ class SuiteSparseConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
+        # Build is failing on Windows, contribution is welcomed.
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("suitesparse is not supported on Windows")
         if not self.dependencies["openblas"].options.get_safe("build_lapack", False):
             raise ConanInvalidConfiguration(
                 "suitesparse requires openblas with build_lapack=True"
