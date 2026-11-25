@@ -2,3 +2,9 @@ sources:
   "7.14.1":
     url: "https://github.com/DrTimothyAldenDavis/SuiteSparse/archive/refs/tags/v7.14.1.tar.gz"
     sha256: "81e560e1f74546df139edb765b3f5bc865866da23062312ffe8fd821063c8397"
+patches:
+  "7.14.1":
+    - patch_file: "patches/7.14.1-0001-escape-quotes-in-jit-link-flags.patch"
+      patch_description: "Escape double quotes in JIT link flags so the generated GB_config.h compiles"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/DrTimothyAldenDavis/SuiteSparse/pull/1076"
