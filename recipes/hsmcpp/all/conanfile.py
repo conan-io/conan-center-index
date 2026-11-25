@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, rm
+from conan.tools.files import copy, get, rmdir, rm, replace_in_file
 import os
 
 
@@ -29,6 +29,8 @@ class HsmcppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Dont need pkgconfig - No optional dependencies to be found by CMake
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_package(PkgConfig REQUIRED)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
