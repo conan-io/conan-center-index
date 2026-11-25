@@ -27,7 +27,7 @@ class YojimboConan(ConanFile):
         self.tool_requires("cmake/[>=3.19]")
 
     def requirements(self):
-        self.requires("mas-bandwidth-serialize/2.1.5", transitive_headers=True)
+        self.requires("mas-bandwidth-serialize/2.1.6", transitive_headers=True)
         self.requires("reliable/1.4.6")
         self.requires("netcode/1.5.0")
 
