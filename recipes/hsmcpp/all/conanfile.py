@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, rm, replace_in_file
+from conan.tools.files import copy, get, rmdir, rm, apply_conandata_patches, export_conandata_patches
 import os
 
 
@@ -21,6 +21,9 @@ class HsmcppConan(ConanFile):
     default_options = {"fPIC": True}
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -29,8 +32,7 @@ class HsmcppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # Dont need pkgconfig - No optional dependencies to be found by CMake
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_package(PkgConfig REQUIRED)", "")
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
