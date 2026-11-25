@@ -317,14 +317,9 @@ class wxWidgetsConan(ConanFile):
             suffix = version_suffix_major_minor
         elif self.settings.os == "Windows":
             toolkit = "msw"
-            if is_msvc(self):
-                prefix = "wx"
-                version = f"{_version.major}{_version.minor}"
-                suffix = ""
-            else:
-                prefix = "wx_"
-                version = ""
-                suffix = version_suffix_major_minor
+            prefix = "wx"
+            version = f"{_version.major}{_version.minor}"
+            suffix = ""
 
         def base_library_pattern(library):
             return "{prefix}base{version}u{debug}_%s{suffix}" % library
@@ -469,6 +464,9 @@ class wxWidgetsConan(ConanFile):
                                                   "oleacc"])
         if is_msvc(self):
             self.cpp_info.includedirs.append(os.path.join("include", "msvc"))
+        elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
+            # INFO: Upstream does not export include/wx for gcc on Windows
+            pass
         else:
             include_path = os.path.join("include", f"wx{version_suffix_major_minor}")
             self.cpp_info.includedirs = [include_path] + self.cpp_info.includedirs
