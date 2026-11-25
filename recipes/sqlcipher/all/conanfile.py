@@ -122,8 +122,6 @@ class SqlcipherConan(ConanFile):
             env.define("USE_CRT_DLL", "1")
         if self.settings.build_type == "Debug":
             env.define("DEBUG", "2")
-        if self.options.shared:
-            env.define("FOR_WIN10", "1")
         env.define("PLATFORM", {
             "x86": "x86",
             "x86_64": "x64",
