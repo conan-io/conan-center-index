@@ -79,10 +79,10 @@ class PangoConan(ConanFile):
         if self.options.with_cairo:
             # "pango/pangocairo.h" includes "cairo.h"
             self.requires("cairo/[>=1.18.0 <2]", transitive_headers=True)
-        self.requires("glib/[>=2.82 <3]", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/[>=2.88 <3]", transitive_headers=True, transitive_libs=True)
         self.requires("fribidi/1.0.13")
         # "pango/pango-coverage.h" includes "hb.h"
-        self.requires("harfbuzz/[>=8.4.0]", transitive_headers=True)
+        self.requires("harfbuzz/[>=11]", transitive_headers=True)
 
     def validate(self):
         if (
@@ -259,8 +259,7 @@ class PangoConan(ConanFile):
             self.cpp_info.components["pangowin32"].set_property("pkg_config_name", "pangowin32")
             self.cpp_info.components["pangowin32"].requires = ["pango_"]
             self.cpp_info.components["pangowin32"].system_libs.append("gdi32")
-            if Version(self.version) >= "1.50.12":
-                self.cpp_info.components["pangowin32"].system_libs.append("dwrite")
+            self.cpp_info.components["pangowin32"].system_libs.append("dwrite")
 
         if is_apple_os(self):
             # https://gitlab.gnome.org/GNOME/pango/-/blob/1.54.0/meson.build#L333-346
