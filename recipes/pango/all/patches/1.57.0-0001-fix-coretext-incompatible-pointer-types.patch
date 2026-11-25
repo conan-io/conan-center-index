@@ -1,0 +1,11 @@
+--- a/pango/pangocoretext.c
++++ b/pango/pangocoretext.c
+@@ -260,7 +260,7 @@ _pango_core_text_font_set_font_map (PangoCoreTextFont    *font,
+ 
+   g_return_if_fail (priv->fontmap == NULL);
+ 
+-  priv->fontmap = fontmap;
++  priv->fontmap = PANGO_FONT_MAP (fontmap);
+   if (fontmap)
+     g_object_add_weak_pointer (G_OBJECT (fontmap), (gpointer *) &priv->fontmap);
+ }
