@@ -61,8 +61,7 @@ class OpenColorIOConan(ConanFile):
         # TODO: add GLUT (needed for ociodisplay tool)
 
     def validate_build(self):
-        minimum_cppstd = 11 if Version(self.version) < "2.5" else 17
-        check_min_cppstd(self, minimum_cppstd)
+        check_min_cppstd(self, 17)
 
     def validate(self):
         check_min_cppstd(self, 11)
@@ -120,6 +119,10 @@ class OpenColorIOConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("minizip-ng", "cmake_file_name", "minizip-ng")
+        deps.set_property("minizip-ng", "cmake_target_name", "MINIZIP::minizip-ng")
+        deps.set_property("lcms", "cmake_file_name", "lcms2")
+        deps.set_property("lcms", "cmake_target_name", "lcms2::lcms2")
         deps.generate()
 
     def _patch_sources(self):

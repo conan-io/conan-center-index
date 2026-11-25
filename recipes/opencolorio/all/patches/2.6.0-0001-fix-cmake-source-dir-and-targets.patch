@@ -11,28 +11,6 @@ index aa942edf..a5768907 100755
      # Install custom macros used in the find modules.
      install(FILES
          ${CMAKE_CURRENT_LIST_DIR}/share/cmake/macros/VersionUtils.cmake
-diff --git share/cmake/modules/FindExtPackages.cmake share/cmake/modules/FindExtPackages.cmake
-index 8896ee34..ff52d7ef 100644
---- share/cmake/modules/FindExtPackages.cmake
-+++ share/cmake/modules/FindExtPackages.cmake
-@@ -110,7 +110,7 @@ ocio_handle_dependency(  ZLIB REQUIRED ALLOW_INSTALL
- 
- # minizip-ng
- # https://github.com/zlib-ng/minizip-ng
--ocio_handle_dependency(  minizip-ng REQUIRED ALLOW_INSTALL
-+ocio_handle_dependency(  minizip REQUIRED ALLOW_INSTALL
-                          MIN_VERSION 4.0.5
-                          RECOMMENDED_VERSION 4.2.2
-                          RECOMMENDED_VERSION_REASON "Latest version tested with OCIO")
-@@ -131,7 +131,7 @@ if(OCIO_BUILD_APPS)
- 
-     # lcms2
-     # https://github.com/mm2/Little-CMS
--    ocio_handle_dependency(  lcms2 REQUIRED ALLOW_INSTALL
-+    ocio_handle_dependency(  lcms REQUIRED ALLOW_INSTALL
-                              MIN_VERSION 2.2
-                              RECOMMENDED_VERSION 2.17
-                              RECOMMENDED_VERSION_REASON "Latest version tested with OCIO")
 diff --git share/cmake/utils/CppVersion.cmake share/cmake/utils/CppVersion.cmake
 index 127ec9e7..8f5abb4a 100644
 --- share/cmake/utils/CppVersion.cmake
@@ -45,43 +23,4 @@ index 127ec9e7..8f5abb4a 100644
 +#set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS "${SUPPORTED_CXX_STANDARDS}")
  
  include(CheckCXXCompilerFlag)
- 
-diff --git src/OpenColorIO/CMakeLists.txt src/OpenColorIO/CMakeLists.txt
-index 646423e9..5a6ad93e 100755
---- src/OpenColorIO/CMakeLists.txt
-+++ src/OpenColorIO/CMakeLists.txt
-@@ -329,7 +329,7 @@ target_link_libraries(OpenColorIO
-         "$<BUILD_INTERFACE:utils::strings>"
-         "$<BUILD_INTERFACE:xxHash>"
-         yaml-cpp::yaml-cpp
--        MINIZIP::minizip-ng
-+        MINIZIP::minizip
- )
- 
- if(OCIO_USE_SIMD AND OCIO_USE_SSE2NEON AND COMPILER_SUPPORTS_SSE_WITH_SSE2NEON)
-diff --git src/apps/ocioarchive/CMakeLists.txt src/apps/ocioarchive/CMakeLists.txt
-index b8af2808..da318ef4 100644
---- src/apps/ocioarchive/CMakeLists.txt
-+++ src/apps/ocioarchive/CMakeLists.txt
-@@ -21,7 +21,7 @@ target_link_libraries(ocioarchive
-     PRIVATE
-         apputils
-         OpenColorIO
--        MINIZIP::minizip-ng
-+        MINIZIP::minizip
- )
- 
- include(StripUtils)
-diff --git src/apps/ociobakelut/CMakeLists.txt src/apps/ociobakelut/CMakeLists.txt
-index 09cd76b1..25630668 100755
---- src/apps/ociobakelut/CMakeLists.txt
-+++ src/apps/ociobakelut/CMakeLists.txt
-@@ -29,7 +29,7 @@ set_target_properties(ociobakelut
- target_link_libraries(ociobakelut 
-     PRIVATE 
-         apputils
--        lcms2::lcms2
-+        lcms::lcms
-         OpenColorIO
- )
  
