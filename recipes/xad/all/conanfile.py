@@ -13,7 +13,7 @@ class XadConan(ConanFile):
     description = "Comprehensive C++ library for automatic differentiation: forward and adjoint modes, higher-order derivatives and checkpointing"
     license = "AGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://auto-differentiation.github.io"
+    homepage = "https://www.xcelerit.com/xad/docs/"
     topics = ("automatic-differentiation", "algorithmic-differentiation", "aad", "adjoint", "derivatives", "autodiff")
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
