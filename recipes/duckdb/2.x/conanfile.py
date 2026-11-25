@@ -104,14 +104,12 @@ class DuckdbConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "DuckDB")
-        self.cpp_info.set_property("cmake_target_name", "duckdb")
-        if self.options.shared:
-            self.cpp_info.libs = ["duckdb"]
-            core = self.cpp_info
-        else:
-            core = self.cpp_info.components["duckdb_static"]
-            core.set_property("cmake_target_name", "duckdb_static")
-            core.libs = ["duckdb_static"]
+
+        core = self.cpp_info.components["core"]  # avoid "duckdb" name to keep it as the global target
+        core.libs = ["duckdb"] if self.options.shared else ["duckdb_static"]
+        core.set_property("cmake_target_name", "duckdb" if self.options.shared else "duckdb_static")
+
+        if not self.options.shared:
             if self.settings.os == "Windows":
                 core.defines.append("DUCKDB_STATIC_BUILD")
             # Consumers must register these with duckdb_register_static_extension(). Upstream does not
@@ -120,7 +118,7 @@ class DuckdbConan(ConanFile):
                         "duckdb_httplib", "duckdb_loadable_extensions"]:
                 self.cpp_info.components[lib].set_property("cmake_target_name", lib)
                 self.cpp_info.components[lib].libs = [lib]
-                self.cpp_info.components[lib].requires = ["duckdb_static"]
+                self.cpp_info.components[lib].requires = ["core"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             core.system_libs.extend(["pthread", "dl", "m"])

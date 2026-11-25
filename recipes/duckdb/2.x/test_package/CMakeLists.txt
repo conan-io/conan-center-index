@@ -4,4 +4,9 @@ project(test_package LANGUAGES CXX)
 find_package(DuckDB REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE duckdb)
+# you can still use duckdb::duckdb as the global target
+if(NOT TARGET duckdb_static)
+    target_link_libraries(${PROJECT_NAME} PRIVATE duckdb)
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE duckdb_static)
+endif()
