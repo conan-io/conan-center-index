@@ -64,6 +64,10 @@ class DuckdbConan(ConanFile):
         tc.cache_variables["BUILD_UNITTESTS"] = False
         tc.cache_variables["ENABLE_SANITIZER"] = False
         tc.cache_variables["ENABLE_UBSAN"] = False
+        if is_msvc(self) and self.options.shared:
+            # INFO: third_party/re2/CMakeLists.txt:24 still requires CMake 3.4 for MSVC shared builds
+            #       https://github.com/duckdb/duckdb/blob/v2.0.1/third_party/re2/CMakeLists.txt#L23-L24
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         if cross_building(self):
             # Must match DuckDBPlatform() in src/include/duckdb/common/platform.hpp
             os_name = {"Macos": "osx", "Android": "linux"}.get(str(self.settings.os), str(self.settings.os).lower())
