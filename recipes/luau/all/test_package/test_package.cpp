@@ -3,11 +3,12 @@
 #include "luacode.h"
 
 #include <cstdlib>
+#include <string>
 
-int main() {
-    const char source[] = "return 42";
+int main(int argc, char* argv[]) {
+    lua_State* L = luaL_newstate();
     size_t size = 0;
-    std::free(luau_compile(source, sizeof(source) - 1, nullptr, &size));
-    lua_close(luaL_newstate());
+    std::free(luau_compile("return 0", 8, nullptr, &size));
+    lua_close(L);
     return 0;
 }
