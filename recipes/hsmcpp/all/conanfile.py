@@ -60,10 +60,10 @@ class HsmcppConan(ConanFile):
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake", "hsmcpp", "scxml2gen"))
         self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "hsmcpp", "scxml2gen", "CMakeLists.txt")])
 
-        self.cpp_info.components["std"].libs = ["hsmcpp_std"]
-
         self.cpp_info.components["core"].libs = ["hsmcpp"]
-        self.cpp_info.components["core"].requires = ["std"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["core"].system_libs.append("pthread")
         self.cpp_info.components["core"].defines = ["HSM_LOGGING_MODE_OFF", "HSM_ENABLE_SAFE_STRUCTURE"]
+
+        self.cpp_info.components["std"].libs = ["hsmcpp_std"]
+        self.cpp_info.components["std"].requires = ["core"]
