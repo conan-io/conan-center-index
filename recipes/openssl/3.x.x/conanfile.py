@@ -125,6 +125,9 @@ class OpenSSLConan(ConanFile):
             self.options.rm_safe("enable_capieng")
         else:
             self.options.rm_safe("fPIC")
+        if self.settings.arch == "arm64ec":
+            # OpenSSL's AArch64 assembly uses registers reserved by the ARM64EC ABI
+            self.options.no_asm = True
 
     def configure(self):
         if self.options.shared:
@@ -158,6 +161,11 @@ class OpenSSLConan(ConanFile):
             raise ConanInvalidConfiguration("fips_module_version cannot be greater than the current OpenSSL version")
         if self._fips_module_version and self.options.no_fips:
             raise ConanInvalidConfiguration("fips_module_version requires no_fips to be set to False")
+        if self.settings.arch == "arm64ec":
+            if not is_msvc(self):
+                raise ConanInvalidConfiguration("arm64ec is only supported with the msvc compiler")
+            if not self.options.no_asm:
+                raise ConanInvalidConfiguration("arm64ec requires no_asm=True: OpenSSL's AArch64 assembly is not ARM64EC compatible")
 
     def build_requirements(self):
         if self.settings_build.os == "Windows":
@@ -298,6 +306,10 @@ class OpenSSLConan(ConanFile):
             "Windows-x86_64-Visual Studio": "VC-WIN64A",
             "Windows-armv7-Visual Studio": "VC-WIN32-ARM",
             "Windows-armv8-Visual Studio": "VC-WIN64-CLANGASM-ARM",
+            # No upstream ARM64EC target (openssl/openssl#16482): build the armv8 target with
+            # no-asm and /arm64EC. Not VC-WIN64-ARM: it is a OneCore target whose ex_libs override
+            # drops the zlib library from the link line.
+            "Windows-arm64ec-Visual Studio": "VC-WIN64-CLANGASM-ARM",
             "Windows-*-Visual Studio": "VC-noCE-common",
             "Windows-ia64-clang": "VC-WIN64I",  # Itanium
             "Windows-x86-clang": "VC-WIN32",
@@ -451,6 +463,13 @@ class OpenSSLConan(ConanFile):
             # Inject -headerpad_max_install_names for shared library, otherwise fix_apple_shared_install_name() may fail.
             # See https://github.com/conan-io/conan-center-index/issues/27424
             tc.extra_ldflags.append("-headerpad_max_install_names")
+
+        if self.settings.arch == "arm64ec":
+            # Conan selects the ARM64 cross tools via vcvars but does not add the ARM64EC switches
+            tc.extra_cflags.append("/arm64EC")
+            tc.extra_cxxflags.append("/arm64EC")
+            tc.extra_ldflags.append("/machine:ARM64EC")
+            env.define("ARFLAGS", "/nologo /machine:ARM64EC")
 
         self._create_targets(tc.cflags, tc.cxxflags, tc.defines, tc.ldflags)
         tc.generate(env)
