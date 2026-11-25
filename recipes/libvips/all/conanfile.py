@@ -236,7 +236,7 @@ class LibvipsConan(ConanFile):
         tc.project_options["doxygen"] = "false"
         tc.project_options["gtk_doc"] = "false"
         tc.project_options["modules"] = "disabled"
-        tc.project_options["introspection"] = "false"
+        tc.project_options["introspection"] = "disabled"
         tc.project_options["vapi"] = "false"
         # External libraries
         tc.project_options["archive"] = enabled_disabled(self.options.get_safe("with_archive"))
