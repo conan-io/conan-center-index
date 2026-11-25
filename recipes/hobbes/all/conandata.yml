@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/morganstanley/hobbes/releases/download/v1.0.0/hobbes-1.0.0.tar.gz"
+    sha256: "2e8f85ed47cf864ff43686b3ee07ed28d8364b4121ba5a49de2ce83daa939bb5"
