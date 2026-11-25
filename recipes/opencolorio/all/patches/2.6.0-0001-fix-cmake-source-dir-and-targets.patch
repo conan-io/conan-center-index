@@ -1,3 +1,5 @@
+Custom: Use PROJECT_BINARY_DIR/PROJECT_SOURCE_DIR from Conan
+
 diff --git CMakeLists.txt CMakeLists.txt
 index aa942edf..a5768907 100755
 --- CMakeLists.txt
