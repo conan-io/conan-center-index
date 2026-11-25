@@ -96,7 +96,8 @@ class OpenColorIOConan(ConanFile):
         tc.variables["OCIO_USE_BOOST_PTR"] = False
 
         # avoid downloading dependencies
-        tc.variables["OCIO_INSTALL_EXT_PACKAGE"] = "NONE"
+        tc.cache_variables["OCIO_INSTALL_EXT_PACKAGES"] = "NONE"
+        tc.cache_variables["OCIO_DIRECTX_ENABLED"] = False
 
         if is_msvc(self) and not self.options.shared:
             # define any value because ifndef is used
