@@ -1,0 +1,4 @@
+sources:
+  "1.12.3":
+    url: "https://github.com/calvinhxx/Fluent-Qt/releases/download/v1.12.3/FluentQt-1.12.3-source.zip"
+    sha256: "0562b5004e601b6bf222bd83fd28b807c6e961c1832ca6377b8e6e02e5bce81e"
