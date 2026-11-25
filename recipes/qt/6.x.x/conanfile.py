@@ -475,7 +475,7 @@ class QtConan(ConanFile):
             self.tool_requires("wayland/1.22.0")
         if cross_building(self):
             tool_options = {}
-            if self._apple_embedded:
+            if self._is_mobile:
                 # Tools are not built for the target (see QT_FORCE_BUILD_TOOLS), the build context Qt must provide them
                 tool_modules = ["qttools", "qtshadertools", "qtdeclarative", "qtremoteobjects", "qtscxml",
                                 "qtquick3d", "qtlottie", "qtopcua", "qtcanvaspainter"]
