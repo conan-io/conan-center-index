@@ -84,16 +84,12 @@ class OpenColorIOConan(ConanFile):
         tc.variables["CMAKE_VERBOSE_MAKEFILE"] = True
         tc.variables["OCIO_BUILD_PYTHON"] = False
 
-        tc.variables["OCIO_USE_SSE"] = self.options.get_safe("use_sse", False)
-
-        # openexr 2.x provides Half library
-        tc.variables["OCIO_USE_OPENEXR_HALF"] = True
+        tc.variables["OCIO_USE_SSE2"] = self.options.get_safe("use_sse", False)
 
         tc.variables["OCIO_BUILD_APPS"] = True
         tc.variables["OCIO_BUILD_DOCS"] = False
         tc.variables["OCIO_BUILD_TESTS"] = False
         tc.variables["OCIO_BUILD_GPU_TESTS"] = False
-        tc.variables["OCIO_USE_BOOST_PTR"] = False
 
         # avoid downloading dependencies
         tc.cache_variables["OCIO_INSTALL_EXT_PACKAGES"] = "NONE"
