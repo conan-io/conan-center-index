@@ -1,12 +1,13 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.4"
 
 
 class QtADS(ConanFile):
@@ -44,9 +45,20 @@ class QtADS(ConanFile):
         self.tool_requires("qt/<host_version>")
         self.tool_requires("cmake/[>=3.27]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
 
+    @property
+    def _qt_major(self):
+        return Version(self.dependencies["qt"].ref.version).major
+
     def validate(self):
-        if Version(self.dependencies["qt"].ref.version) >= "6.0.0":
-            check_min_cppstd(self, 17) # Qt6 requires C++17 as a minimum
+        # Qt 6 needs C++17; upstream pins CXX_STANDARD 14 for Qt 5 (4.5.0 and 5.1.1 alike)
+        check_min_cppstd(self, 17 if self._qt_major >= 6 else 14)
+
+        qt_options = self.dependencies["qt"].options
+        if not (qt_options.gui and qt_options.widgets):
+            raise ConanInvalidConfiguration(f"{self.ref} requires qt:gui=True and qt:widgets=True")
+        # ads_globals.h includes <xcb/xcb.h> on every Unix but macOS, and xcb only reaches us through Qt's xorg dependency
+        if self.settings.os in ["Linux", "FreeBSD"] and not qt_options.get_safe("with_x11"):
+            raise ConanInvalidConfiguration(f"{self.ref} requires qt:with_x11=True on {self.settings.os}")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -57,13 +69,12 @@ class QtADS(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["ADS_VERSION"] = self.version
         tc.cache_variables["BUILD_EXAMPLES"] = "OFF"
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
-        # The upstream CMakeLists.txt only sets CMAKE_MODULE_PATH inside an
-        # if(NOT ADS_VERSION) block. Since we supply ADS_VERSION, that block is
-        # skipped and src/CMakeLists.txt cannot find Versioning.cmake.
-        tc.cache_variables["CMAKE_MODULE_PATH"] = os.path.join(self.source_folder, "cmake", "modules").replace("\\", "/")
+        if Version(self.version) < "5.1.0":
+            tc.cache_variables["ADS_VERSION"] = self.version
+            # Supplying ADS_VERSION skips upstream's CMAKE_MODULE_PATH setup.
+            tc.cache_variables["CMAKE_MODULE_PATH"] = os.path.join(self.source_folder, "cmake", "modules").replace("\\", "/")
 
         qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
         if qt_tools_rootdir:
@@ -85,22 +96,22 @@ class QtADS(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "gnu-lgpl-v2.1.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "license"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        # Detect Qt major version from installed include directory name
-        qt_major = 6 if Version(self.dependencies["qt"].ref.version) >= "6.0.0" else 5
-
-        base_name = f"qtadvanceddocking-qt{qt_major}"
+        base_name = f"qtadvanceddocking-qt{self._qt_major}"
         self.cpp_info.includedirs.append(os.path.join("include", base_name))
-        cmake_name = f"qt{qt_major}advanceddocking"
-        lib_name = f"{base_name}d" if self.settings.build_type == "Debug" else base_name
+        cmake_name = base_name if Version(self.version) >= "5.1.0" else f"qt{self._qt_major}advanceddocking"
+        debug_suffix = "d" if self.settings.build_type == "Debug" else ""
+        static_suffix = "" if self.options.shared else "_static"
+        if Version(self.version) >= "5.1.0":
+            self.cpp_info.libs = [f"{base_name}{static_suffix}{debug_suffix}"]
+        else:
+            self.cpp_info.libs = [f"{base_name}{debug_suffix}{static_suffix}"]
 
         self.cpp_info.set_property("cmake_file_name", cmake_name)
         self.cpp_info.set_property("cmake_target_name", f"ads::{cmake_name}")
 
-        if self.options.shared:
-            self.cpp_info.libs = [lib_name]
-        else:
+        if not self.options.shared:
             self.cpp_info.defines.append("ADS_STATIC")
-            self.cpp_info.libs = [f"{lib_name}_static"]

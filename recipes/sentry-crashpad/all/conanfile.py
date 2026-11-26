@@ -2,13 +2,11 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, apply_conandata_patches, copy, export_conandata_patches, rmdir, rm, replace_in_file
-from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, copy, rmdir, rm, replace_in_file
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class SentryCrashpadConan(ConanFile):
@@ -30,24 +28,9 @@ class SentryCrashpadConan(ConanFile):
         "with_tls": "openssl",
     }
 
-    short_paths = True
-
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "191",
-            "gcc": "6",
-            "clang": "3.4",
-            "apple-clang": "5.1",
-        }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -67,22 +50,16 @@ class SentryCrashpadConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            # Set as required in crashpad CMake file.
-            # See https://github.com/getsentry/crashpad/blob/71bcaad4cf30294b8de1bfa02064ab629437163b/CMakeLists.txt#L67
-            check_min_cppstd(self, 14)
-
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warning("Compiler is unknown. Assuming it supports C++14.")
-        elif Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"Build requires support for C++14. Minimum version for {self.settings.compiler} is {minimum_version}")
+        # Since 0.7, the public client headers need C++17 (getsentry/crashpad#160).
+        check_min_cppstd(self, 17)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)])
+        # Let Conan configure C++ standard
+        replace_in_file(self, os.path.join(self.source_folder, "external", "crashpad", "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 17)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -94,11 +71,6 @@ class SentryCrashpadConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
-        openssl_repl = "find_package(OpenSSL REQUIRED)" if self.options.get_safe("with_tls") else ""
-        if Version(self.version) < "0.6.1":
-            replace_in_file(self, os.path.join(self.source_folder, "external", "crashpad", "CMakeLists.txt"),
-                            "find_package(OpenSSL)", openssl_repl)
         cmake = CMake(self)
         cmake.configure(build_script_folder="external/crashpad")
         cmake.build()
@@ -107,7 +79,6 @@ class SentryCrashpadConan(ConanFile):
         copy(self, "LICENSE", src=os.path.join(self.source_folder, "external", "crashpad"),
                               dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
-        cmake.configure(build_script_folder="external/crashpad")
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -138,10 +109,14 @@ class SentryCrashpadConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_compat"].system_libs.append("dl")
 
+        # mpack
+        self.cpp_info.components["crashpad_mpack"].set_property("cmake_target_name", "crashpad::mpack")
+        self.cpp_info.components["crashpad_mpack"].libs = ["crashpad_mpack"]
+
         # util
         self.cpp_info.components["crashpad_util"].set_property("cmake_target_name", "crashpad::util")
         self.cpp_info.components["crashpad_util"].libs = ["crashpad_util"]
-        self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "zlib::zlib"]
+        self.cpp_info.components["crashpad_util"].requires = ["crashpad_compat", "crashpad_mini_chromium", "crashpad_mpack", "zlib::zlib"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["crashpad_util"].system_libs.extend(["pthread", "rt"])
             # Requires libcurl https://github.com/getsentry/crashpad/blob/2237d97ee2c38c930c07001e660be57324f69a37/util/CMakeLists.txt#L256
@@ -167,7 +142,7 @@ class SentryCrashpadConan(ConanFile):
             "crashpad_util", "crashpad_mini_chromium",
         ]
         if self.settings.os == "Windows":
-            self.cpp_info.components["snapshot"].system_libs.append("powrprof")
+            self.cpp_info.components["crashpad_snapshot"].system_libs.append("powrprof")
 
         # minidump
         self.cpp_info.components["crashpad_minidump"].set_property("cmake_target_name", "crashpad::minidump")
@@ -195,30 +170,3 @@ class SentryCrashpadConan(ConanFile):
         # tools
         self.cpp_info.components["crashpad_tools"].set_property("cmake_target_name", "crashpad::tools")
         self.cpp_info.components["crashpad_tools"].libs = ["crashpad_tools"]
-
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
-        self.env_info.PATH.append(bin_path)
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "crashpad"
-        self.cpp_info.names["cmake_find_package_multi"] = "crashpad"
-        self.cpp_info.components["crashpad_mini_chromium"].names["cmake_find_package"] = "mini_chromium"
-        self.cpp_info.components["crashpad_mini_chromium"].names["cmake_find_package_multi"] = "mini_chromium"
-        self.cpp_info.components["crashpad_compat"].names["cmake_find_package"] = "compat"
-        self.cpp_info.components["crashpad_compat"].names["cmake_find_package_multi"] = "compat"
-        self.cpp_info.components["crashpad_util"].names["cmake_find_package"] = "util"
-        self.cpp_info.components["crashpad_util"].names["cmake_find_package_multi"] = "util"
-        self.cpp_info.components["crashpad_client"].names["cmake_find_package"] = "client"
-        self.cpp_info.components["crashpad_client"].names["cmake_find_package_multi"] = "client"
-        self.cpp_info.components["crashpad_snapshot"].names["cmake_find_package"] = "snapshot"
-        self.cpp_info.components["crashpad_snapshot"].names["cmake_find_package_multi"] = "snapshot"
-        self.cpp_info.components["crashpad_minidump"].names["cmake_find_package"] = "minidump"
-        self.cpp_info.components["crashpad_minidump"].names["cmake_find_package_multi"] = "minidump"
-        if self.settings.os == "Windows":
-            self.cpp_info.components["crashpad_getopt"].names["cmake_find_package"] = "getopt"
-            self.cpp_info.components["crashpad_getopt"].names["cmake_find_package_multi"] = "getopt"
-        self.cpp_info.components["crashpad_handler"].names["cmake_find_package"] = "handler"
-        self.cpp_info.components["crashpad_handler"].names["cmake_find_package_multi"] = "handler"
-        self.cpp_info.components["crashpad_tools"].names["cmake_find_package"] = "tools"
-        self.cpp_info.components["crashpad_tools"].names["cmake_find_package_multi"] = "tools"

@@ -343,6 +343,9 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.options.with_otlp_http or self.options.with_otlp_grpc:
             self.cpp_info.components["opentelemetry_proto"].requires.append("protobuf::protobuf")
+            if Version(self.version) >= "1.25":
+                # https://github.com/open-telemetry/opentelemetry-cpp/issues/4182
+                self.cpp_info.components["opentelemetry_proto"].defines.append("OPENTELEMETRY_PROTO_API=")
             self.cpp_info.components["opentelemetry_otlp_recordable"].requires.extend([
                 "opentelemetry_proto",
                 "opentelemetry_resources",

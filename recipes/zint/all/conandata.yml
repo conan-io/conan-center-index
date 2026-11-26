@@ -1,7 +1,7 @@
 sources:
-  "2.10.0":
-    url: "https://sourceforge.net/projects/zint/files/zint/2.10.0/zint-2.10.0-src.tar.gz"
-    sha256: "BB97E98A32E140C344E92C8DA84A9DF413DCA16083F2FCDC29791BEC77350339"
+  "2.16.0":
+    url: "https://sourceforge.net/projects/zint/files/zint/2.16.0/zint-2.16.0-src.tar.gz"
+    sha256: "37e767afada2403bb9ae49b93a19eb0a9e944a0c278d9f23522746b3d08a3c4b"
 patches:
-  "2.10.0":
-    - patch_file: "patches/0001-2.10.0-conan-integration.patch"
+  "2.16.0":
+    - patch_file: "patches/0001-2.16.0-conan-integration.patch"

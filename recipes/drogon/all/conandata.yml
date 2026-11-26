@@ -1,4 +1,7 @@
 sources:
-  "1.9.13":
-    url: "https://github.com/drogonframework/drogon/archive/v1.9.13.tar.gz"
-    sha256: "c3bd0e276b82576151dc7376c8d4027dd1fcec282d784849e11f84a7e977b2f5"
+  "1.9.14":
+    url: "https://github.com/drogonframework/drogon/archive/v1.9.14.tar.gz"
+    sha256: "3831bfae74eb6b47965a424e5c9d593d5efa31e9f7e6a5e02d4754039facff5e"
+patches:
+  "1.9.14":
+    - patch_file: "patches/1.9.14-0001-spdlog-without-submodule.patch"

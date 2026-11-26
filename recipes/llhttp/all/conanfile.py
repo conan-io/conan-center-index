@@ -1,10 +1,9 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, rmdir
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LlhttpParserConan(ConanFile):
@@ -25,9 +24,6 @@ class LlhttpParserConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,17 +39,15 @@ class LlhttpParserConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def build_requirements(self):
-        if Version(self.version) >= "9.3.0":
-            self.tool_requires("cmake/[>=3.25]")
+        self.tool_requires("cmake/[>=3.25]")
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if not self.options.shared:
-            tc.variables["BUILD_STATIC_LIBS"] = True
+        tc.cache_variables["LLHTTP_BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["LLHTTP_BUILD_STATIC_LIBS"] = not self.options.shared
         tc.generate()
 
     def build(self):

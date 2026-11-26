@@ -64,7 +64,7 @@ class LibheifConan(ConanFile):
         if self.options.with_libde265:
             self.requires("libde265/[>=1.0.12 <2]")
         if self.options.with_x265:
-            self.requires("libx265/[>=3.4 <4]")
+            self.requires("libx265/[>=3.4 <5]")
         if self.options.with_libaomav1:
             self.requires("libaom-av1/[>=3.6.1 <4]")
         if self.options.with_dav1d:

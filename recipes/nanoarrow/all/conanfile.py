@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 import os
 
 required_conan_version = ">=2.4.0"
@@ -31,6 +31,9 @@ class NanoarrowConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -42,12 +45,15 @@ class NanoarrowConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ipc:
-            # flatcc is bundled because nanoarrow requires a version newer than 0.6.1
+            # nanoarrow requires flatcc >= 0.6.2 (flatcc_verify_table_as_root_with_size et al.)
+            self.requires("flatcc/0.6.4")
             if self.options.get_safe("with_zstd"):
                 self.requires("zstd/[>=1.5 <1.6]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "thirdparty"))
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -97,7 +103,7 @@ class NanoarrowConan(ConanFile):
         
         if self.options.with_ipc:
             self.cpp_info.components["nanoarrow_ipc"].libs = [f"nanoarrow_ipc{suffix}"]
-            self.cpp_info.components["nanoarrow_ipc"].requires = ["nanoarrow_core"]
+            self.cpp_info.components["nanoarrow_ipc"].requires = ["nanoarrow_core", "flatcc::flatcc"]
             self.cpp_info.components["nanoarrow_ipc"].set_property("cmake_target_name", "nanoarrow::nanoarrow_ipc")
             if self.options.get_safe("with_zstd"):
                 self.cpp_info.components["nanoarrow_ipc"].requires.append("zstd::zstd")

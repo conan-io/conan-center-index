@@ -50,7 +50,7 @@ class NmosCppConan(ConanFile):
         self.requires("websocketpp/0.8.2")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("json-schema-validator/2.3.0")
-        self.requires("nlohmann_json/3.11.3")
+        self.requires("nlohmann_json/[>=3.11 <3.13]")
         self.requires("jwt-cpp/0.7.0")
 
         if self.options.get_safe("with_dnssd") == "mdnsresponder":
@@ -63,7 +63,7 @@ class NmosCppConan(ConanFile):
             self.requires("avahi/0.8")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.17 <4]")
+        self.tool_requires("cmake/[>=3.17]")
 
     def validate(self):
         check_min_cppstd(self, 11)

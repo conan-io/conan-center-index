@@ -1,4 +1,4 @@
-from six import StringIO
+from io import StringIO
 from conan import ConanFile
 from conan.tools.build import can_run
 import re

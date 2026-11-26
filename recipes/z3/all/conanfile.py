@@ -3,8 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=2"
@@ -35,6 +34,9 @@ class Z3Conan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -51,8 +53,15 @@ class Z3Conan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
 
+    @property
+    def _build_script_folder(self):
+        return os.path.join(self.source_folder, "core") if Version(self.version) >= "4.15.4" else self.source_folder
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self._build_script_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD ", "# set(CMAKE_CXX_STANDARD ")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -77,8 +86,7 @@ class Z3Conan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        build_script_folder = os.path.join(self.source_folder, "core") if Version(self.version) >= "4.15.4" else self.source_folder
-        cmake.configure(build_script_folder=build_script_folder)
+        cmake.configure(build_script_folder=self._build_script_folder)
         cmake.build()
 
     def package(self):

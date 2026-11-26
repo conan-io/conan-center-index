@@ -5,6 +5,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rename, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
@@ -115,7 +116,9 @@ class Libx265Conan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0091"] = "NEW"
         if self.settings.os == "Linux":
             tc.variables["PLATFORM_LIBS"] = "dl"
-        if "arm" in self.settings.arch:
+        if self.settings.arch in ("armv8", "armv8.3"):
+            tc.variables["CROSS_COMPILE_ARM64"] = cross_building(self)
+        elif "arm" in self.settings.arch:
             tc.variables["CROSS_COMPILE_ARM"] = cross_building(self)
         tc.generate()
         deps = CMakeDeps(self)
@@ -171,6 +174,8 @@ class Libx265Conan(ConanFile):
         if self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.defines.append("X265_API_IMPORTS")
+            elif Version(self.version) >= "4.2":
+                self.cpp_info.system_libs.append("advapi32")
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "pthread", "m", "rt"])
             if not self.options.shared:

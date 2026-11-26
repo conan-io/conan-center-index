@@ -1,0 +1,309 @@
+{
+    "ar": {
+        "requires": ["arch", "js", "tf", "plug", "vt", "onetbb::libtbb"]
+    },
+    "arch": {
+        "requires": []
+    },
+    "cameraUtil": {
+        "condition": ["with_imaging"],
+        "requires": ["tf", "gf"]
+    },
+    "ef": {
+        "requires": ["vdf", "arch", "tf", "trace", "usd", "work", "onetbb::libtbb"]
+    },
+    "esf": {
+        "requires": ["arch", "sdf", "tf", "vt", "usd"]
+    },
+    "esfUsd": {
+        "requires": ["arch", "esf", "tf", "sdf", "usd"]
+    },
+    "exec": {
+        "requires": ["ef", "esf", "tf", "trace", "ts", "sdf", "usd", "vdf", "vt", "onetbb::libtbb"]
+    },
+    "execGeom": {
+        "requires": ["gf", "tf", "execUsd", "usdGeom"]
+    },
+    "execIr": {
+        "requires": ["execGeom", "execUsd", "gf", "sdf", "tf", "usd", "vt"]
+    },
+    "execUsd": {
+        "requires": ["esf", "esfUsd", "exec", "tf", "trace", "sdf", "usd"]
+    },
+    "garch": {
+        "condition": ["with_imaging"],
+        "frameworks": ["Foundation", "$kit_framework"],
+        "requires": ["arch", "tf", "opengl::opengl"]
+    },
+    "geomUtil": {
+        "condition": ["with_imaging"],
+        "requires": ["arch", "gf", "tf", "vt", "pxOsd"]
+    },
+    "gf": {
+        "requires": ["arch", "tf"]
+    },
+    "glf": {
+        "condition": ["with_imaging"],
+        "requires": ["ar", "arch", "garch", "gf", "hf", "hio", "plug", "tf", "trace", "sdf"]
+    },
+    "hd": {
+        "condition": ["with_imaging"],
+        "requires": ["plug", "tf", "trace", "vt", "work", "sdf", "cameraUtil", "hf", "pxOsd", "sdr", "onetbb::libtbb"]
+    },
+    "hdGp": {
+        "condition": ["with_imaging"],
+        "requires": ["hd", "hf", "onetbb::libtbb"]
+    },
+    "hdMtlx": {
+        "condition": ["with_imaging", "with_materialx"],
+        "requires": ["gf", "hd", "sdf", "sdr", "tf", "trace", "usdMtlx", "vt", "materialx::MaterialXCore", "materialx::MaterialXFormat"]
+    },
+    "hdSt": {
+        "condition": ["with_imaging"],
+        "conditional": [
+            {
+                "condition": ["with_materialx"],
+                "requires": ["materialx::MaterialXGenShader", "materialx::MaterialXRender", "materialx::MaterialXCore", "materialx::MaterialXFormat", "materialx::MaterialXGenGlsl", "hdMtlx"]
+            },
+            {
+                "condition": ["is_apple", "with_materialx"],
+                "requires": ["materialx::MaterialXGenMsl"]
+            }
+        ],
+        "requires": ["hio", "garch", "glf", "hd", "hdsi", "hgiGL", "hgiInterop", "sdr", "tf", "trace", "onetbb::libtbb", "opensubdiv::osdcpu", "opensubdiv::osdgpu"]
+    },
+    "hdStorm": {
+        "condition": ["with_imaging"],
+        "is_plugin": true,
+        "requires": ["plug", "tf", "trace", "vt", "work", "hd", "hdSt", "opensubdiv::osdcpu", "opensubdiv::osdgpu"]
+    },
+    "hdar": {
+        "condition": ["with_imaging"],
+        "requires": ["hd", "ar"]
+    },
+    "hdsi": {
+        "condition": ["with_imaging"],
+        "requires": ["plug", "tf", "trace", "vt", "work", "sdf", "cameraUtil", "usdShade", "usdVol", "geomUtil", "hf", "hd", "pxOsd", "onetbb::libtbb"]
+    },
+    "hdx": {
+        "condition": ["with_imaging"],
+        "requires": ["plug", "tf", "vt", "gf", "work", "garch", "glf", "pxOsd", "hd", "hdSt", "hgi", "hgiInterop", "cameraUtil", "sdf"]
+    },
+    "hf": {
+        "condition": ["with_imaging"],
+        "requires": ["plug", "tf", "trace"]
+    },
+    "hgi": {
+        "condition": ["with_imaging"],
+        "requires": ["gf", "plug", "tf", "hio"]
+    },
+    "hgiGL": {
+        "condition": ["with_imaging"],
+        "requires": ["arch", "garch", "hf", "hgi", "tf", "trace"]
+    },
+    "hgiInterop": {
+        "condition": ["with_imaging"],
+        "conditional": [
+            {
+                "condition": ["is_apple"],
+                "frameworks": ["Foundation", "CoreVideo"],
+                "requires": ["hgiMetal"]
+            }
+        ],
+        "requires": ["gf", "tf", "hgi", "vt", "garch"]
+    },
+    "hgiMetal": {
+        "condition": ["is_apple", "with_imaging"],
+        "frameworks": ["Foundation", "Metal", "AppKit"],
+        "requires": ["arch", "hgi", "tf", "trace"]
+    },
+    "hio": {
+        "condition": ["with_imaging"],
+        "requires": ["arch", "js", "plug", "tf", "vt", "trace", "ar", "hf"]
+    },
+    "hioAvif": {
+        "condition": ["with_imaging"],
+        "is_plugin": true,
+        "requires": ["ar", "arch", "gf", "hio", "tf"]
+    },
+    "hioImageIO": {
+        "condition": ["is_apple", "with_imaging"],
+        "frameworks": ["Foundation", "CoreGraphics", "ImageIO"],
+        "is_plugin": true,
+        "requires": ["ar", "arch", "gf", "hio", "tf"]
+    },
+    "hioOiio": {
+        "condition": ["with_imaging", "with_openimageio"],
+        "is_plugin": true,
+        "requires": ["ar", "arch", "gf", "hio", "tf", "openimageio::openimageio"]
+    },
+    "hioOpenEXR": {
+        "condition": ["with_imaging"],
+        "is_plugin": true,
+        "requires": ["ar", "arch", "gf", "hio", "tf"]
+    },
+    "js": {
+        "requires": ["tf"]
+    },
+    "kind": {
+        "requires": ["tf", "plug"]
+    },
+    "pcp": {
+        "requires": ["tf", "trace", "vt", "sdf", "work", "ar", "onetbb::libtbb"]
+    },
+    "pegtl": {
+        "requires": ["arch"]
+    },
+    "plug": {
+        "requires": ["arch", "tf", "js", "trace", "work", "onetbb::libtbb"]
+    },
+    "pxOsd": {
+        "condition": ["with_imaging"],
+        "requires": ["tf", "gf", "vt", "opensubdiv::osdcpu"]
+    },
+    "sdf": {
+        "requires": ["arch", "tf", "gf", "pegtl", "trace", "ts", "vt", "work", "ar", "onetbb::libtbb"]
+    },
+    "sdr": {
+        "requires": ["arch", "plug", "trace", "tf", "vt", "work", "ar", "sdf"]
+    },
+    "sdrGlslfx": {
+        "condition": ["with_imaging"],
+        "is_plugin": true,
+        "requires": ["ar", "sdr", "hio"]
+    },
+    "tf": {
+        "requires": ["arch", "onetbb::libtbb"]
+    },
+    "trace": {
+        "requires": ["arch", "js", "tf", "onetbb::libtbb"]
+    },
+    "ts": {
+        "requires": ["vt", "gf", "tf"]
+    },
+    "usd": {
+        "requires": ["arch", "kind", "pcp", "sdf", "ar", "plug", "tf", "trace", "ts", "vt", "work", "onetbb::libtbb"]
+    },
+    "usdAppUtils": {
+        "condition": ["with_imaging"],
+        "requires": ["garch", "gf", "hio", "sdf", "tf", "usd", "usdGeom", "usdImagingGL"]
+    },
+    "usdBakeMtlx": {
+        "condition": ["with_imaging", "with_materialx"],
+        "requires": ["tf", "sdr", "usdMtlx", "usdShade", "hd", "hdMtlx", "usdImaging", "materialx::MaterialXCore", "materialx::MaterialXFormat", "materialx::MaterialXRenderGlsl"]
+    },
+    "usdExecImaging": {
+        "condition": ["with_imaging"],
+        "requires": ["execGeom", "execIr", "execUsd", "hd", "sdf", "tf", "trace", "usd", "usdGeom", "vt"]
+    },
+    "usdGeom": {
+        "requires": ["js", "tf", "plug", "vt", "sdf", "trace", "usd", "work", "onetbb::libtbb"]
+    },
+    "usdGeomValidators": {
+        "requires": ["tf", "plug", "sdf", "usd", "usdGeom", "usdValidation"]
+    },
+    "usdHydra": {
+        "requires": ["tf", "usd", "usdShade"]
+    },
+    "usdImaging": {
+        "condition": ["with_imaging"],
+        "requires": ["gf", "tf", "plug", "trace", "vt", "work", "geomUtil", "hd", "hdar", "hdsi", "hio", "pxOsd", "sdf", "usd", "usdGeom", "usdLux", "usdRender", "usdShade", "usdSkel", "usdVol", "ar", "onetbb::libtbb"]
+    },
+    "usdImagingGL": {
+        "condition": ["with_imaging"],
+        "requires": ["gf", "tf", "plug", "trace", "vt", "work", "hio", "garch", "glf", "hd", "hdsi", "hdx", "pxOsd", "sdf", "sdr", "usd", "usdGeom", "usdHydra", "usdShade", "usdImaging", "usdExecImaging", "ar"]
+    },
+    "usdIrImaging": {
+        "condition": ["with_imaging"],
+        "requires": ["execIr", "gf", "hd", "tf", "usd", "usdGeom", "usdImaging"]
+    },
+    "usdLod": {
+        "requires": ["tf", "gf", "vt", "sdf", "usd", "usdGeom"]
+    },
+    "usdLux": {
+        "requires": ["tf", "vt", "sdf", "sdr", "usd", "usdGeom", "usdShade"]
+    },
+    "usdLuxValidators": {
+        "requires": ["tf", "plug", "sdf", "usd", "sdr", "usdShade", "usdLux", "usdValidation"]
+    },
+    "usdMedia": {
+        "requires": ["tf", "vt", "sdf", "usd", "usdGeom"]
+    },
+    "usdMtlx": {
+        "condition": ["with_materialx"],
+        "requires": ["arch", "gf", "sdf", "sdr", "tf", "vt", "usd", "usdGeom", "usdShade", "usdUI", "usdUtils", "materialx::MaterialXCore", "materialx::MaterialXFormat"]
+    },
+    "usdPhysics": {
+        "requires": ["tf", "plug", "vt", "sdf", "trace", "usd", "usdGeom", "usdShade", "work"]
+    },
+    "usdPhysicsValidators": {
+        "requires": ["tf", "plug", "sdf", "usd", "usdGeom", "usdPhysics", "usdValidation"]
+    },
+    "usdProc": {
+        "requires": ["tf", "usd", "usdGeom"]
+    },
+    "usdProcImaging": {
+        "condition": ["with_imaging"],
+        "requires": ["usdImaging", "usdProc"]
+    },
+    "usdProfiles": {
+        "requires": ["arch", "tf", "plug", "vt", "js", "sdf", "usd"]
+    },
+    "usdRender": {
+        "requires": ["gf", "tf", "usd", "usdGeom", "usdShade"]
+    },
+    "usdRi": {
+        "requires": ["tf", "vt", "sdf", "usd", "usdShade", "usdGeom"]
+    },
+    "usdSemantics": {
+        "requires": ["tf", "vt", "usd"]
+    },
+    "usdShade": {
+        "requires": ["tf", "vt", "js", "sdf", "sdr", "usd", "usdGeom", "onetbb::libtbb"]
+    },
+    "usdShadeValidators": {
+        "requires": ["tf", "plug", "sdf", "usd", "sdr", "usdShade", "usdValidation"]
+    },
+    "usdShaders": {
+        "is_plugin": true,
+        "requires": ["ar", "sdr", "usdShade"]
+    },
+    "usdSkel": {
+        "requires": ["arch", "gf", "tf", "trace", "vt", "work", "sdf", "usd", "usdGeom", "onetbb::libtbb"]
+    },
+    "usdSkelImaging": {
+        "condition": ["with_imaging"],
+        "requires": ["hio", "hd", "usdImaging", "usdSkel"]
+    },
+    "usdSkelValidators": {
+        "requires": ["tf", "plug", "sdf", "usd", "usdSkel", "usdValidation"]
+    },
+    "usdUI": {
+        "requires": ["tf", "vt", "sdf", "usd"]
+    },
+    "usdUtils": {
+        "requires": ["arch", "tf", "gf", "sdf", "usd", "usdGeom", "usdShade", "usdUI", "onetbb::libtbb"]
+    },
+    "usdUtilsValidators": {
+        "requires": ["tf", "plug", "sdf", "usd", "usdUtils", "usdValidation"]
+    },
+    "usdValidation": {
+        "requires": ["sdf", "plug", "tf", "gf", "usd", "work"]
+    },
+    "usdVol": {
+        "requires": ["tf", "usd", "usdGeom"]
+    },
+    "usdVolImaging": {
+        "condition": ["with_imaging"],
+        "requires": ["usdImaging"]
+    },
+    "vdf": {
+        "requires": ["arch", "gf", "tf", "trace", "vt", "work", "onetbb::libtbb"]
+    },
+    "vt": {
+        "requires": ["arch", "tf", "gf", "trace", "onetbb::libtbb"]
+    },
+    "work": {
+        "requires": ["tf", "trace", "onetbb::libtbb"]
+    }
+}

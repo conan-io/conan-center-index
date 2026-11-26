@@ -8,3 +8,6 @@ sources:
   "1.7.0":
     url: "https://github.com/paullouisageneau/libjuice/archive/refs/tags/v1.7.0.tar.gz"
     sha256: "a510c7df90d82731d1d5e32e32205d3370ec2e62d6230ffe7b19b0f3c1acabf2"
+  "1.7.5":
+    url: "https://github.com/paullouisageneau/libjuice/archive/refs/tags/v1.7.5.tar.gz"
+    sha256: "a0cdc9069613d4dfdc54f829ad11ebd23fedf345bc43727fbcd2f5439f2425bd"

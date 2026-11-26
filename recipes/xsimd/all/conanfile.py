@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
-from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 import os
 
@@ -34,7 +33,8 @@ class XsimdConan(ConanFile):
 
     def requirements(self):
         if self.options.xtl_complex:
-            self.requires("xtl/0.7.5")
+            xtl_version = "0.7.5" if Version(self.version) < "13.2.0" else "0.8.0"
+            self.requires(f"xtl/{xtl_version}")
 
     def package_id(self):
         self.info.clear()
@@ -61,7 +61,3 @@ class XsimdConan(ConanFile):
             self.cpp_info.defines = ["XSIMD_ENABLE_XTL_COMPLEX=1"]
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        ## TODO: workaround for arm compilation issue : https://github.com/xtensor-stack/xsimd/issues/735
-        if is_apple_os(self) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
-            self.cpp_info.cxxflags.extend(["-flax-vector-conversions", "-fsigned-char",])

@@ -28,8 +28,6 @@ class LibvipsConan(ConanFile):
         "fPIC": [True, False],
         "deprecated": [True, False],
         "cpp": [True, False],
-        "introspection": [True, False],
-        "vapi": [True, False],
         "with_archive": [True, False],
         "with_cfitsio": [True, False],
         "with_cgif": [True, False],
@@ -68,8 +66,6 @@ class LibvipsConan(ConanFile):
         "fPIC": True,
         "deprecated": True,
         "cpp": True,
-        "introspection": False,
-        "vapi": False,
         "with_archive": False,
         "with_cfitsio": False,
         "with_cgif": False,
@@ -180,8 +176,6 @@ class LibvipsConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.options.vapi and not self.options.introspection:
-            raise ConanInvalidConfiguration("vapi requires introspection")
         if self.options.with_pangocairo and not self.dependencies["pango"].options.with_cairo:
             raise ConanInvalidConfiguration(f"{self.ref}:with_pangocairo=True requires pango/*:with_cairo=True")
         if self.options.with_pdfium and self.options.with_poppler:
@@ -217,8 +211,6 @@ class LibvipsConan(ConanFile):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self.options.introspection:
-            self.tool_requires("gobject-introspection/1.72.0")
         self.tool_requires("glib/<host_version>")
 
         if self.settings.os == "Macos":
@@ -244,8 +236,8 @@ class LibvipsConan(ConanFile):
         tc.project_options["doxygen"] = "false"
         tc.project_options["gtk_doc"] = "false"
         tc.project_options["modules"] = "disabled"
-        tc.project_options["introspection"] = enabled_disabled(self.options.introspection)
-        tc.project_options["vapi"] = true_false(self.options.vapi)
+        tc.project_options["introspection"] = "disabled"
+        tc.project_options["vapi"] = "false"
         # External libraries
         tc.project_options["archive"] = enabled_disabled(self.options.get_safe("with_archive"))
         tc.project_options["cfitsio"] = enabled_disabled(self.options.with_cfitsio)

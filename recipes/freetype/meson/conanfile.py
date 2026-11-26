@@ -70,7 +70,7 @@ class FreetypeConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_brotli"):
-            self.requires("brotli/1.1.0")
+            self.requires("brotli/[>=1.1.1 <2]")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.3.2 <2]")
@@ -95,6 +95,9 @@ class FreetypeConan(ConanFile):
         # Harfbuzz support introduces a circular dependency between Harfbuzz and Freetype.
         # They both have options to require each other.
         tc.project_options["harfbuzz"] = "disabled"
+        # hvf is experimental and available only on macOS
+        if Version(self.version) >= "2.15.0":
+            tc.project_options["hvf"] = "disabled"
         tc.project_options["png"] = feature(self.options.with_png)
         tc.project_options["tests"] = "disabled"
         tc.project_options["zlib"] = "system" if self.options.with_zlib else "disabled"

@@ -1,0 +1,16 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -280,11 +280,11 @@
+ 
+ # ADS uses private Qt GUI APIs on Unix systems other than macOS,
+ # specifically qpa/qplatformnativeinterface.h.
+-if(UNIX AND NOT APPLE AND QT_VERSION_MAJOR STREQUAL "6")
++if(UNIX AND NOT APPLE)
+     target_link_libraries(
+         ${library_name}
+         PRIVATE
+-            Qt6::GuiPrivate
++            Qt${QT_VERSION_MAJOR}::GuiPrivate
+     )
+ endif()
+ 

@@ -1,4 +1,7 @@
 sources:
+  "1.6.0":
+    url: "https://github.com/facebook/zstd/releases/download/v1.6.0/zstd-1.6.0.tar.gz"
+    sha256: "2ba599ae2a257976278e7e71e998433a387bfd18aa7b78678229fd5d84f5e9b8"
   "1.5.7":
     url: "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz"
     sha256: "eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3"

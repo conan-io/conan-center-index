@@ -26,12 +26,10 @@ class GStreamerConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_introspection": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_introspection": False,
     }
 
     @property
@@ -71,8 +69,6 @@ class GStreamerConan(ConanFile):
             self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.72.0")
         if self._settings_build.os == 'Windows':
             self.tool_requires("winflexbison/2.5.25")
         else:
@@ -96,7 +92,7 @@ class GStreamerConan(ConanFile):
         tc.project_options["examples"] = "disabled"
         tc.project_options["benchmarks"] = "disabled"
         tc.project_options["tests"] = "disabled"
-        tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
+        tc.project_options["introspection"] = "disabled"
         tc.generate()
 
     def build(self):

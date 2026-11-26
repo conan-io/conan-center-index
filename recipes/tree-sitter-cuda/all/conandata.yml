@@ -2,9 +2,16 @@ sources:
   "0.21.1":
     url: "https://github.com/tree-sitter-grammars/tree-sitter-cuda/archive/refs/tags/v0.21.1.tar.gz"
     sha256: "8cb5f44b706cbefcb5b5bdad7cc7f8fd3e49aa14c37693895fd9f198c56ba4d9"
+  "0.21.2":
+    url: "https://github.com/tree-sitter-grammars/tree-sitter-cuda/releases/download/v0.21.2/tree-sitter-cuda.tar.gz"
+    sha256: "e2f411ed33f71d0ff1c538bc0c66cb117008e3a9d0d3228bdc6211bd4e968a1b"
 patches:
   "0.21.1":
-    - patch_file: "patches/0.21.1-disable-gencode-fpic.patch"
+    - patch_file: "patches/0.21-disable-gencode-fpic.patch"
+      patch_description: "disable gencode and fPIC"
+      patch_type: "portability"
+  "0.21.2":
+    - patch_file: "patches/0.21-disable-gencode-fpic.patch"
       patch_description: "disable gencode and fPIC"
       patch_type: "portability"
 # Each version of tree-sitter-cuda is tied to a specific range of versions of tree-sitter;
@@ -26,3 +33,4 @@ patches:
 #   https://github.com/conan-io/conan-center-index/pull/28510
 tree-sitter-version:
   "0.21.1": "[>=0.25.0 <0.26.0]"
+  "0.21.2": "[>=0.25.0 <0.28.0]"

@@ -1,4 +1,4 @@
 sources:
-  "1.2.5":
-    url: "https://github.com/networkprotocol/yojimbo/archive/refs/tags/v1.2.5.tar.gz"
-    sha256: "0bbac01643f47f4167c884b88a10ed64b327eb4c6cae920551d7bcd447f1e292"
+  "1.16.1":
+    url: "https://github.com/mas-bandwidth/yojimbo/archive/refs/tags/v1.16.1.tar.gz"
+    sha256: "c1a76ac99c09f616584f72decec331bf705f5c6926901abee3baecc1d317fad3"

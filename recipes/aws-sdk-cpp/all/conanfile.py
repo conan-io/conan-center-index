@@ -28,8 +28,11 @@ class AwsSdkCppConan(ConanFile):
         "AWSMigrationHub",
         "accessanalyzer",
         "account",
+        "account-access",
         "acm",
         "acm-pca",
+        "agent-registry",
+        "agent-registry-control",
         "aiops",
         "amp",
         "amplify",
@@ -102,6 +105,7 @@ class AwsSdkCppConan(ConanFile):
         "cloudsearchdomain",
         "cloudtrail",
         "cloudtrail-data",
+        "cloudwatchomni",
         "codeartifact",
         "codebuild",
         "codecatalyst",
@@ -120,12 +124,14 @@ class AwsSdkCppConan(ConanFile):
         "comprehend",
         "comprehendmedical",
         "compute-optimizer",
+        "compute-optimizer-automation",
         "config",
         "connect",
         "connect-contact-lens",
         "connectcampaigns",
         "connectcampaignsv2",
         "connectcases",
+        "connecthealth",
         "connectparticipant",
         "controlcatalog",
         "controltower",
@@ -141,6 +147,7 @@ class AwsSdkCppConan(ConanFile):
         "deadline",
         "detective",
         "devicefarm",
+        "devops-agent",
         "devops-guru",
         "directconnect",
         "directory-service-data",
@@ -168,18 +175,17 @@ class AwsSdkCppConan(ConanFile):
         "elasticloadbalancing",
         "elasticloadbalancingv2",
         "elasticmapreduce",
-        "elastictranscoder",
+        "elementalinference",
         "email",
         "emr-containers",
         "emr-serverless",
+        "endusermessaging",
         "entityresolution",
         "es",
         "eventbridge",
+        "eventbridgev2",
         "events",
-        "evidently",
         "evs",
-        "finspace",
-        "finspace-data",
         "firehose",
         "fis",
         "fms",
@@ -204,22 +210,21 @@ class AwsSdkCppConan(ConanFile):
         "health",
         "healthlake",
         "iam",
+        "iam-toolbox",
         "identitystore",
         "imagebuilder",
         "importexport",
         "inspector",
         "inspector-scan",
         "inspector2",
+        "interconnect",
         "internetmonitor",
         "invoicing",
         "iot",
         "iot-data",
         "iot-jobs-data",
         "iot-managed-integrations",
-        "iotanalytics",
         "iotdeviceadvisor",
-        "iotevents",
-        "iotevents-data",
         "iotfleetwise",
         "iotsecuretunneling",
         "iotsitewise",
@@ -246,6 +251,9 @@ class AwsSdkCppConan(ConanFile):
         "kms",
         "lakeformation",
         "lambda",
+        "lambda-core",
+        "lambda-microvms",
+        "lambda-web",
         "launch-wizard",
         "lex",
         "lex-models",
@@ -267,6 +275,7 @@ class AwsSdkCppConan(ConanFile):
         "marketplace-agreement",
         "marketplace-catalog",
         "marketplace-deployment",
+        "marketplace-discovery",
         "marketplace-entitlement",
         "marketplace-reporting",
         "marketplacecommerceanalytics",
@@ -292,15 +301,18 @@ class AwsSdkCppConan(ConanFile):
         "mq",
         "mturk-requester",
         "mwaa",
+        "mwaa-serverless",
         "neptune",
         "neptune-graph",
         "neptunedata",
         "network-firewall",
+        "network-security-manager",
         "networkflowmonitor",
         "networkmanager",
         "networkmonitor",
         "notifications",
         "notificationscontacts",
+        "nova-act",
         "oam",
         "observabilityadmin",
         "odb",
@@ -310,7 +322,10 @@ class AwsSdkCppConan(ConanFile):
         "organizations",
         "osis",
         "outposts",
-        "panorama",
+        "partnercentral-account",
+        "partnercentral-benefits",
+        "partnercentral-channel",
+        "partnercentral-revenue-measurement",
         "partnercentral-selling",
         "payment-cryptography",
         "payment-cryptography-data",
@@ -327,6 +342,7 @@ class AwsSdkCppConan(ConanFile):
         "pipes",
         "polly",
         "pricing",
+        "pricing-plan-manager",
         "proton",
         "qapps",
         "qbusiness",
@@ -342,6 +358,7 @@ class AwsSdkCppConan(ConanFile):
         "rekognition",
         "repostspace",
         "resiliencehub",
+        "resiliencehubv2",
         "resource-explorer-2",
         "resource-groups",
         "resourcegroupstaggingapi",
@@ -351,6 +368,7 @@ class AwsSdkCppConan(ConanFile):
         "route53-recovery-control-config",
         "route53-recovery-readiness",
         "route53domains",
+        "route53globalresolver",
         "route53profiles",
         "route53resolver",
         "rtbfabric",
@@ -358,6 +376,7 @@ class AwsSdkCppConan(ConanFile):
         "s3",
         "s3-crt",
         "s3control",
+        "s3files",
         "s3outposts",
         "s3tables",
         "s3vectors",
@@ -368,12 +387,16 @@ class AwsSdkCppConan(ConanFile):
         "sagemaker-geospatial",
         "sagemaker-metrics",
         "sagemaker-runtime",
+        "sagemaker-runtime-http2",
+        "sagemakerjobruntime",
+        "sagemakertrainingsessionruntime",
         "savingsplans",
         "scheduler",
         "schemas",
         "sdb",
         "secretsmanager",
         "security-ir",
+        "securityagent",
         "securityhub",
         "securitylake",
         "serverlessrepo",
@@ -384,7 +407,9 @@ class AwsSdkCppConan(ConanFile):
         "sesv2",
         "shield",
         "signer",
-        "simspaceweaver",
+        "signer-data",
+        "signin",
+        "simpledbv2",
         "sms-voice",
         "snow-device-management",
         "snowball",
@@ -406,6 +431,8 @@ class AwsSdkCppConan(ConanFile):
         "supplychain",
         "support",
         "support-app",
+        "supportauthz",
+        "sustainability",
         "swf",
         "synthetics",
         "taxsettings",
@@ -413,11 +440,11 @@ class AwsSdkCppConan(ConanFile):
         "timestream-influxdb",
         "timestream-query",
         "timestream-write",
-        "tnb",
         "transcribe",
         "transcribestreaming",
         "translate",
         "trustedadvisor",
+        "uxc",
         "verifiedpermissions",
         "voice-id",
         "vpc-lattice",
@@ -425,6 +452,7 @@ class AwsSdkCppConan(ConanFile):
         "waf-regional",
         "wafv2",
         "wellarchitected",
+        "wickr",
         "wisdom",
         "workdocs",
         "workmail",
@@ -440,7 +468,8 @@ class AwsSdkCppConan(ConanFile):
         "queues",
         "s3-encryption",
         "identity-management",
-        "transfer"
+        "transfer",
+        "s3-transfer"
     )
     options = {
         **{
@@ -463,7 +492,7 @@ class AwsSdkCppConan(ConanFile):
 
     @property
     def _internal_requirements(self):
-        # These modules and dependencies come from https://github.com/aws/aws-sdk-cpp/blob/1.11.691/cmake/sdksCommon.cmake#L136 and below
+        # These modules and dependencies come from https://github.com/aws/aws-sdk-cpp/blob/1.11.915/cmake/sdksCommon.cmake#L143 and below
         # Additionally Core is added to all modules automatically
         return {
             "access-management": ["iam", "cognito-identity"],
@@ -472,6 +501,7 @@ class AwsSdkCppConan(ConanFile):
             "s3-encryption": ["s3", "kms"],
             "text-to-speech": ["polly"],
             "transfer": ["s3"],
+            "s3-transfer": ["s3"],
         }
 
     def export_sources(self):
@@ -514,19 +544,21 @@ class AwsSdkCppConan(ConanFile):
         # don't bump them independently, check the file
         # Create the new versions for the dependencies in the order shown
         # in that script, they are mostly topo sorted
-        self.requires("aws-crt-cpp/0.35.2", transitive_headers=True)
-        self.requires("aws-c-auth/0.9.1")
-        self.requires("aws-c-cal/0.9.8")
-        self.requires("aws-c-common/0.12.5")
-        self.requires("aws-c-compression/0.3.1")
-        self.requires("aws-c-event-stream/0.5.7")
-        self.requires("aws-c-http/0.10.5")
-        self.requires("aws-c-io/0.23.2")
-        self.requires("aws-c-mqtt/0.13.3")
+        self.requires("aws-crt-cpp/0.43.9", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-auth/0.10.4")
+        self.requires("aws-c-cal/0.9.15")
+        self.requires("aws-c-common/0.14.5", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-compression/0.3.2")
+        self.requires("aws-c-event-stream/0.7.1", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-http/0.11.0")
+        self.requires("aws-c-io/0.27.6")
+        self.requires("aws-c-mqtt/0.16.1")
         if self.options.get_safe("s3-crt"):
-            self.requires("aws-c-s3/0.9.2")
-        self.requires("aws-c-sdkutils/0.2.4")  # No mention of this in the code
-        self.requires("aws-checksums/0.2.6")
+            self.requires("aws-c-s3/0.13.5")
+        # Not used by the SDK sources directly (only through aws-crt-cpp's endpoints rule engine),
+        # but upstream's CMake calls aws_use_package() on it
+        self.requires("aws-c-sdkutils/0.2.9")
+        self.requires("aws-checksums/0.2.10")
         if self.settings.os != "Windows":
             # Used transitively in core/utils/crypto/openssl/CryptoImpl.h public header
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)

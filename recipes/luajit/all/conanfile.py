@@ -4,13 +4,13 @@ from conan.tools.files import get, chdir, replace_in_file, copy, rmdir, export_c
 from conan.tools.microsoft import is_msvc, MSBuildToolchain, VCVars, unix_path
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class LuajitConan(ConanFile):
@@ -21,6 +21,8 @@ class LuajitConan(ConanFile):
     description = "LuaJIT is a Just-In-Time Compiler (JIT) for the Lua programming language."
     topics = ("lua", "jit")
     provides = "lua"
+    package_type = "library"
+    languages = "C"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -42,14 +44,12 @@ class LuajitConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os == "Macos" and self.settings.arch == "armv8" and cross_building(self):
-            raise ConanInvalidConfiguration(f"{self.ref} can not be cross-built to Mac M1. Please, try any version >=2.1")
-        elif Version(self.version) <= "2.1.0-beta1" and self.settings.os == "Macos" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported by Mac M1. Please, try any version >=2.1")
+        if self.settings.os == "Macos" and cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building LuaJIT on Mac is not supported. See https://github.com/LuaJIT/LuaJIT/issues/947")
 
     def source(self):
-        filename = f"LuaJIT-{self.version}.tar.gz"
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, filename=filename, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         if is_msvc(self):
@@ -59,6 +59,9 @@ class LuajitConan(ConanFile):
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
+            if self.options.shared and is_apple_os(self):
+                # INFO: changing install names or rpaths can't be redone because larger updated load commands do not fit
+                tc.extra_ldflags.append("-headerpad_max_install_names")
             tc.generate()
 
     def _patch_sources(self):
@@ -105,7 +108,6 @@ class LuajitConan(ConanFile):
         return "luajit-2.1"
 
     def build(self):
-        apply_conandata_patches(self)
         self._patch_sources()
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "src")):
@@ -133,6 +135,8 @@ class LuajitConan(ConanFile):
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
                 autotools.install(args=self._make_arguments + ["DESTDIR="])
+                if self.options.shared:
+                    fix_apple_shared_install_name(self)
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
 

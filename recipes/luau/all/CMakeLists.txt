@@ -34,6 +34,16 @@ install(
 )
 install(DIRECTORY "${LUAU_SRC_DIR}/Config/include/Luau" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
+foreach(_luau_lib Bytecode Inliner)
+    install(
+        TARGETS Luau.${_luau_lib}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+    install(DIRECTORY "${LUAU_SRC_DIR}/${_luau_lib}/include/" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+endforeach()
+
 install(
     TARGETS Luau.Compiler
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -53,6 +54,11 @@ class LibmountConan(ConanFile):
             "--enable-libmount",
             "--enable-libblkid",
         ])
+        if Version(self.version) >= "2.42":
+            tc.configure_args.extend([
+                "--without-systemd",
+                "--without-econf",
+            ])
         tc.generate()
 
     def build(self):

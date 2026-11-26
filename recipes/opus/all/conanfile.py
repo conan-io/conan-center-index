@@ -56,6 +56,9 @@ class OpusConan(ConanFile):
         tc.cache_variables["OPUS_BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.cache_variables["OPUS_FIXED_POINT"] = self.options.fixed_point
         tc.cache_variables["OPUS_STACK_PROTECTOR"] = self.options.stack_protector
+        if self.settings.arch == "armv8":
+            # https://github.com/xiph/opus/pull/511
+            tc.cache_variables["OPUS_PRESUME_NEON"] = True
         if is_msvc(self):
             tc.cache_variables["OPUS_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
