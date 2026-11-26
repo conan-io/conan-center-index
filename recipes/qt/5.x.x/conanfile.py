@@ -967,6 +967,20 @@ Prefix = ..""")
                     unset(_isPolicyNEW)
                 endif()
                 """)
+        elif self.settings.os == "Android":
+            androidSupport = "Qt5AndroidSupport.cmake"
+            filecontents += f'include("${{CMAKE_CURRENT_LIST_DIR}}/{androidSupport}")\n'
+
+            # androiddeployqt calls have bug in CMake - 2 command line parameters are passed as a single string
+            androidSupportPath = os.path.join(self.package_folder, "lib", "cmake", "Qt5Core", androidSupport)
+            replace_in_file(self, androidSupportPath,
+                'set(android_deploy_qt_jdk "--jdk ${JAVA_HOME}")',
+                'set(android_deploy_qt_jdk "--jdk" ${JAVA_HOME})'
+            )
+            replace_in_file(self, androidSupportPath,
+                'set(android_deploy_qt_platform "--android-platform ${ANDROID_SDK_PLATFORM}")',
+                'set(android_deploy_qt_platform "--android-platform" ${ANDROID_SDK_PLATFORM})'
+            )
 
         filecontents += textwrap.dedent(f"""\
             if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
