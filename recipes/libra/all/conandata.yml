@@ -1,0 +1,4 @@
+sources:
+  "0.13.12":
+    url: "https://github.com/jharwell/libra/archive/refs/tags/v0.13.12.tar.gz"
+    sha256: "41e1110504cecfc0d1778a5f7fa444d7ef48575c108860777f4301420051c867"
