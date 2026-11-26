@@ -1,4 +1,7 @@
 sources:
+  "1.28.7":
+    url: "https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.28.7.tar.xz"
+    sha256: "787329b2c5758e228a71d926a6dcf960bceaacca3cadd63874ba665dfcda013e"
   "1.28.1":
     url: "https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.28.1.tar.xz"
     sha256: "b65e2ffa35bdbf8798cb75c23ffc3d05e484e48346ff7546844ba85217664504"
