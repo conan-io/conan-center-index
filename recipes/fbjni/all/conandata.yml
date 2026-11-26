@@ -1,0 +1,4 @@
+sources:
+  "0.8.1":
+    url: "https://github.com/facebookincubator/fbjni/archive/refs/tags/v0.8.1.tar.gz"
+    sha256: "30053bf081a9b57a504fa94eede21e493c03d3ffd3eda8e2813545f6333e5b6f"
