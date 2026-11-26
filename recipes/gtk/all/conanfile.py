@@ -51,11 +51,11 @@ class Gtk4Conan(ConanFile):
         self.tool_requires("glib/<host_version>")
         if self.options.get_safe("with_wayland", False):
             self.tool_requires("wayland/<host_version>")
-            self.tool_requires("wayland-protocols/[>=1.42 <2]")
+            self.tool_requires("wayland-protocols/[>=1.48 <2]")
 
     def requirements(self):
         # INFO: gtkconfig.h:8 glib.h
-        self.requires("glib/[>=2.82 <3]", transitive_headers=True)
+        self.requires("glib/[>=2.89.3 <3]", transitive_headers=True)
         # INFO: gdktexture.h:26 gdk-pixbuf.h/gdk-pixbuf.h
         self.requires("gdk-pixbuf/[>=2.42 <3]", transitive_headers=True)
         # INFO: gdktypes.h:36 cairo.h
@@ -63,7 +63,7 @@ class Gtk4Conan(ConanFile):
         # INFO: gtkscrollinfo.h:29 graphene.h
         self.requires("graphene/1.10.8", transitive_headers=True)
         # INFO: gdkcairo.h:26 pango/pangocairo.h
-        self.requires("pango/[>=1.50.7 <2]", transitive_headers=True)
+        self.requires("pango/[>=1.58 <2]", transitive_headers=True)
         # TODO: Consider to depend on libjpeg-turbo
         self.requires("libjpeg/[>=9f]")
         self.requires("fribidi/1.0.13")
@@ -73,12 +73,13 @@ class Gtk4Conan(ConanFile):
         if self.settings.os == "Linux":
             if self.options.with_wayland:
                 self.requires("xkbcommon/[>=1.5.0 <2]")
-                self.requires("wayland/[>=1.23 <2]")
+                self.requires("wayland/[>=1.24 <2]")
             if self.options.with_x11:
                 self.requires("xorg/system")
             self.requires("libdrm/[>=2.4 <3]")
         elif self.settings.os == "Windows":
-            self.requires("directx-headers/1.619.1")
+            # DirectX headers is only consumed by source code, not exposed to consumers
+            self.requires("directx-headers/1.619.1", visible=False)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -205,7 +206,7 @@ class Gtk4Conan(ConanFile):
             self.cpp_info.components["gtk-win32"].set_property("pkg_config_name", "gtk4-win32")
             self.cpp_info.components["gtk-win32"].set_property("pkg_config_custom_content", pkgconfig_vars)
             self.cpp_info.components["gtk-win32"].libdirs = []
-            self.cpp_info.components["gtk-win32"].requires = ["gtk-4", "directx-headers::directx-headers"]
+            self.cpp_info.components["gtk-win32"].requires = ["gtk-4"]
         elif self.settings.os == "Macos":
             self.cpp_info.components["gtk-macos"].set_property("pkg_config_name", "gtk4-macos")
             self.cpp_info.components["gtk-macos"].set_property("pkg_config_custom_content", pkgconfig_vars)
