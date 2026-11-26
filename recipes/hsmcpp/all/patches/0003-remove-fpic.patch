@@ -1,0 +1,14 @@
+Custom: Let Conan configure fPIC flag
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e99361b..2f1ac89 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -219,7 +219,6 @@ elseif (HSMBUILD_TARGET STREQUAL "library")
+     target_include_directories(${HSM_LIBRARY_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+                                                            ${CMAKE_CURRENT_SOURCE_DIR}/include/hsmcpp/os)
+     if (NOT WIN32)
+-        target_compile_options(${HSM_LIBRARY_NAME} PUBLIC "-fPIC")
+     endif()
+ 
+     # =============================================

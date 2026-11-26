@@ -6,3 +6,5 @@ patches:
   "1.0.6":
     - patch_file: "patches/0001-fix-cmake-install.patch"
     - patch_file: "patches/0002-fix-pkgconfig.patch"
+    - patch_file: "patches/0003-remove-fpic.patch"
+    - patch_file: "patches/0004-cpp-standard.patch"
