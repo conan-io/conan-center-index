@@ -52,7 +52,7 @@ class OpenColorIOConan(ConanFile):
         self.requires("imath/[>=3.1.9 <4]")
         self.requires("pystring/1.1.4")
         self.requires("yaml-cpp/0.8.0")
-        self.requires("minizip-ng/[>=4.0.3 <5]")
+        self.requires("minizip-ng/[>=4.0.5 <5]")
         if self.settings.arch == "armv8" and str(self.settings.os) in ["Windows", "Macos"]:
             self.requires("sse2neon/1.9.1")
 
@@ -61,12 +61,11 @@ class OpenColorIOConan(ConanFile):
         # TODO: add GLUT (needed for ociodisplay tool)
 
     def validate_build(self):
-        minimum_cppstd = 11 if Version(self.version) < "2.5" else 17
-        check_min_cppstd(self, minimum_cppstd)
-    
+        check_min_cppstd(self, 17)
+
     def validate(self):
         check_min_cppstd(self, 11)
-        
+
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6.0":
             raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 6.0")
 
@@ -85,19 +84,16 @@ class OpenColorIOConan(ConanFile):
         tc.variables["CMAKE_VERBOSE_MAKEFILE"] = True
         tc.variables["OCIO_BUILD_PYTHON"] = False
 
-        tc.variables["OCIO_USE_SSE"] = self.options.get_safe("use_sse", False)
-
-        # openexr 2.x provides Half library
-        tc.variables["OCIO_USE_OPENEXR_HALF"] = True
+        tc.variables["OCIO_USE_SSE2"] = self.options.get_safe("use_sse", False)
 
         tc.variables["OCIO_BUILD_APPS"] = True
         tc.variables["OCIO_BUILD_DOCS"] = False
         tc.variables["OCIO_BUILD_TESTS"] = False
         tc.variables["OCIO_BUILD_GPU_TESTS"] = False
-        tc.variables["OCIO_USE_BOOST_PTR"] = False
 
         # avoid downloading dependencies
-        tc.variables["OCIO_INSTALL_EXT_PACKAGE"] = "NONE"
+        tc.cache_variables["OCIO_INSTALL_EXT_PACKAGES"] = "NONE"
+        tc.cache_variables["OCIO_DIRECTX_ENABLED"] = False
 
         if is_msvc(self) and not self.options.shared:
             # define any value because ifndef is used
@@ -111,9 +107,19 @@ class OpenColorIOConan(ConanFile):
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
             tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
 
+        # Workaround for the upstream recipe setting CMAKE_OSX_DEPLOYMENT_TARGET before calling project
+        # which means a non-forced setting from our toolchain is ignored.
+        # See https://github.com/AcademySoftwareFoundation/OpenColorIO/issues/2366
+        if is_apple_os(self) and self.settings.get_safe("os.version"):
+            tc.cache_variables["CMAKE_OSX_DEPLOYMENT_TARGET"] = str(self.settings.os.version)
+
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("minizip-ng", "cmake_file_name", "minizip-ng")
+        deps.set_property("minizip-ng", "cmake_target_name", "MINIZIP::minizip-ng")
+        deps.set_property("lcms", "cmake_file_name", "lcms2")
+        deps.set_property("lcms", "cmake_target_name", "lcms2::lcms2")
         deps.generate()
 
     def _patch_sources(self):
