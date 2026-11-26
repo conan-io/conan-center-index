@@ -8,6 +8,9 @@ sources:
   "1790.80.10":
     url: "https://github.com/apple-oss-distributions/mDNSResponder/archive/mDNSResponder-1790.80.10.tar.gz"
     sha256: "ffb990231639dfe8c7f0b15d0665206a9013f1aacfb2cbb934eb87f6a57f38b7"
+  "2881.40.18":
+    url: "https://github.com/apple-oss-distributions/mDNSResponder/archive/mDNSResponder-2881.40.18.tar.gz"
+    sha256: "b04b88a579fbc303f32d8c8194d5562b7b825f3f3ff52e883c6300038ff30b34"
 patches:
   "878.200.35":
     - patch_file: "patches/878.200.35/DLLStub.c.patch"
@@ -30,4 +33,14 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/1790.80.10/Add-unicast-disabled-flag.patch"
       patch_description: "add missing unicast cropping option: update Makefile to add missing cropping option, and update uDNS.c to resolve related compilation errors."
+      patch_type: "bugfix"
+  "2881.40.18":
+    - patch_file: "patches/2881.40.18/support-cross-building.patch"
+      patch_description: "allow dependencies provided by conan and support cross-building for linux:update Makefile to use dependencies provided by conan and support cross-building."
+      patch_type: "conan"
+    - patch_file: "patches/2881.40.18/add-unicast-disabled-flag.patch"
+      patch_description: "add missing unicast cropping option: update Makefile to add missing unicast disable option."
+      patch_type: "bugfix"
+    - patch_file: "patches/2881.40.18/windows-legacy-fix.patch"
+      patch_description: "Bring back an old file that was deleted leading to unresolved symbols."
       patch_type: "bugfix"
