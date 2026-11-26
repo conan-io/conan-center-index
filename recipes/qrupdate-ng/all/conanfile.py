@@ -13,7 +13,7 @@ import os
 required_conan_version = ">=2.0.9"
 
 
-class QrupdateConan(ConanFile):
+class QrupdateNgConan(ConanFile):
     name = "qrupdate-ng"
     description = (
         "qrupdate-ng: a Fortran library for fast updates of QR and Cholesky decompositions "
