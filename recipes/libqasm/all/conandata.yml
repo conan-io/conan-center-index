@@ -1,4 +1,4 @@
 sources:
-  "1.6.0":
-    url: "https://github.com/QuTech-Delft/libqasm/releases/download/1.6.0/libqasm-1.6.0.tar.gz"
-    sha256: "1a277e3a0e9008a31eec59511473a4afa7442ddacb741d9b253b74d1d7dbc734"
+  "1.7.0":
+    url: "https://github.com/QuTech-Delft/libqasm/releases/download/1.7.0/libqasm-1.7.0.tar.gz"
+    sha256: "8f657c3b3180a9517cba80f4f5e5973f056d4a78ca826026f23db052157fd379"
