@@ -14,7 +14,7 @@ index ea66f18..be24078 100644
 +SQLITE3DLL = sqlcipher.dll
  !ELSE
 -SQLITE3DLL = sqlite3.dll
-+SQLITE3DLL = sqlcipher.lib
++SQLITE3DLL = sqlcipher.dll
  !ENDIF
  !ENDIF
  
