@@ -1,0 +1,5 @@
+sources:
+  "1.5.1":
+    url:
+    - "https://github.com/ArchRobison/zapif/archive/refs/tags/v1.5.1.tar.gz"
+    sha256: "f4961a62c421761987f22d1d9ec320173e5c2e1da4b1c8e74487571ae4988f40"
