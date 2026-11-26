@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/rysolis/torqus/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "01af7a335e2ce874b755909a814186ea961498d4c86b07d06bc422bf9105111c"
