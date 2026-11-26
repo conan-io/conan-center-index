@@ -1,0 +1,9 @@
+sources:
+  "1.0.6":
+    url: "https://github.com/igor-krechetov/hsmcpp/archive/refs/tags/1.0.6.tar.gz"
+    sha256: "1ec44811102976c0c1e5847db4c012ac81856136e21e0fd6dee1d4c5a87867dc"
+patches:
+  "1.0.6":
+    - patch_file: "patches/0001-fix-cmake-install.patch"
+    - patch_file: "patches/0002-fix-pkgconfig.patch"
+    - patch_file: "patches/0003-conan-config.patch"

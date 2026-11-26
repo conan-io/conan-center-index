@@ -1,0 +1,17 @@
+Pkgconfig is optional when no dependency is required
+
+https://github.com/igor-krechetov/hsmcpp/pull/41
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index aee86e6..e99361b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -179,7 +179,7 @@ elseif (HSMBUILD_TARGET STREQUAL "arduinoide")
+ elseif (HSMBUILD_TARGET STREQUAL "library")
+     # =============================================
+     # Common modules
+-    if (NOT WIN32)
++    if (NOT WIN32 AND (HSMBUILD_DISPATCHER_GLIB OR HSMBUILD_DISPATCHER_GLIBMM))
+         find_package(PkgConfig REQUIRED)
+     endif()
+ 
