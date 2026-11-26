@@ -23,6 +23,8 @@ class IMGUIConan(ConanFile):
         "fPIC": [True, False],
         "enable_test_engine": [True, False],
         "with_sdl3_binding": [True, False],
+        "with_opengl3_binding": [True, False],
+        "with_glfw_binding": [True, False],
         "use_wchar32": [True, False],
     }
     default_options = {
@@ -30,12 +32,18 @@ class IMGUIConan(ConanFile):
         "fPIC": True,
         "enable_test_engine": False,
         "with_sdl3_binding": False,
+        "with_glfw_binding": False,
+        "with_opengl3_binding": False,
         "use_wchar32": False,
     }
 
     def requirements(self):
         if self.options.get_safe("with_sdl3_binding"):
             self.requires("sdl/[>3 <4]", transitive_headers=True)
+        if self.options.get_safe("with_glfw_binding"):
+            self.requires("glfw/[>3]", transitive_headers=True)
+        if self.options.get_safe("with_opengl3_binding"):
+            self.requires("opengl/system", transitive_headers=True)
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
@@ -70,6 +78,8 @@ class IMGUIConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["IMGUI_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.variables["IMGUI_WITH_SDL3_BINDING"] = self.options.get_safe("with_sdl3_binding", False)
+        tc.variables["IMGUI_WITH_OPENGL3_BINDING"] = self.options.get_safe("with_opengl3_binding", False)
+        tc.variables["IMGUI_WITH_GLFW_BINDING"] = self.options.get_safe("with_glfw_binding", False)
         # test engine is not available for all versions
         if self.options.get_safe("enable_test_engine"):
             tc.preprocessor_definitions["IMGUI_ENABLE_TEST_ENGINE"] = "1"
