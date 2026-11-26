@@ -7,13 +7,13 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2"
+required_conan_version = ">=2.0"
 
 
 class BitserializerConan(ConanFile):
     name = "bitserializer"
-    description = "Multi-format serialization library (JSON, XML, YAML, CSV, MsgPack)"
-    topics = ("serialization", "json", "xml", "yaml", "csv", "msgpack")
+    description = "C++17 serialization to JSON/JSONC, XML, YAML, CSV and MsgPack via one API, with self-contained built-in formats and optional fast_float acceleration."
+    topics = ("c-plus-plus", "cpp17", "csv", "deserialization", "json", "jsonc", "messagepack", "msgpack", "serialization", "xml", "yaml")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/PavelKisliak/BitSerializer"
     license = "MIT"
@@ -27,6 +27,8 @@ class BitserializerConan(ConanFile):
         "with_rapidyaml": [True, False],
         "with_csv": [True, False],
         "with_msgpack": [True, False],
+        "with_json": [True, False],
+        "with_fast_float": [True, False],
     }
     default_options = {
         "shared": False,
@@ -36,16 +38,25 @@ class BitserializerConan(ConanFile):
         "with_rapidyaml": False,
         "with_csv": False,
         "with_msgpack": False,
+        "with_json": False,
+        "with_fast_float": True,
     }
 
     def _is_header_only(self, info=False):
-        # All components of library are header-only except csv-archive and msgpack-archive
+        # All components are header-only except the compiled JSON, CSV and MsgPack archives.
         options = self.info.options if info else self.options
-        return not (options.with_csv or options.get_safe("with_msgpack"))
+        return not (
+            options.get_safe("with_json")
+            or options.get_safe("with_csv")
+            or options.get_safe("with_msgpack")
+        )
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.90":
+            self.options.rm_safe("with_json")
+            self.options.rm_safe("with_fast_float")
 
     def configure(self):
         if self._is_header_only():
@@ -63,13 +74,30 @@ class BitserializerConan(ConanFile):
         if self.options.get_safe("with_rapidjson"):
             self.requires("rapidjson/1.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_pugixml"):
-            self.requires("pugixml/1.15", transitive_headers=True, transitive_libs=True)
+            # PugiXml declares the std::string_view overload in the header when the consumer
+            # uses C++17, but its prebuilt library is compiled with an older standard.
+            # Use the header-only package so declarations and definitions match.
+            self.requires("pugixml/1.15", transitive_headers=True, transitive_libs=True,
+                          options={"header_only": True})
+        if self.options.get_safe("with_fast_float"):
+            self.requires("fast_float/8.2.10", transitive_headers=True)
         if self.options.get_safe("with_rapidyaml"):
-            self.requires("rapidyaml/[>=0.8.0 <=0.10.0]", transitive_headers=True, transitive_libs=True)
+            # RapidYAML headers inline c4core code. The CCI rapidyaml recipe exposes the c4core
+            # headers but does not propagate its libraries, so consumers that include the ryml
+            # headers need c4core at link time as well.
+            if Version(self.version) >= "0.90":
+                self.requires("rapidyaml/[>=0.15.2 <0.17]", transitive_headers=True, transitive_libs=True)
+                self.requires("c4core/0.4.0", transitive_headers=True, transitive_libs=True)
+            else:
+                self.requires("rapidyaml/[>=0.8.0 <=0.10.0]", transitive_headers=True, transitive_libs=True)
+                self.requires("c4core/0.2.0", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         if self._is_header_only(info=True):
+            fast_float = self.info.options.get_safe("with_fast_float")
             self.info.clear()
+            if fast_float is not None:
+                self.info.options.with_fast_float = fast_float
 
     def validate(self):
         check_min_cppstd(self, 17)
@@ -86,23 +114,33 @@ class BitserializerConan(ConanFile):
     def generate(self):
         if not self._is_header_only():
             tc = CMakeToolchain(self)
-            tc.cache_variables["BUILD_RAPIDJSON_ARCHIVE"] = self.options.get_safe("with_rapidjson")
-            tc.cache_variables["BUILD_PUGIXML_ARCHIVE"] = self.options.get_safe("with_pugixml")
-            tc.cache_variables["BUILD_RAPIDYAML_ARCHIVE"] = self.options.get_safe("with_rapidyaml")
-            tc.cache_variables["BUILD_CSV_ARCHIVE"] = self.options.get_safe("with_csv")
-            tc.cache_variables["BUILD_MSGPACK_ARCHIVE"] = self.options.get_safe("with_msgpack")
+            for option, cache_variable in (
+                ("with_rapidjson", "BUILD_RAPIDJSON_ARCHIVE"),
+                ("with_pugixml", "BUILD_PUGIXML_ARCHIVE"),
+                ("with_rapidyaml", "BUILD_RAPIDYAML_ARCHIVE"),
+                ("with_csv", "BUILD_CSV_ARCHIVE"),
+                ("with_msgpack", "BUILD_MSGPACK_ARCHIVE"),
+                ("with_json", "BUILD_JSON_ARCHIVE"),
+            ):
+                value = self.options.get_safe(option)
+                if value is not None:
+                    tc.cache_variables[cache_variable] = value
+            if self.options.get_safe("with_fast_float") is False:
+                tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_FastFloat"] = True
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
 
     def _patch_sources(self):
-        # Remove 'ryml' subdirectory from #include
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "include", "bitserializer", "rapidyaml_archive.h"),
-            "#include \"ryml/",
-            "#include \"",
-        )
+        # BitSerializer 0.90 and later detect both ryml.hpp layouts with __has_include.
+        # Older releases only include "ryml/..." and need the path flattened.
+        if Version(self.version) < "0.90":
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "include", "bitserializer", "rapidyaml_archive.h"),
+                "#include \"ryml/",
+                "#include \"",
+            )
 
     def build(self):
         if not self._is_header_only():
@@ -125,12 +163,16 @@ class BitserializerConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "bitserializer")
 
         # bitserializer-core
-        self.cpp_info.components["bitserializer-core"].set_property("cmake_target_name", "BitSerializer::core")
-        self.cpp_info.components["bitserializer-core"].bindirs = []
-        self.cpp_info.components["bitserializer-core"].libdirs = []
+        core = self.cpp_info.components["bitserializer-core"]
+        core.set_property("cmake_target_name", "BitSerializer::core")
+        core.bindirs = []
+        core.libdirs = []
+        if self.options.get_safe("with_fast_float"):
+            core.requires = ["fast_float::fast_float"]
+            core.defines = ["BITSERIALIZER_HAS_FAST_FLOAT=1"]
         if self.settings.compiler == "gcc" or (self.settings.os == "Linux" and self.settings.compiler == "clang"):
             if Version(self.settings.compiler.version) < 9:
-                self.cpp_info.components["bitserializer-core"].system_libs = ["stdc++fs"]
+                core.system_libs = ["stdc++fs"]
 
         # rapidjson-archive
         if self.options.get_safe("with_rapidjson"):
@@ -151,7 +193,13 @@ class BitserializerConan(ConanFile):
             self.cpp_info.components["bitserializer-rapidyaml"].set_property("cmake_target_name", "BitSerializer::rapidyaml-archive")
             self.cpp_info.components["bitserializer-rapidyaml"].bindirs = []
             self.cpp_info.components["bitserializer-rapidyaml"].libdirs = []
-            self.cpp_info.components["bitserializer-rapidyaml"].requires = ["bitserializer-core", "rapidyaml::rapidyaml"]
+            self.cpp_info.components["bitserializer-rapidyaml"].requires = ["bitserializer-core", "rapidyaml::rapidyaml", "c4core::c4core"]
+
+        # json-archive
+        if self.options.get_safe("with_json"):
+            self.cpp_info.components["bitserializer-json"].set_property("cmake_target_name", "BitSerializer::json-archive")
+            self.cpp_info.components["bitserializer-json"].requires = ["bitserializer-core"]
+            self.cpp_info.components["bitserializer-json"].libs = [f"bitserializer-json{lib_suffix}"]
 
         # csv-archive
         if self.options.get_safe("with_csv"):

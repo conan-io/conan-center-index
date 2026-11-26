@@ -23,6 +23,7 @@ class TestPackageConan(ConanFile):
         tc.variables["WITH_RAPIDYAML"] = bitserializerOptions.get_safe("with_rapidyaml", False)
         tc.variables["WITH_CSV"] = bitserializerOptions.get_safe("with_csv", False)
         tc.variables["WITH_MSGPACK"] = bitserializerOptions.get_safe("with_msgpack", False)
+        tc.variables["WITH_JSON"] = bitserializerOptions.get_safe("with_json", False)
         tc.generate()
 
     def build(self):
