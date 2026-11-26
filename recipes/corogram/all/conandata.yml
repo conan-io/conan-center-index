@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/corogram/corogram/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "72994add1d5ac03476ee73c7905cfd3b1937baa8e1f0a38aa11907c593f8bb78"
