@@ -205,7 +205,7 @@ class Gtk4Conan(ConanFile):
             self.cpp_info.components["gtk-win32"].set_property("pkg_config_name", "gtk4-win32")
             self.cpp_info.components["gtk-win32"].set_property("pkg_config_custom_content", pkgconfig_vars)
             self.cpp_info.components["gtk-win32"].libdirs = []
-            self.cpp_info.components["gtk-win32"].requires = ["gtk-4"]
+            self.cpp_info.components["gtk-win32"].requires = ["gtk-4", "directx-headers::directx-headers"]
         elif self.settings.os == "Macos":
             self.cpp_info.components["gtk-macos"].set_property("pkg_config_name", "gtk4-macos")
             self.cpp_info.components["gtk-macos"].set_property("pkg_config_custom_content", pkgconfig_vars)
