@@ -1,0 +1,5 @@
+sources:
+  "2.4.1.cci.20261124":
+    # reference source code by commit id, every release gets version v2.4.1
+    url: "https://github.com/lovell/libimagequant/archive/9c6eca0f62c9fe63650c1f15e527bc94b280f4d2.tar.gz"
+    sha256: "5e4754a8be0a3cd7602bd02c11c755f0648a31dea4e69707c49a9ac9623e2888"
