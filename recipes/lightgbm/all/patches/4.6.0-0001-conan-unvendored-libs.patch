@@ -1,0 +1,63 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 168026f..3d0b7e4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -35,12 +35,9 @@ endif()
+ 
+ project(lightgbm LANGUAGES C CXX)
+ 
+-if(BUILD_CPP_TEST)
+-  set(CMAKE_CXX_STANDARD 14)
+-else()
+-  set(CMAKE_CXX_STANDARD 11)
+-endif()
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
++find_package(Eigen3 REQUIRED CONFIG)
++find_package(fast_double_parser REQUIRED CONFIG)
++find_package(fmt REQUIRED CONFIG)
+ 
+ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
+ 
+@@ -116,18 +113,11 @@ if(USE_SWIG)
+   file(MAKE_DIRECTORY "${LGBM_SWIG_DESTINATION_DIR}")
+ endif()
+ 
+-set(EIGEN_DIR "${PROJECT_SOURCE_DIR}/external_libs/eigen")
+-include_directories(${EIGEN_DIR})
+ 
+ # See https://gitlab.com/libeigen/eigen/-/blob/master/COPYING.README
+ add_definitions(-DEIGEN_MPL2_ONLY)
+ add_definitions(-DEIGEN_DONT_PARALLELIZE)
+ 
+-set(FAST_DOUBLE_PARSER_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/external_libs/fast_double_parser/include")
+-include_directories(${FAST_DOUBLE_PARSER_INCLUDE_DIR})
+-
+-set(FMT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/external_libs/fmt/include")
+-include_directories(${FMT_INCLUDE_DIR})
+ 
+ if(__BUILD_FOR_R)
+     find_package(LibR REQUIRED)
+@@ -470,6 +460,9 @@ else()
+   add_library(_lightgbm SHARED)
+ endif()
+ 
++target_link_libraries(lightgbm_objs PRIVATE Eigen3::Eigen fast_double_parser::fast_double_parser fmt::fmt)
++target_link_libraries(lightgbm_capi_objs PRIVATE Eigen3::Eigen fast_double_parser::fast_double_parser fmt::fmt)
++
+ # R expects libraries of the form <project>.{dll,dylib,so}, not lib_<project>.{dll,dylib,so}
+ if(__BUILD_FOR_R)
+   set_target_properties(
+@@ -793,13 +786,4 @@ if(INSTALL_HEADERS)
+       DIRECTORY ${LightGBM_HEADER_DIR}/LightGBM
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+     )
+-    install(
+-      FILES ${FAST_DOUBLE_PARSER_INCLUDE_DIR}/fast_double_parser.h
+-      DESTINATION ${CMAKE_INSTALL_PREFIX}/include/LightGBM/utils
+-    )
+-    install(
+-      DIRECTORY ${FMT_INCLUDE_DIR}/
+-      DESTINATION ${CMAKE_INSTALL_PREFIX}/include/LightGBM/utils
+-      FILES_MATCHING PATTERN "*.h"
+-    )
+ endif()

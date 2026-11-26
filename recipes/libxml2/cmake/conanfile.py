@@ -124,8 +124,10 @@ class Libxml2Conan(ConanFile):
 
     def package_info(self):
         postfix = ""
-        prefix = "lib" if self.settings.os == "Windows" else ""
-        if is_msvc(self):
+        # compiler.runtime distinguishes clang-cl (has MSVC runtime, e.g. "dynamic") from clang targeting libc++ (no compiler.runtime setting)
+        msvc_like = self.settings.os == "Windows" and self.settings.compiler in ["msvc", "clang"] and self.settings.get_safe("compiler.runtime")
+        prefix = "lib" if msvc_like else ""
+        if msvc_like:
             static_postfix = "s" if not self.options.shared else ""
             debug_postfix = "d" if self.settings.build_type == "Debug" else ""
             postfix = f"{static_postfix}{debug_postfix}"
@@ -142,9 +144,10 @@ class Libxml2Conan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libxml2")
         self.cpp_info.set_property("cmake_target_name", "LibXml2::LibXml2")
         self.cpp_info.set_property("cmake_additional_variables_prefixes", ["LIBXML2"])
+        self.cpp_info.set_property("cmake_file_name_variants", ["LibXml2"])
         self.cpp_info.set_property("pkg_config_name", "libxml-2.0")
 
-        is_unix = self.settings.os in ["Linux", "FreeBSD", "Macos"] or is_apple_os(self)
+        is_unix = self.settings.os in ["Linux", "FreeBSD", "Macos", "Android"] or is_apple_os(self)
 
         if is_unix:
             self.cpp_info.system_libs.append("m")
@@ -162,5 +165,5 @@ class Libxml2Conan(ConanFile):
         if self.options.zlib:
             self.cpp_info.requires.append("zlib::zlib")
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("Bcrypt")
+            self.cpp_info.system_libs.append("bcrypt")
             self.cpp_info.system_libs.append("ws2_32") # http

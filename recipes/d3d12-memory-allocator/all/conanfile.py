@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir
 import os
 
@@ -19,9 +19,11 @@ class D3D12MemoryAllocatorConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
+        "with_dxheaders": [True, False],
     }
     default_options = {
         "shared": False,
+        "with_dxheaders": False,
     }
 
     def validate(self):
@@ -35,6 +37,10 @@ class D3D12MemoryAllocatorConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
+    def requirements(self):
+        if self.options.with_dxheaders:
+            self.requires("directx-headers/[>=1.618.2 <2]", transitive_headers=True)
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25]")
 
@@ -42,7 +48,12 @@ class D3D12MemoryAllocatorConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["D3D12MA_BUILD_SAMPLE"] = False
+        tc.cache_variables["D3D12MA_USING_DIRECTX_HEADERS"] = self.options.with_dxheaders
+
         tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -56,6 +67,9 @@ class D3D12MemoryAllocatorConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        if self.options.with_dxheaders:
+            self.cpp_info.defines.append("D3D12MA_USING_DIRECTX_HEADERS")
+
         self.cpp_info.set_property("cmake_file_name", "D3D12MemoryAllocator")
         self.cpp_info.set_property("cmake_target_name", "GPUOpen::D3D12MemoryAllocator")
         postfix = {"Release": "", "Debug": "d", "RelWithDebInfo": "rd", "MinSizeRel": "s"}[str(self.settings.build_type)]

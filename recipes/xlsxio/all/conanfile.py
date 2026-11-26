@@ -55,7 +55,7 @@ class XlsxioConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libzip:
-            self.requires("libzip/1.10.1")
+            self.requires("libzip/[>=1.10.1 <2]")
         elif Version(self.version) >= "0.2.34" and self.options.with_minizip_ng :
             self.requires("minizip-ng/[>=4.0.1 <5]")
         else:

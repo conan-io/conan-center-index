@@ -88,7 +88,15 @@ class LuauConan(ConanFile):
         # Compiler
         self.cpp_info.components["Compiler"].libs = ["Luau.Compiler"]
         self.cpp_info.components["Compiler"].set_property("cmake_target_name", "Luau::Compiler")
-        self.cpp_info.components["Compiler"].requires = ["Ast"]
+        self.cpp_info.components["Compiler"].requires = ["Ast", "Bytecode"]
+        # Bytecode
+        self.cpp_info.components["Bytecode"].libs = ["Luau.Bytecode"]
+        self.cpp_info.components["Bytecode"].set_property("cmake_target_name", "Luau::Bytecode")
+        self.cpp_info.components["Bytecode"].requires = ["Common"]
+        # Inliner
+        self.cpp_info.components["Inliner"].libs = ["Luau.Inliner"]
+        self.cpp_info.components["Inliner"].set_property("cmake_target_name", "Luau::Inliner")
+        self.cpp_info.components["Inliner"].requires = ["Bytecode", "VM"]
         # CodeGen
         self.cpp_info.components["CodeGen"].libs = ["Luau.CodeGen"]
         self.cpp_info.components["CodeGen"].set_property("cmake_target_name", "Luau::CodeGen")

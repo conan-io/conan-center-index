@@ -32,17 +32,17 @@ class AwsCrtCpp(ConanFile):
 
     def requirements(self):
         # Bump these in accordance with aws-sdk-cpp
-        self.requires("aws-c-common/0.12.5")
-        self.requires("aws-c-sdkutils/0.2.4")
-        self.requires("aws-c-io/0.23.2", transitive_headers=True)
-        self.requires("aws-c-cal/0.9.8")
-        self.requires("aws-c-compression/0.3.1")
-        self.requires("aws-c-http/0.10.5", transitive_headers=True)
-        self.requires("aws-c-auth/0.9.1", transitive_headers=True)
-        self.requires("aws-c-mqtt/0.13.3", transitive_headers=True)
-        self.requires("aws-checksums/0.2.6")
-        self.requires("aws-c-event-stream/0.5.7")
-        self.requires("aws-c-s3/0.9.2")
+        self.requires("aws-c-common/0.14.5", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-sdkutils/0.2.9")
+        self.requires("aws-c-io/0.27.6", transitive_headers=True, transitive_libs=True)
+        self.requires("aws-c-cal/0.9.15")
+        self.requires("aws-c-compression/0.3.2")
+        self.requires("aws-c-http/0.11.0", transitive_headers=True)
+        self.requires("aws-c-auth/0.10.4", transitive_headers=True)
+        self.requires("aws-c-mqtt/0.16.1", transitive_headers=True)
+        self.requires("aws-checksums/0.2.10")
+        self.requires("aws-c-event-stream/0.7.1")
+        self.requires("aws-c-s3/0.13.5")
 
     def validate(self):
         check_min_cppstd(self, 11)

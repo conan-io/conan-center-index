@@ -1,0 +1,41 @@
+From 2b0956bed3ee0e8c329af94c056e2c4f719ba3da Mon Sep 17 00:00:00 2001
+From: David Seifert <soap@gentoo.org>
+Date: Sat, 27 Jul 2024 20:12:19 +0200
+Subject: [PATCH 2/2] Fix for GCC 15 two-phase lookup
+
+* GCC 15 is more aggressive about checking dependent names:
+  https://gcc.gnu.org/git/?p=gcc.git;a=commitdiff;h=r15-2117-g313afcfdabeab3
+
+Bug: https://bugs.gentoo.org/936634
+---
+ src/math/lp/static_matrix.h     | 2 +-
+ src/math/lp/static_matrix_def.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/math/lp/static_matrix.h b/src/math/lp/static_matrix.h
+index 9d6bb859964..42dd476b5d4 100644
+--- a/src/math/lp/static_matrix.h
++++ b/src/math/lp/static_matrix.h
+@@ -79,7 +79,7 @@ class static_matrix
+         ref(static_matrix & m, unsigned row, unsigned col):m_matrix(m), m_row(row), m_col(col) {}
+         ref & operator=(T const & v) { m_matrix.set( m_row, m_col, v); return *this; }
+ 
+-        ref operator=(ref & v) { m_matrix.set(m_row, m_col, v.m_matrix.get(v.m_row, v.m_col)); return *this; }
++        ref operator=(ref & v) { m_matrix.set(m_row, m_col, v.m_matrix.get_elem(v.m_row, v.m_col)); return *this; }
+ 
+         operator T () const { return m_matrix.get_elem(m_row, m_col); }
+     };
+diff --git a/src/math/lp/static_matrix_def.h b/src/math/lp/static_matrix_def.h
+index 0370ee8990a..c3b2fc16821 100644
+--- a/src/math/lp/static_matrix_def.h
++++ b/src/math/lp/static_matrix_def.h
+@@ -92,7 +92,7 @@ static_matrix<T, X>::static_matrix(static_matrix const &A, unsigned * /* basis *
+     init_row_columns(m, m);
+     for (; m-- > 0; ) 
+         for (auto & col : A.m_columns[m]) 
+-            set(col.var(), m, A.get_value_of_column_cell(col));
++            set(col.var(), m, A.get_column_cell(col));
+ }
+ 
+ template <typename T, typename X> void static_matrix<T, X>::clear() {
+ 

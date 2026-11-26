@@ -65,6 +65,8 @@ class YamlCppConan(ConanFile):
         if is_msvc(self):
             tc.variables["YAML_MSVC_SHARED_RT"] = not is_msvc_static_runtime(self)
             tc.preprocessor_definitions["_NOEXCEPT"] = "noexcept"
+        if Version(self.version) >= "0.9.0":
+            tc.cache_variables["YAML_ENABLE_PIC"] = self.options.get_safe("fPIC", "OFF")
         tc.generate()
 
     def build(self):

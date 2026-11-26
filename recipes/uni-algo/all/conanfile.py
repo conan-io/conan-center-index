@@ -4,11 +4,10 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class UniAlgoConan(ConanFile):
@@ -68,17 +67,13 @@ class UniAlgoConan(ConanFile):
             self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-
-        if is_msvc(self) and self.options.get_safe("shared"):
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared with msvc")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -115,13 +110,16 @@ class UniAlgoConan(ConanFile):
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
         else:
+
+            if self.options.shared:
+                self.cpp_info.defines.append("UNI_ALGO_DLL_IMPORT")
+            ver = Version(self.version)
+            lib_name = f"{self.name}-v{ver.major}-{ver.minor}" if (self.settings.os == "Windows" and self.options.shared) else f"{self.name}"
+
             if self.settings.build_type == "Debug":
-                if Version(self.version) < "0.7":
-                    self.cpp_info.libs = [f"{self.name}d"]
-                else:
-                    self.cpp_info.libs = [f"{self.name}-debug"]
+                self.cpp_info.libs = [f"{lib_name}-debug"]
             else:
-                self.cpp_info.libs = [f"{self.name}"]
+                self.cpp_info.libs = [f"{lib_name}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 

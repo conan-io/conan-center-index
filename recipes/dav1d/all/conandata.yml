@@ -1,4 +1,4 @@
 sources:
-  "1.5.3":
-    url: "https://downloads.videolan.org/videolan/dav1d/1.5.3/dav1d-1.5.3.tar.xz"
-    sha256: "732010aa5ef461fa93355ed2c6c5fedb48ddc4b74e697eaabe8907eaeb943011"
+  "1.5.5":
+    url: "https://downloads.videolan.org/videolan/dav1d/1.5.5/dav1d-1.5.5.tar.xz"
+    sha256: "ca96b1d0ba3f01f55de7231d775892b64994ba061aaeeaaa4f662a390b3abf9e"

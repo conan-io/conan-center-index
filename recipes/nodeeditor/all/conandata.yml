@@ -2,3 +2,6 @@ sources:
   "3.0.11":
     url: "https://github.com/paceholder/nodeeditor/archive/refs/tags/3.0.11.tar.gz"
     sha256: "9810137d576d8d1049df29c0a8869a0dce4ae10636e3b042a841f5696f26187d"
+  "3.0.16":
+    url: "https://github.com/paceholder/nodeeditor/archive/refs/tags/3.0.16.tar.gz"
+    sha256: "453e6eb783379fee6edf9282283576eaa7d27349b8731e638926ccbd8331f7ef"

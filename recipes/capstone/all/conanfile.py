@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
 required_conan_version = ">=2.4"
@@ -39,10 +38,10 @@ class CapstoneConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = "C"
 
-    _archs = ["arm", "m68k", "mips", "ppc", "sparc", "sysz", "xcore", "x86", "tms320c64x", "m680x", "evm"]
+    _archs = ["arm", "aarch64", "m68k", "mips", "ppc", "sparc", "sysz", "xcore", "x86", "tms320c64x", "m680x", "evm"]
     options.update({a: [True, False] for a in _archs})
     default_options.update({a: True for a in _archs})
-
+        
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -57,11 +56,13 @@ class CapstoneConan(ConanFile):
 
         tc.cache_variables["CAPSTONE_BUILD_TESTS"] = False
         tc.cache_variables["CAPSTONE_BUILD_CSTOOL"] = False
-        tc.cache_variables["CAPSTONE_ARCHITECUTRE_DEFAULT"] = False
+        tc.cache_variables["CAPSTONE_ARCHITECTURE_DEFAULT"] = False
         tc.cache_variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
         for a in self._archs:
             tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
-        
+        # Older versions have arm64 naming for aarch64
+        tc.cache_variables["CAPSTONE_ARM64_SUPPORT"] = self.options.get_safe("aarch64")
+
         tc.generate()
 
     def build(self):

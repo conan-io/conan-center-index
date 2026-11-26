@@ -1,5 +1,5 @@
-#include <InfluxDBFactory.h>
-#include <InfluxDBException.h>
+#include <InfluxDB/InfluxDBFactory.h>
+#include <InfluxDB/InfluxDBException.h>
 #include <iostream>
 
 int main()

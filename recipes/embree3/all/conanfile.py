@@ -14,6 +14,7 @@ required_conan_version = ">=1.53.0"
 
 class EmbreeConan(ConanFile):
     name = "embree3"
+    deprecated = "Please use the embree recipe at version >=4"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("embree", "raytracing", "rendering")
@@ -43,7 +44,6 @@ class EmbreeConan(ConanFile):
         "ray_masking": [True, False],
         "backface_culling": [True, False],
         "ignore_invalid_rays": [True, False],
-        "with_tbb": [True, False],
     }
 
     default_options = {
@@ -67,20 +67,11 @@ class EmbreeConan(ConanFile):
         "ray_masking": False,
         "backface_culling": False,
         "ignore_invalid_rays": False,
-        "with_tbb": False,
     }
 
     @property
     def _has_sse_avx(self):
         return self.settings.arch in ["x86", "x86_64"]
-
-    @property
-    def _embree_has_neon_support(self):
-        return Version(self.version) >= "3.13.0"
-
-    @property
-    def _embree_has_neon2x_support(self):
-        return Version(self.version) >= "3.13.4"
 
     @property
     def _has_neon(self):
@@ -94,9 +85,9 @@ class EmbreeConan(ConanFile):
     def _num_isa(self):
         num_isa = 0
         if self._has_neon:
-            if self._embree_has_neon_support and self.options.neon:
+            if self.options.neon:
                 num_isa += 1
-            if self._embree_has_neon2x_support and self.options.neon2x:
+            if self.options.neon2x:
                 num_isa += 1
         for simd_option in ["sse2", "sse42", "avx", "avx2", "avx512"]:
             if self.options.get_safe(simd_option):
@@ -118,11 +109,6 @@ class EmbreeConan(ConanFile):
         if not self._has_neon:
             del self.options.neon
             del self.options.neon2x
-        else:
-            if not self._embree_has_neon_support:
-                del self.options.neon
-            if not self._embree_has_neon2x_support:
-                del self.options.neon2x
 
     def configure(self):
         if self.options.shared:
@@ -131,12 +117,8 @@ class EmbreeConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def requirements(self):
-        if self.options.with_tbb:
-            self.requires("onetbb/2021.7.0")
-
     def validate(self):
-        if not (self._has_sse_avx or (self._embree_has_neon_support and self._has_neon)):
+        if not (self._has_sse_avx or self._has_neon):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support {self.settings.arch}")
 
         compiler_version = Version(self.settings.compiler.version)
@@ -174,23 +156,17 @@ class EmbreeConan(ConanFile):
         tc.variables["EMBREE_BACKFACE_CULLING"] = self.options.backface_culling
         tc.variables["EMBREE_IGNORE_INVALID_RAYS"] = self.options.ignore_invalid_rays
         tc.variables["EMBREE_ISPC_SUPPORT"] = False
-        tc.variables["EMBREE_TASKING_SYSTEM"] = "TBB" if self.options.with_tbb else "INTERNAL"
+        tc.variables["EMBREE_TASKING_SYSTEM"] = "INTERNAL"
         tc.variables["EMBREE_MAX_ISA"] = "NONE"
-        if self._embree_has_neon_support:
-            tc.variables["EMBREE_ISA_NEON"] = self.options.get_safe("neon", False)
-        if self._embree_has_neon2x_support:
-            tc.variables["EMBREE_ISA_NEON2X"] = self.options.get_safe("neon2x", False)
+        tc.variables["EMBREE_ISA_NEON"] = self.options.get_safe("neon", False)
+        tc.variables["EMBREE_ISA_NEON2X"] = self.options.get_safe("neon2x", False)
 
         tc.variables["EMBREE_ISA_SSE2"] = self.options.get_safe("sse2", False)
         tc.variables["EMBREE_ISA_SSE42"] = self.options.get_safe("sse42", False)
         tc.variables["EMBREE_ISA_AVX"] = self.options.get_safe("avx", False)
         tc.variables["EMBREE_ISA_AVX2"] = self.options.get_safe("avx2", False)
-        if Version(self.version) < "3.12.2":
-            # TODO: probably broken if avx512 enabled, must cumbersome to add specific options in the recipe
-            tc.variables["EMBREE_ISA_AVX512KNL"] = self.options.get_safe("avx512", False)
-            tc.variables["EMBREE_ISA_AVX512SKX"] = self.options.get_safe("avx512", False)
-        else:
-            tc.variables["EMBREE_ISA_AVX512"] = self.options.get_safe("avx512", False)
+        tc.variables["EMBREE_ISA_AVX512"] = self.options.get_safe("avx512", False)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -260,17 +236,10 @@ class EmbreeConan(ConanFile):
         self.cpp_info.libs = ["embree3"]
         if not self.options.shared:
             self.cpp_info.libs.extend(["sys", "math", "simd", "lexers", "tasking"])
-            simd_libs = ["embree_sse42", "embree_avx", "embree_avx2"]
-            simd_libs.extend(["embree_avx512knl", "embree_avx512skx"] if Version(self.version) < "3.12.2" else ["embree_avx512"])
+            simd_libs = ["embree_sse42", "embree_avx", "embree_avx2", "embree_avx512"]
             for lib in simd_libs:
                 if _lib_exists(lib):
                     self.cpp_info.libs.append(lib)
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "embree"
-        self.cpp_info.names["cmake_find_package_multi"] = "embree"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

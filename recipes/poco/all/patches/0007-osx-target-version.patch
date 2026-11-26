@@ -1,0 +1,14 @@
+Let Conan configure CMAKE_OSX_DEPLOYMENT_TARGET - Conan Center uses 13.0 by default
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 56ca6e5..d506c04 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.26.0)
+
+ # Minimum macOS version.
+ # Must be set before the project.
+-set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0" CACHE STRING "macOS minimum supported target")
+
+ # Compiler selection (must be processed before project())
+ # Provides POCO_COMPILER and POCO_CROSS_COMPILE cache variables.

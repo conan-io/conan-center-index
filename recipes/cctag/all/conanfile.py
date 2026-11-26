@@ -57,7 +57,7 @@ class CCTagConan(ConanFile):
     def requirements(self):
         self.requires(f"boost/1.85.0", transitive_headers=True, transitive_libs=True)
         self.requires("opencv/[>=4.9.0 <5]", transitive_headers=True, transitive_libs=True)
-        self.requires("onetbb/2021.10.0")
+        self.requires("onetbb/[>=2021.10.0 <2024]")
         self.requires("eigen/[>=3.4.0 <4]", transitive_headers=True)
 
     @property

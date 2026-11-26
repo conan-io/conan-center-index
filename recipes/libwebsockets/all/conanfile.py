@@ -220,7 +220,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("miniz/3.0.2")
 
         if self.options.with_libmount:
-            self.requires("libmount/2.39.2")
+            self.requires("libmount/[>=2.42.4 <3]")
 
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.44.2")
@@ -230,7 +230,7 @@ class LibwebsocketsConan(ConanFile):
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/3.5.0")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.6.3")
+            self.requires("wolfssl/[>=5.6.6 <6]")
 
     def validate(self):
         if self.options.shared and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
@@ -293,6 +293,13 @@ class LibwebsocketsConan(ConanFile):
         tc.variables["LWS_WITH_STATIC"] = not self.options.shared
         tc.variables["LWS_WITH_SSL"] = bool(self.options.with_ssl)
         tc.variables["LWS_WITH_NETLINK"] = self.options.with_netlink
+        # libwebsockets detects libcap on the build machine, but libcap is not a
+        # requirement of this recipe and is not propagated, so consumers of a
+        # static build fail with undefined cap_* symbols. Never use it: 4.5
+        # reads LWS_WITH_LIBCAP, and 4.3 skips its check when LWS_HAVE_LIBCAP is
+        # already set.
+        tc.variables["LWS_WITH_LIBCAP"] = False
+        tc.variables["LWS_HAVE_LIBCAP"] = False
 
         # Allow forwarding project targets to try_compile and derivatives
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
@@ -422,7 +429,8 @@ class LibwebsocketsConan(ConanFile):
         tc.variables["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
         tc.variables["DISABLE_WERROR"] = True
 
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) < "4.5.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -431,8 +439,8 @@ class LibwebsocketsConan(ConanFile):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self,
             cmakelists,
-            "SET(CMAKE_INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}${LIB_SUFFIX}\")",
-            "",
+            'SET(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}',
+            '# SET(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}',
         )
 
         # Early call to find_package(OpenSSL) because its referenced in different places

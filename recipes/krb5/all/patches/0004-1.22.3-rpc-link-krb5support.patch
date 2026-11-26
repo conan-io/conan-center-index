@@ -1,0 +1,29 @@
+Fix: link libgssrpc against libkrb5support
+
+Reported error:
+
+Undefined symbols for architecture arm64:
+  "_k5_secure_getenv", referenced from:
+      _gssrpc__svcauth_gssapi in svc_auth_gssapi.so
+
+That function is provided by libkrb5support, but libgssrpc does not
+link against it, so linking fails where undefined symbols.
+
+Regression coming from https://github.com/krb5/krb5/commit/8aab893c6e
+Suggested fix: https://github.com/krb5/krb5/pull/1564
+
+diff --git a/src/lib/rpc/Makefile.in b/src/lib/rpc/Makefile.in
+index 39db2d3ce9..7658f4ff70 100644
+--- a/src/lib/rpc/Makefile.in
++++ b/src/lib/rpc/Makefile.in
+@@ -14,8 +14,9 @@ SHLIB_EXPDEPS= \
+ 	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
+ 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+ 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
++	$(TOPLIBD)/libkrb5support$(SHLIBEXT) \
+ 	$(COM_ERR_DEPLIB)
+-SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto $(COM_ERR_LIB) $(LIBS)
++SHLIB_EXPLIBS=-lgssapi_krb5 -lkrb5 -lk5crypto -lkrb5support $(COM_ERR_LIB) $(LIBS)
+ RELDIR=rpc
+ 
+ SRCS = $(srcdir)/auth_none.c \

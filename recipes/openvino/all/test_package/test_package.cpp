@@ -1,61 +1,53 @@
+#include <stdbool.h>
+
 #include <openvino/c/openvino.h>
-#include <openvino/core/visibility.hpp>
+#include <openvino/openvino.hpp>
 #include <openvino/frontend/manager.hpp>
 
-#define OV_SUCCESS(statement) \
-    if ((statement) != 0) \
-        return 1;
+#define TEST(statement) { int value = (statement); if (value) return value; }
 
-#define OV_FAIL(statement) \
-    if ((statement) == 0) \
-        return 1;
 
-int test_available_frontends() {
+int main() {
+    // Test frontends
     ov::frontend::FrontEndManager manager;
-    auto frontend_found = [&] (const std::string & name) -> int {
+    auto frontend_available = [&] (const std::string & name) -> bool {
         try {
             manager.load_by_framework(name);
-        } catch (const std::exception & e) {
-            return 1;
+            return true;
+        } catch (const std::exception &e) {
+            return false;
+        }
+    };
+    auto test_frontend = [&] (int test_id, const std::string &name, bool enabled) -> int {
+        if (frontend_available(name) != enabled) {
+            return test_id;
         }
         return 0;
     };
+    TEST(test_frontend(1001, "ir", ENABLE_IR_FRONTEND));
+    TEST(test_frontend(1002, "tflite", ENABLE_TF_LITE_FRONTEND));
+    TEST(test_frontend(1003, "pytorch", ENABLE_PYTORCH_FRONTEND));
+    TEST(test_frontend(1004, "onnx", ENABLE_ONNX_FRONTEND));
+    TEST(test_frontend(1005, "tf", ENABLE_TF_FRONTEND));
+    TEST(test_frontend(1006, "paddle", ENABLE_PADDLE_FRONTEND));
 
-#ifdef ENABLE_IR_FRONTEND
-    OV_SUCCESS(frontend_found("ir"));
-#else
-    OV_FAIL(frontend_found("ir"));
-#endif
-#ifdef ENABLE_TF_LITE_FRONTEND
-    OV_SUCCESS(frontend_found("tflite"));
-#else
-    OV_FAIL(frontend_found("tflite"));
-#endif
-#ifdef ENABLE_PYTORCH_FRONTEND
-    OV_SUCCESS(frontend_found("pytorch"));
-#else
-    OV_FAIL(frontend_found("pytorch"));
-#endif
-#ifdef ENABLE_ONNX_FRONTEND
-    OV_SUCCESS(frontend_found("onnx"));
-#else
-    OV_FAIL(frontend_found("onnx"));
-#endif
-#ifdef ENABLE_TF_FRONTEND
-    OV_SUCCESS(frontend_found("tf"));
-#else
-    OV_FAIL(frontend_found("tf"));
-#endif
-#ifdef ENABLE_PADDLE_FRONTEND
-    OV_SUCCESS(frontend_found("paddle"));
-#else
-    OV_FAIL(frontend_found("paddle"));
-#endif
-    return 0;
-}
-
-int main() {
-    OV_SUCCESS(test_available_frontends());
+    ov::Core core;
+    auto test_device = [&] (int test_id, const std::string &device, const std::string &prop, bool enabled) -> int {
+        bool available = false;
+        try {
+            core.get_property(device, prop);
+            available = true;
+        } catch (const std::exception &e) { }
+        if (available != enabled) {
+            return test_id;
+        }
+        return 0;
+    };
+    TEST(test_device(1101, "CPU", "AVAILABLE_DEVICES", ENABLE_INTEL_CPU));
+    //TEST(test_device(1102, "GPU", "AVAILABLE_DEVICES", ENABLE_INTEL_GPU));
+    TEST(test_device(1103, "AUTO", "SUPPORTED_PROPERTIES", ENABLE_AUTO));
+    TEST(test_device(1104, "BATCH", "SUPPORTED_PROPERTIES", ENABLE_AUTO_BATCH));
+    TEST(test_device(1105, "HETERO", "SUPPORTED_PROPERTIES", ENABLE_HETERO));
 
     // Deinitialize OpenVINO. Important for old systems like Ubuntu 16.04 with obsolete glibc,
     // where application deinit can lead to the following issue on exit:

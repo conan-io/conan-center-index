@@ -1,0 +1,4 @@
+sources:
+  "2.0":
+    url: "https://github.com/rwindegger/bigint23/archive/refs/tags/v2.0.tar.gz"
+    sha256: "623DAD137A6D536FBF975E8CF501920D709754955DE24DAB9EDCBEC62D645823"

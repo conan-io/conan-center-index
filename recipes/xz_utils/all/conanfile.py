@@ -1,16 +1,16 @@
-from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
-from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.files import copy, get, rename, replace_in_file, rm, rmdir, save
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, check_min_vs, is_msvc_static_runtime, MSBuild, MSBuildToolchain
+from conan.tools.scm import Version
+
+required_conan_version = ">=2"
 
 
 class XZUtilsConan(ConanFile):
@@ -29,15 +29,13 @@ class XZUtilsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_tools": False,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     @property
     def _effective_msbuild_type(self):
@@ -49,10 +47,6 @@ class XZUtilsConan(ConanFile):
         )
 
     @property
-    def _msbuild_target(self):
-        return "liblzma_dll" if self.options.shared else "liblzma"
-    
-    @property
     def _use_msbuild(self):
         assume_clang_cl = (self.settings.os == "Windows"
                            and self.settings.compiler == "clang"
@@ -62,9 +56,6 @@ class XZUtilsConan(ConanFile):
     @property
     def _use_cmake(self):
         return self.settings.os == "Windows" and Version(self.version) >= "5.8.1"
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -80,7 +71,7 @@ class XZUtilsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not self._use_msbuild and (Version(self.version) < "5.8.1" or self.settings.os == "Android"):
+        if self.settings_build.os == "Windows" and not self._use_msbuild and (Version(self.version) < "5.8.1" or self.settings.os == "Android"):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -98,25 +89,41 @@ class XZUtilsConan(ConanFile):
         elif self._use_cmake:
             tc = CMakeToolchain(self)
             tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+            if not self.options.with_tools:
+                tc.cache_variables["XZ_TOOL_XZ"] = False
+                tc.cache_variables["XZ_TOOL_XZDEC"] = False
+                tc.cache_variables["XZ_TOOL_LZMADEC"] = False
+                tc.cache_variables["XZ_TOOL_LZMAINFO"] = False
+                tc.cache_variables["ENABLE_SCRIPTS"] = False
+                tc.cache_variables["XZ_TOOL_SYMLINKS"] = False
+                tc.cache_variables["XZ_TOOL_SYMLINKS_LZMA"] = False
+                tc.cache_variables["XZ_DOC"] = False
+                # sandbox should only apply to the tools, so if the tools are enabled
+                # the sandboxing features will be enabled.
+                tc.cache_variables["XZ_SANDBOX"] = "no"
             tc.generate()
         else:
-            env = VirtualBuildEnv(self)
-            env.generate()
             tc = AutotoolsToolchain(self)
-            tc.configure_args.append("--disable-doc")
+            if not self.options.with_tools:
+                tc.configure_args.extend([
+                    "--disable-xz",
+                    "--disable-xzdec",
+                    "--disable-lzmadec",
+                    "--disable-lzmainfo",
+                    "--disable-scripts",
+                    "--disable-doc",
+                    "--disable-lzma-links",
+                    # sandbox should only apply to the tools, so if the tools are enabled
+                    # the sandboxing features will be enabled.
+                    "--disable-sandbox"
+                    ])
             if self.settings.build_type == "Debug":
                 tc.configure_args.append("--enable-debug")
             tc.generate()
 
-    @property
-    def _msvc_sln_folder(self):
-        if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
-           (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler) >= "191"):
-            return "vs2017"
-        return "vs2013"
-
     def _build_msvc(self):
-        build_script_folder = os.path.join(self.source_folder, "windows", self._msvc_sln_folder)
+        is_msvc_modern = check_min_vs(self, 191)
+        build_script_folder = os.path.join(self.source_folder, "windows", "vs2017" if is_msvc_modern else "vs2013")
 
         #==============================
         # TODO: to remove once https://github.com/conan-io/conan/pull/12817 available in conan client.
@@ -124,11 +131,7 @@ class XZUtilsConan(ConanFile):
             os.path.join(build_script_folder, "liblzma.vcxproj"),
             os.path.join(build_script_folder, "liblzma_dll.vcxproj"),
         ]
-        if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler) >= "15") or \
-           (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler) >= "191"):
-            old_toolset = "v141"
-        else:
-            old_toolset = "v120"
+        old_toolset = "v141" if is_msvc_modern else "v120"
         new_toolset = MSBuildToolchain(self).toolset
         conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
         for vcxproj_file in vcxproj_files:
@@ -142,10 +145,10 @@ class XZUtilsConan(ConanFile):
                 "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
                 f"<Import Project=\"{conantoolchain_props}\" /><Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\" />",
             )
-            
+
             if self.settings.arch == "armv8":
                 replace_in_file(self, vcxproj_file, "x64", "ARM64")
-            
+
         solution_file = os.path.join(build_script_folder, "xz_win.sln")
         if self.settings.arch == "armv8":
             replace_in_file(self, solution_file, "x64", "ARM64")
@@ -155,10 +158,9 @@ class XZUtilsConan(ConanFile):
         msbuild = MSBuild(self)
         msbuild.build_type = self._effective_msbuild_type
         msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
-        msbuild.build(os.path.join(build_script_folder, solution_file), targets=[self._msbuild_target])
+        msbuild.build(os.path.join(build_script_folder, solution_file), targets=["liblzma_dll" if self.options.shared else "liblzma"])
 
     def build(self):
-        apply_conandata_patches(self)
         if self._use_msbuild:
             self._build_msvc()
         elif self._use_cmake:
@@ -194,7 +196,6 @@ class XZUtilsConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "share"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             fix_apple_shared_install_name(self)
-
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path),
         )

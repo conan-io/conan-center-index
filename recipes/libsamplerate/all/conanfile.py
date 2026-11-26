@@ -6,7 +6,7 @@ from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibsamplerateConan(ConanFile):
@@ -47,7 +47,7 @@ class LibsamplerateConan(ConanFile):
     def build_requirements(self):
         if is_apple_os(self) and self.options.shared and Version(self.version) >= "0.2.2":
             # see https://github.com/libsndfile/libsamplerate/blob/0.2.2/src/CMakeLists.txt#L110-L119
-            self.tool_requires("cmake/[>=3.17 <4]")
+            self.tool_requires("cmake/[>=3.17]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -56,9 +56,10 @@ class LibsamplerateConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = CMakeToolchain(self)
-        tc.variables["LIBSAMPLERATE_EXAMPLES"] = False
-        tc.variables["LIBSAMPLERATE_INSTALL"] = True
-        tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["LIBSAMPLERATE_EXAMPLES"] = False
+        tc.cache_variables["LIBSAMPLERATE_INSTALL"] = True
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def _patch_sources(self):
@@ -88,11 +89,4 @@ class LibsamplerateConan(ConanFile):
         self.cpp_info.components["samplerate"].libs = ["samplerate"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["samplerate"].system_libs.append("m")
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "SampleRate"
-        self.cpp_info.names["cmake_find_package_multi"] = "SampleRate"
-        self.cpp_info.names["pkg_config"] = "samplerate"
-        self.cpp_info.components["samplerate"].names["cmake_find_package"] = "samplerate"
-        self.cpp_info.components["samplerate"].names["cmake_find_package_multi"] = "samplerate"
         self.cpp_info.components["samplerate"].set_property("cmake_target_name", "SampleRate::samplerate")

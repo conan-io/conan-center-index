@@ -48,6 +48,14 @@ main(int argc, char *argv[])
     char buffer [256] = {0};
 
     zip_error_init(&error);
+
+    if (zip_encryption_method_supported(ZIP_EM_AES_256, 0) == 0) {
+        #ifdef SHOULD_HAVE_CRYPTO
+        printf("Encryption is unexpectedly unsupported\n");
+        return 1;
+        #endif
+    }
+
     /* create source from buffer */
     if ((src = zip_source_buffer_create(data, size, 1, &error)) == NULL) {
         zip_error_fini(&error);

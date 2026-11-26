@@ -1,0 +1,153 @@
+From 03b00cc8f02aee8f1f0d0283f1f3c9328af19a0d Mon Sep 17 00:00:00 2001
+Date: Sun, 6 Aug 2023 17:44:12 -0700
+Subject: [PATCH 1/3] fix build with GNU13 and Eigen3.4
+
+
+diff --git a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/command.h b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/command.h
+index e7dbdedd3..ca4ef7fb1 100644
+--- a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/command.h
++++ b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/command.h
+@@ -43,6 +43,8 @@
+ 
+ #include <pcl/apps/point_cloud_editor/localTypes.h>
+ 
++#include <cassert>
++
+ /// @brief The abstract parent class of all the command classes. Commands are
+ /// non-copyable.
+ class Command
+diff --git a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/commandQueue.h b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/commandQueue.h
+index 93433339c..f69d9fa05 100644
+--- a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/commandQueue.h
++++ b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/commandQueue.h
+@@ -41,6 +41,7 @@
+ 
+ #pragma once
+ 
++#include <cassert>
+ #include <deque>
+ #include <pcl/apps/point_cloud_editor/localTypes.h>
+ 
+diff --git a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/select1DTool.h b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/select1DTool.h
+index fc21d80aa..ee34d7d75 100644
+--- a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/select1DTool.h
++++ b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/select1DTool.h
+@@ -44,6 +44,8 @@
+ 
+ #include <pcl/memory.h>  // for pcl::shared_ptr
+ 
++#include <cassert>
++
+ class Selection;
+ 
+ class Select1DTool : public ToolInterface
+diff --git a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/statistics.h b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/statistics.h
+index 8618e4b96..80d3fc474 100644
+--- a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/statistics.h
++++ b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/statistics.h
+@@ -42,6 +42,7 @@
+ 
+ #include <vector>
+ #include <string>
++#include <cassert>
+ #include <pcl/apps/point_cloud_editor/localTypes.h>
+ 
+ class Statistics
+diff --git a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/toolInterface.h b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/toolInterface.h
+index c5cc67c89..38111acba 100644
+--- a/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/toolInterface.h
++++ b/apps/point_cloud_editor/include/pcl/apps/point_cloud_editor/toolInterface.h
+@@ -43,6 +43,8 @@
+ 
+ #include <pcl/apps/point_cloud_editor/localTypes.h>
+ 
++#include <cassert>
++
+ /// @brief the parent class of all the select and the transform tool classes
+ class ToolInterface
+ {
+diff --git a/common/include/pcl/common/impl/gaussian.hpp b/common/include/pcl/common/impl/gaussian.hpp
+index 3b9c20b22..f8ecab25c 100644
+--- a/common/include/pcl/common/impl/gaussian.hpp
++++ b/common/include/pcl/common/impl/gaussian.hpp
+@@ -40,6 +40,7 @@
+ #pragma once
+ 
+ #include <pcl/common/gaussian.h>
++#include <cassert>
+ 
+ namespace pcl
+ {
+diff --git a/common/src/colors.cpp b/common/src/colors.cpp
+index 4d53ab130..77970055f 100644
+--- a/common/src/colors.cpp
++++ b/common/src/colors.cpp
+@@ -38,6 +38,7 @@
+ #include <pcl/point_types.h>
+ #include <pcl/common/colors.h>
+ 
++#include <cassert>
+ #include <array>
+ 
+ /// Glasbey lookup table
+diff --git a/common/src/gaussian.cpp b/common/src/gaussian.cpp
+index 69bbd1253..2b6a66716 100644
+--- a/common/src/gaussian.cpp
++++ b/common/src/gaussian.cpp
+@@ -36,6 +36,7 @@
+  */
+ 
+ #include <pcl/common/gaussian.h>
++#include <cassert>
+ 
+ void 
+ pcl::GaussianKernel::compute (float sigma, 
+diff --git a/common/src/range_image_planar.cpp b/common/src/range_image_planar.cpp
+index 97b249bc7..80f4ce1d1 100644
+--- a/common/src/range_image_planar.cpp
++++ b/common/src/range_image_planar.cpp
+@@ -34,6 +34,7 @@
+ 
+ /** \author Bastian Steder */
+ 
++#include <cassert>
+ #include <iostream>
+ using std::cout;
+ using std::cerr;
+diff --git a/geometry/include/pcl/geometry/mesh_base.h b/geometry/include/pcl/geometry/mesh_base.h
+index d9346bab9..f0437d2d5 100644
+--- a/geometry/include/pcl/geometry/mesh_base.h
++++ b/geometry/include/pcl/geometry/mesh_base.h
+@@ -48,6 +48,7 @@
+ #include <pcl/pcl_macros.h>
+ #include <pcl/point_cloud.h>
+ 
++#include <cassert>
+ #include <type_traits>
+ #include <vector>
+ 
+diff --git a/gpu/features/src/features.cpp b/gpu/features/src/features.cpp
+index cefd88b69..a0172c3a2 100644
+--- a/gpu/features/src/features.cpp
++++ b/gpu/features/src/features.cpp
+@@ -41,6 +41,8 @@
+ #include <pcl/exceptions.h>
+ #include <pcl/console/print.h>
+ 
++#include <cassert>
++
+ using namespace pcl::device;
+ 
+ /////////////////////////////////////////////////////////////////////////
+diff --git a/kdtree/include/pcl/kdtree/kdtree.h b/kdtree/include/pcl/kdtree/kdtree.h
+index 3a72725ee..a141d55b8 100644
+--- a/kdtree/include/pcl/kdtree/kdtree.h
++++ b/kdtree/include/pcl/kdtree/kdtree.h
+@@ -43,6 +43,7 @@
+ #include <pcl/point_cloud.h>
+ #include <pcl/point_representation.h>
+ #include <pcl/common/copy_point.h>
++#include <cassert>
+ 
+ namespace pcl
+ {

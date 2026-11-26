@@ -29,6 +29,14 @@ add_executable(${BINARY_TO_COMPRESSED_BIN} ${EXTRA_FONTS_DIR}/binary_to_compress
 target_compile_features(${BINARY_TO_COMPRESSED_BIN} PRIVATE cxx_std_11)
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
+
+if(IMGUI_WITH_SDL3_BINDING)
+    target_sources(${PROJECT_NAME} PRIVATE ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.cpp)
+    list(APPEND HEADER_FILES ${IMGUI_SRC_DIR}/backends/imgui_impl_sdl3.h)
+    find_package(SDL3 REQUIRED CONFIG)
+    target_link_libraries(${PROJECT_NAME} PUBLIC SDL3::SDL3)
+endif()
+
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN ON

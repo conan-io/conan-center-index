@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, CMakeToolchain
 
 required_conan_version = ">=2.1"
 
@@ -18,7 +18,6 @@ class IsptrRecipe(ConanFile):
     homepage = "https://github.com/gershnik/intrusive_shared_ptr"
     topics = ("smart-pointer", "intrusive", "header-only", "header-library")
 
-    generators = "CMakeToolchain"
     settings = "os", "arch", "build_type", "compiler"
     package_type = "header-library"
     no_copy_source = True
@@ -37,6 +36,11 @@ class IsptrRecipe(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+    
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -47,8 +51,8 @@ class IsptrRecipe(ConanFile):
         copy(self, pattern="LICENSE.txt", src=self.source_folder, dst=Path(self.package_folder) / "licenses")
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, Path(self.package_folder) / "share")
-        rm(self, "*.cmake", Path(self.package_folder) / "lib" / "isptr")
+        rm(self, "*.cmake", Path(self.package_folder) / "share" / "isptr")
+        rmdir(self, Path(self.package_folder) / "share" / "pkgconfig")
 
     def package_info(self):
         self.cpp_info.bindirs = []

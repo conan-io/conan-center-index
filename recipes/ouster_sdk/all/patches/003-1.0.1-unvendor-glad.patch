@@ -1,0 +1,35 @@
+diff --git a/ouster_viz/CMakeLists.txt b/ouster_viz/CMakeLists.txt
+index 0475f04..f3e70ab 100644
+--- a/ouster_viz/CMakeLists.txt
++++ b/ouster_viz/CMakeLists.txt
+@@ -16,7 +16,7 @@ add_library(ouster_viz STATIC src/point_viz.cpp src/cloud.cpp src/camera.cpp src
+   src/gltext.cpp src/misc.cpp src/glfw.cpp src/framebuffer.cpp src/screenshot_utils.cpp src/mesh.cpp
+   src/zone_monitor_voxel_mesh.cpp src/buffers.cpp src/object_overlay.cpp)
+ target_link_libraries(ouster_viz
+-  PRIVATE Eigen3::Eigen glfw ${GL_LOADER} OpenGL::GL ouster_core glad PNG::PNG)
++  PRIVATE Eigen3::Eigen glfw ${GL_LOADER} OpenGL::GL ouster_core glad::glad PNG::PNG)
+ 
+ if(APPLE)
+   enable_language(OBJCXX)
+@@ -41,7 +41,7 @@ target_include_directories(ouster_viz
+ add_library(OusterSDK::ouster_viz ALIAS ouster_viz)
+ 
+ # ==== Install ====
+-install(TARGETS ouster_viz glad
++install(TARGETS ouster_viz
+         EXPORT ouster-sdk-targets
+         RUNTIME DESTINATION bin
+         ARCHIVE DESTINATION lib
+diff --git a/ouster_viz/src/glfw.h b/ouster_viz/src/glfw.h
+index 76f0fb6..89af51c 100644
+--- a/ouster_viz/src/glfw.h
++++ b/ouster_viz/src/glfw.h
+@@ -7,7 +7,7 @@
+ 
+ // clang-format off
+ // GLAD must be included before GLFW
+-#include "glad.h"
++#include <glad/gl.h>
+ #include <GLFW/glfw3.h>
+ // clang-format on
+ 

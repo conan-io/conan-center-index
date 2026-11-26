@@ -1,4 +1,4 @@
 sources:
-  "1.9":
-    url: "https://github.com/gershnik/intrusive_shared_ptr/tarball/v1.9/isptr-1.9.tgz"
-    sha256: "f9095609a2226f3aa6dbfcd4726a8521a56f4fd2f426b0898d92acd1f133aa6d"
+  "1.14":
+    url: "https://github.com/gershnik/intrusive_shared_ptr/archive/refs/tags/v1.14.tar.gz"
+    sha256: "ebe460e2439d9dee07486425fbf7dc7d6be9b6be3abcd10cafecdbcea109b1ce"

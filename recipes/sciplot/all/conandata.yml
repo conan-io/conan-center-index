@@ -1,0 +1,4 @@
+sources:
+  "0.3.1":
+    url: "https://github.com/sciplot/sciplot/archive/refs/tags/v0.3.1.tar.gz"
+    sha256: "d5f8fa7783920c0db4f54d8d9cea8a5e50be99153e81dcaccf91532994ebbad0"

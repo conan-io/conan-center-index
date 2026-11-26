@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, check_min_vs
@@ -66,7 +66,7 @@ class BenchmarkConan(ConanFile):
             self.requires("libpfm4/4.13.0")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3]")
 
     def _patch_sources(self):
         replace_in_file(self,
@@ -89,10 +89,6 @@ class BenchmarkConan(ConanFile):
         tc.variables["BENCHMARK_ENABLE_WERROR"] = False
         tc.variables["BENCHMARK_FORCE_WERROR"] = False
         if self.settings.os != "Windows":
-            if cross_building(self):
-                tc.variables["HAVE_STD_REGEX"] = False
-                tc.variables["HAVE_POSIX_REGEX"] = False
-                tc.variables["HAVE_STEADY_CLOCK"] = False
             tc.variables["BENCHMARK_USE_LIBCXX"] = self.settings.compiler.get_safe("libcxx") == "libc++"
         else:
             tc.variables["BENCHMARK_USE_LIBCXX"] = False

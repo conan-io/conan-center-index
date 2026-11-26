@@ -9,7 +9,7 @@ from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.apple import is_apple_os
 import os
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=2.0"
 
 class GenieConan(ConanFile):
     name = "genie"
@@ -20,11 +20,6 @@ class GenieConan(ConanFile):
     topics = ("genie", "project", "generator", "build", "build-systems")
     settings = "os", "arch", "compiler", "build_type"
 
-    @property
-    def _settings_build(self):
-        # TODO: Remove for Conan v2
-        return getattr(self, "settings_build", self.settings)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -32,11 +27,11 @@ class GenieConan(ConanFile):
         del self.info.settings.compiler
 
     def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
+        if cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -97,12 +92,5 @@ class GenieConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
         
-        #TODO remove for conan v2
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bindir}")
-        self.env_info.PATH.append(bindir)
-
         if self.settings.build_type == "Debug":
-            resdir = os.path.join(self.package_folder, "res")
-            self.output.info(f"Appending PREMAKE_PATH environment variable: {resdir}")
-            self.env_info.PREMAKE_PATH.append(resdir)
+            self.buildenv_info.append_path("PREMAKE_PATH", os.path.join(self.package_folder, "res"))

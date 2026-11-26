@@ -24,7 +24,10 @@ class SpscqueueConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            if Version(self.version) >= "2.0.0":
+                check_min_cppstd(self, 20)
+            else:
+                check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("gcc < 5 not supported")
 

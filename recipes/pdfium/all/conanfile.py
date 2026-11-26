@@ -17,7 +17,7 @@ class PdfiumConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://opensource.google/projects/pdfium"
     topics = ("generate", "generation", "rendering", "pdf", "document", "print")
-
+    deprecated = "No longer maintained: the build is too complex to keep up to date in Conan Center"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -46,15 +46,15 @@ class PdfiumConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.13.2")
+        self.requires("freetype/[>=2.13.2 <3]")
         self.requires("icu/74.1")
         self.requires("lcms/2.16")
-        self.requires("openjpeg/2.5.0")
+        self.requires("openjpeg/[>=2.5 <3]")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_libjpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+            self.requires("libjpeg-turbo/[>=3.0.1 <4]")
 
     def validate(self):
         check_min_cppstd(self, 14)

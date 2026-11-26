@@ -147,6 +147,10 @@ class DuckdbConan(ConanFile):
         dpes.generate()
 
     def build(self):
+        # Upstream forces the static MSVC runtime, let the profile's compiler.runtime decide
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")',
+                        "")
         if is_msvc(self) and not self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "src", "include", "duckdb.h"),
                             f"#define DUCKDB_C_API __declspec(dllimport)",
@@ -166,6 +170,8 @@ class DuckdbConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        # No-op LoadAllExtensions, must not be linked together with duckdb_generated_extension_loader
+        rm(self, "*dummy_static_extension_loader*", os.path.join(self.package_folder, "lib"))
         if self.options.shared:
             rm(self, "duckdb_*.lib", os.path.join(self.package_folder, "lib"))
             for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
@@ -186,6 +192,7 @@ class DuckdbConan(ConanFile):
         else:
             self.cpp_info.libs = [
                 "duckdb_static",
+                "duckdb_generated_extension_loader",
                 "duckdb_fmt",
                 "duckdb_pg_query",
                 "duckdb_re2",
@@ -218,7 +225,7 @@ class DuckdbConan(ConanFile):
             if self.options.with_httpfs:
                 self.cpp_info.libs.append("httpfs_extension")
             if self.settings.os == "Linux" and self.settings.arch == "x86_64":
-                self.cpp_info.libs.append("jemalloc_extension")
+                self.cpp_info.libs.append("duckdb_jemalloc")
             if self.options.with_json:
                 self.cpp_info.libs.append("json_extension")
             if self.options.with_excel:

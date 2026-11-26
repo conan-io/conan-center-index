@@ -83,12 +83,7 @@ class OpenSubdivConan(ConanFile):
 
     def requirements(self):
         if self.options.with_tbb:
-            # OpenSubdiv < 3.6.0 support only onettbb/2020.x.x
-            # https://github.com/PixarAnimationStudios/OpenSubdiv/pull/1317
-            if Version(self.version) < "3.6.0":
-                self.requires("onetbb/2020.3.3", transitive_headers=True)
-            else:
-                self.requires("onetbb/2021.12.0", transitive_headers=True)
+            self.requires("onetbb/[>=2021.10.0 <2024]", transitive_headers=True)
         if self.options.with_opengl:
             self.requires("opengl/system")
             self.requires("glfw/3.4")
@@ -177,7 +172,7 @@ class OpenSubdivConan(ConanFile):
         self.cpp_info.components["osdcpu"].set_property("cmake_target_name", f"OpenSubdiv::osdcpu{target_suffix}")
         self.cpp_info.components["osdcpu"].libs = ["osdCPU"]
         if self.options.with_tbb:
-            self.cpp_info.components["osdcpu"].requires = ["onetbb::onetbb"]
+            self.cpp_info.components["osdcpu"].requires = ["onetbb::libtbb"]
 
         if self._osd_gpu_enabled:
             self.cpp_info.components["osdgpu"].set_property("cmake_target_name", f"OpenSubdiv::osdgpu{target_suffix}")
@@ -190,11 +185,3 @@ class OpenSubdivConan(ConanFile):
             dl_required = self.options.with_opengl or self.options.with_opencl
             if self.settings.os in ["Linux", "FreeBSD"] and dl_required:
                 self.cpp_info.components["osdgpu"].system_libs = ["dl"]
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "OpenSubdiv"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenSubdiv"
-        self.cpp_info.components["osdcpu"].names["cmake_find_package"] = f"osdcpu{target_suffix}"
-        self.cpp_info.components["osdcpu"].names["cmake_find_package_multi"] = f"osdcpu{target_suffix}"
-        self.cpp_info.components["osdgpu"].names["cmake_find_package"] = f"osdgpu{target_suffix}"
-        self.cpp_info.components["osdgpu"].names["cmake_find_package_multi"] = f"osdgpu{target_suffix}"

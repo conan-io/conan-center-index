@@ -1,0 +1,4 @@
+sources:
+  "2.5.1":
+    url: "https://github.com/nilstate/icey/archive/refs/tags/2.5.1.tar.gz"
+    sha256: "2df5f802db160212de78a1bdfba01c9275b5d5d0ca8f58b00298779d50a5e02a"

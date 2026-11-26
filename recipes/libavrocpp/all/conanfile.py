@@ -60,6 +60,8 @@ class LibavrocppConan(ConanFile):
         tc.cache_variables["AVRO_BUILD_TESTS"] = False
         tc.cache_variables["AVRO_USE_BOOST"] = self.options.with_boost
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_zstd"] = True # please open an issue if this is needed
+        # fmt 12.2.0 stopped pulling fmt/format.h from fmt/core.h. Remove this once upstream fixes it.
+        tc.preprocessor_definitions["FMT_DEPRECATED_HEAVY_CORE"] = None
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -88,6 +90,8 @@ class LibavrocppConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "avro-cpp::avrocpp" if self.options.shared else "avro-cpp::avrocpp_s")
         if self.options.shared:
             self.cpp_info.defines.append("AVRO_DYN_LINK")
+        # Exception.hh is a public header, so consumers need this too. Remove this once upstream fixes it.
+        self.cpp_info.defines.append("FMT_DEPRECATED_HEAVY_CORE")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 

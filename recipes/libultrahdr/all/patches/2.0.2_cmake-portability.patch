@@ -1,0 +1,35 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index 0d565a1..202195c 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -145,7 +145,7 @@ if(UHDR_BUILD_BENCHMARK AND EMSCRIPTEN)
+ endif()
+ 
+ # side effects
+-if(CMAKE_CROSSCOMPILING AND UHDR_ENABLE_INSTALL)
++if(FALSE)
+   set(UHDR_ENABLE_INSTALL FALSE) # disable install and uninstall targets during cross compilation.
+   message(STATUS "Install and uninstall targets - Disabled")
+ endif()
+@@ -185,9 +185,9 @@ endif()
+ ###########################################################
+ # Compile flags
+ ###########################################################
+-set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_EXTENSIONS OFF)
++#set(CMAKE_CXX_STANDARD 17)
++#set(CMAKE_CXX_STANDARD_REQUIRED ON)
++#set(CMAKE_CXX_EXTENSIONS OFF)
+ if(BUILD_SHARED_LIBS)
+   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+   set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+@@ -976,7 +976,7 @@ endif()
+ if(UHDR_ENABLE_INSTALL)
+   # XCODE seems to have issues when the target has only object files as input
+   # we use combine_static_libs to prepare install targets
+-  if(NOT XCODE)
++  if(TRUE)
+     include(GNUInstallDirs)
+ 
+     # pkg-config: libuhdr.pc

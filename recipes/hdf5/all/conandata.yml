@@ -1,7 +1,18 @@
 sources:
+  "2.2.0":
+    url: "https://github.com/HDFGroup/hdf5/archive/refs/tags/2.2.0.tar.gz"
+    sha256: "5b8d75125ae7b4fef55d3b39e8d3dbfd238cdf63b6518afd67fa69ac80f06542"
   "1.14.6":
     url: "https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5_1.14.6.tar.gz"
     sha256: "09ee1c671a87401a5201c06106650f62badeea5a3b3941e9b1e2e1e08317357f"
   "1.14.3":
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_14_3/hdf5-1_14_3.tar.gz"
     sha256: "df5ee33c74d5efb59738075ef96f4201588e1f1eeb233f047ac7fd1072dee1f6"
+
+patches:
+  "2.2.0":
+    - patch_file: "patches/2.2.0-0001-escape-quotes-h5build-settings.patch"
+  "1.14.6":
+    - patch_file: "patches/1.14.6-0001-escape-quotes-h5build-settings.patch"
+  "1.14.3":
+    - patch_file: "patches/1.14.3-0001-escape-quotes-h5build-settings.patch"

@@ -1,8 +1,16 @@
 sources:
+  "1.22.3":
+    url: "https://kerberos.org/dist/krb5/1.22/krb5-1.22.3.tar.gz"
+    sha256: "fe90af8441ad9fa9b064b8e53077cefb782a96f8a68276b031dc54af1789ff0b"
   "1.21.2":
     url: "https://kerberos.org/dist/krb5/1.21/krb5-1.21.2.tar.gz"
     sha256: "9560941a9d843c0243a71b17a7ac6fe31c7cebb5bce3983db79e52ae7e850491"
 patches:
+  "1.22.3":
+    - patch_file: "patches/0001-1.22.3-no-tests.patch"
+    - patch_file: "patches/0002-1.22.3-disable-ksu-root.patch"
+    - patch_file: "patches/0003-find-openssl-module.patch"
+    - patch_file: "patches/0004-1.22.3-rpc-link-krb5support.patch"
   "1.21.2":
     - patch_file: "patches/0001-no-tests.patch"
       patch_type: "conan"

@@ -9,7 +9,7 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class AprUtilConan(ConanFile):
@@ -75,7 +75,7 @@ class AprUtilConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("apr/1.7.4", transitive_headers=True)
+        self.requires("apr/[>=1.7.4 <2]", transitive_headers=True)
         if self.settings.os != "Windows":
             #cmake build doesn't allow injection of iconv yet
             # https://github.com/conan-io/conan-center-index/pull/16142#issuecomment-1494282164
@@ -87,7 +87,7 @@ class AprUtilConan(ConanFile):
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_expat:
             self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_postgresql:
@@ -115,6 +115,7 @@ class AprUtilConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _with_crypto(self):
@@ -126,6 +127,7 @@ class AprUtilConan(ConanFile):
             tc.variables["INSTALL_PDB"] = False
             tc.variables["APU_HAVE_CRYPTO"] = self._with_crypto
             tc.variables["APR_HAS_LDAP"] = self.options.with_ldap
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -164,7 +166,6 @@ class AprUtilConan(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.configure()

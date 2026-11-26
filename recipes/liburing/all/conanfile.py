@@ -1,12 +1,12 @@
 from conan import ConanFile
-from conan.tools.files import get, rmdir, copy, apply_conandata_patches, chdir, export_conandata_patches, rm
+from conan.tools.files import get, rmdir, copy, chdir, rm, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2"
 
 
 class Liburing(ConanFile):
@@ -30,18 +30,9 @@ class Liburing(ConanFile):
         "with_libc": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def requirements(self):
-        if Version(self.version) < "2.3":
-            self.requires("linux-headers-generic/5.13.9")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "2.2":
-            del self.options.with_libc
 
     def configure(self):
         if self.options.shared:
@@ -60,6 +51,8 @@ class Liburing(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, "Makefile", "@$(MAKE) -C test", "")
+        replace_in_file(self, "Makefile", "@$(MAKE) -C examples", "")
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -67,9 +60,8 @@ class Liburing(ConanFile):
         if Version(self.version) >= "2.5":
             if self.options.with_libc:
                 tc.configure_args.append("--use-libc")
-        elif Version(self.version) >= "2.2":
-            if not self.options.with_libc:
-                tc.configure_args.append("--nolibc")
+        elif not self.options.with_libc:
+            tc.configure_args.append("--nolibc")
 
         tc.update_configure_args({
             "--host": None,
@@ -86,7 +78,6 @@ class Liburing(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         with chdir(self, self.source_folder):
             at = Autotools(self)
             at.configure()
