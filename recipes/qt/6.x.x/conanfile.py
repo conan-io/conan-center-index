@@ -843,6 +843,23 @@ class QtConan(ConanFile):
             save(self, ".qmake.super", "")
         cmake = CMake(self)
         cmake.configure()
+
+        skipped = []
+        for module, info in self._get_module_tree.items():
+            if not self.options.get_safe(module):
+                continue
+            build_dir = os.path.join(self.build_folder, info["path"])
+            if not os.path.isdir(build_dir):
+                skipped.append(module)
+                continue
+            if all(d == "CMakeFiles" or not os.path.isdir(os.path.join(build_dir, d))
+                   for d in os.listdir(build_dir)):
+                skipped.append(module)
+        if skipped:
+            raise ConanException(
+                f"Qt submodules enabled but skipped during CMake configure: {skipped}. "
+                "Search the configure output for 'Skipping the build' to see the unmet condition.")
+
         cmake.build()
 
     @property
