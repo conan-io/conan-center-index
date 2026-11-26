@@ -80,16 +80,17 @@ class ArpackNgConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"-o {self.name}/*:eigen=True requires -o {self.name}/*:icb=True"
             )
-        if not self.dependencies["openblas"].options.build_lapack:
+        if not self.dependencies["openblas"].options.get_safe("build_lapack", False):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires LAPACK: set -o openblas/*:build_lapack=True"
             )
 
     def validate_build(self):
         if not self._fortran_compiler:
-            raise ConanInvalidConfiguration(
+            self.output.warning(
                 f"{self.ref} needs a Fortran compiler: set it in the profile, e.g. "
-                'tools.build:compiler_executables={"fortran": "gfortran"}'
+                'tools.build:compiler_executables={"fortran": "gfortran"}. '
+                "Alternatively CMake need to find Fortran in the PATH"
             )
 
     def build_requirements(self):
@@ -100,8 +101,14 @@ class ArpackNgConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        deps = CMakeDeps(self)
+        deps.set_property("openblas", "cmake_file_name", "BLAS")
+        deps.set_property("openblas", "cmake_target_name", "BLAS::BLAS")
+        deps.generate()
+
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_Fortran_COMPILER"] = self._fortran_compiler
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
+        tc.cache_variables["BLA_VENDOR"] = "OpenBLAS"
         tc.cache_variables["TESTS"] = False
         tc.cache_variables["EXAMPLES"] = False
         tc.cache_variables["MPI"] = False
@@ -111,15 +118,9 @@ class ArpackNgConan(ConanFile):
         tc.cache_variables["INTERFACE64"] = False
         tc.generate()
 
-        # Eigen and OpenBLAS are resolved via cmake via pkgconfig
+        # Eigen is resolved via cmake via pkgconfig
         pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.set_property(
-            "openblas", "pkg_config_aliases", ["blas", "lapack"]
-        )
         pkg_config_deps.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)
