@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.gnu import PkgConfigDeps
 from conan.tools.files import (
     copy,
     export_conandata_patches,
@@ -11,7 +10,7 @@ from conan.tools.files import (
 )
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.21.0"
 
 
 class ArpackNgConan(ConanFile):
@@ -95,7 +94,6 @@ class ArpackNgConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.19 <4]")
-        self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -104,6 +102,15 @@ class ArpackNgConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("openblas", "cmake_file_name", "BLAS")
         deps.set_property("openblas", "cmake_target_name", "BLAS::BLAS")
+        if self.options.eigen:
+            # upstream calls find_package(Eigen3 3.3 QUIET) and falls back to pkg-config unless
+            # EIGEN3_FOUND is set, then reads EIGEN3_INCLUDE_DIR.
+            # The default SameMajorVersion rule rejects eigen >= 4 for the "3.3" request
+            deps.set_property("eigen", "cmake_config_version_compat", "AnyNewerVersion")
+            # find_package() in config mode only sets Eigen3_FOUND, not the EIGEN3_FOUND upstream checks
+            deps.set_property("eigen", "cmake_extra_variables", {"EIGEN3_FOUND": "1"})
+            # provides EIGEN3_INCLUDE_DIR, CMakeDeps only defines Eigen3_INCLUDE_DIR
+            deps.set_property("eigen", "cmake_additional_variables_prefixes", ["EIGEN3"])
         deps.generate()
 
         tc = CMakeToolchain(self)
@@ -117,10 +124,6 @@ class ArpackNgConan(ConanFile):
         tc.cache_variables["ICB"] = bool(self.options.icb)
         tc.cache_variables["INTERFACE64"] = False
         tc.generate()
-
-        # Eigen is resolved via cmake via pkgconfig
-        pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.generate()
 
     def build(self):
         cmake = CMake(self)
