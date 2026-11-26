@@ -23,12 +23,48 @@ class FontconfigConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "use_system_dirs_if_supported": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "use_system_dirs_if_supported": False,
+    }
+    options_description = {
+        "use_system_dirs_if_supported": "Use Fontconfig system directories if supported",
     }
     package_type = "library"
+
+
+    class _DirsHelper:
+        def __init__(self, conanfile):
+            self.conanfile = conanfile
+            self.datadir = None
+            self.sysconfdir = None
+            self.use_package_dirs = True
+            self._set_standard_dirs()
+
+        def _set_package_standard_dirs(self):
+            self.datadir = os.path.join("res", "share")
+            self.sysconfdir = os.path.join("res", "etc")
+            self.use_package_dirs = True
+
+        def _set_standard_dirs(self):
+            if not self.conanfile.options.use_system_dirs_if_supported:
+                self._set_package_standard_dirs()
+                return
+            self.use_package_dirs = False
+            if self.conanfile.settings.os == "Linux":
+                self.datadir = "usr/share"
+                self.sysconfdir = "etc"
+            elif self.conanfile.settings.os == "FreeBSD":
+                self.datadir = "usr/local/share"
+                self.sysconfdir = "usr/local/etc"
+            else:
+                self.conanfile.output.warning(f"it was requested to use system dirs, but it is not supported for {self.conanfile.settings.os}."
+                                              " Fallback to using package dirs. Set the FONTCONFIG_PATH environment variable at runtime")
+                self._set_package_standard_dirs()
+
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -64,13 +100,14 @@ class FontconfigConan(ConanFile):
         deps.generate()
 
         tc = MesonToolchain(self)
+        dirs_helper = self._DirsHelper(self)
         tc.project_options.update({
             "doc": "disabled",
             "nls": "disabled",
             "tests": "disabled",
             "tools": "disabled",
-            "sysconfdir": os.path.join("res", "etc"),
-            "datadir": os.path.join("res", "share"),
+            "sysconfdir": dirs_helper.sysconfdir,
+            "datadir": dirs_helper.datadir,
         })
         tc.generate()
 
@@ -80,11 +117,13 @@ class FontconfigConan(ConanFile):
         meson.build()
 
     def package(self):
+        dirs_helper = self._DirsHelper(self)
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
+        # TODO: A) always delete, or only when using system dirs ? B) What to delete ?
         rm(self, "*.pdb", self.package_folder, recursive=True)
-        rm(self, "*.conf", os.path.join(self.package_folder, "res", "etc", "fonts", "conf.d"))
+        rm(self, "*.conf", os.path.join(self.package_folder, dirs_helper.sysconfdir, "fonts", "conf.d"))
         rm(self, "*.def", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         fix_apple_shared_install_name(self)
@@ -100,9 +139,10 @@ class FontconfigConan(ConanFile):
         self.cpp_info.libs = ["fontconfig"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
-
-        fontconfig_path = os.path.join(self.package_folder, "res", "etc", "fonts")
-        self.runenv_info.append_path("FONTCONFIG_PATH", fontconfig_path)
+        dirs_helper = self._DirsHelper(self)
+        if dirs_helper.use_package_dirs:
+            fontconfig_path = os.path.join(self.package_folder, dirs_helper.sysconfdir, "fonts")
+            self.runenv_info.append_path("FONTCONFIG_PATH", fontconfig_path)
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
