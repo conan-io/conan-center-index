@@ -47,6 +47,9 @@ class bgfxConan(ConanFile):
             self.requires("libsquish/1.15")
         # INFO: glflags and spirv-tools are vendored only. No need to add them as dependencies
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21]")
+
     def validate(self):
         check_min_cppstd(self, 20)
 
@@ -69,10 +72,13 @@ class bgfxConan(ConanFile):
         tc.cache_variables["BGFX_OPENGLES_VERSION"] = 30
         tc.generate()
         deps = CMakeDeps(self)
+        # bgfx.cmake links these through ${MINIZ_LIBRARIES}, ${TINYEXR_LIBRARIES} and
+        # ${LIBSQUISH_LIBRARIES} on every platform; without the prefixes the variables
+        # are empty and texturec fails to link miniz (tinyexr Pxr24) on Windows.
+        deps.set_property("miniz", "cmake_additional_variables_prefixes", ["MINIZ",])
+        deps.set_property("tinyexr", "cmake_additional_variables_prefixes", ["TINYEXR",])
+        deps.set_property("libsquish", "cmake_additional_variables_prefixes", ["LIBSQUISH",])
         if self.settings.os == "Linux":
-            deps.set_property("miniz", "cmake_additional_variables_prefixes", ["MINIZ",])
-            deps.set_property("tinyexr", "cmake_additional_variables_prefixes", ["TINYEXR",])
-            deps.set_property("libsquish", "cmake_additional_variables_prefixes", ["LIBSQUISH",])
             deps.set_property("wayland", "cmake_target_name", "wayland-egl")
         deps.generate()
 
