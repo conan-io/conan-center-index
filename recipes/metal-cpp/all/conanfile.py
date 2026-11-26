@@ -1,15 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import XCRun
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 
 import os
-import platform
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class MetalcppConan(ConanFile):
@@ -43,21 +40,6 @@ class MetalcppConan(ConanFile):
             raise ConanInvalidConfiguration("Metal can only be used on macOS, iOS, tvOS or visionOS.")
 
         check_min_cppstd(self, 17)
-
-        minimum_os_versions_list = self.conan_data["minimum_os_version"][self.version]
-        if not os_name in minimum_os_versions_list:
-            # Prevent unmapped versions (e.g. older versions + visionOS).
-            raise ConanInvalidConfiguration("No minimal compatible version defined for this OS and metal-cpp combination.")
-        minimum_os_version = minimum_os_versions_list[os_name]
-
-        sdk_version = self.settings.get_safe("os.sdk_version") or self.settings.get_safe("os.version")
-        if not sdk_version and platform.system() == "Darwin":
-            sdk_version = XCRun(self).sdk_version
-
-        if sdk_version and Version(sdk_version) < Version(minimum_os_version):
-            raise ConanInvalidConfiguration(
-                f"metal-cpp {self.version} requires {os_name} SDK version {minimum_os_version} but {sdk_version} is the target."
-            )
 
     def package(self):
         copy(
