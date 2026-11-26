@@ -74,6 +74,8 @@ class Gtk4Conan(ConanFile):
             if self.options.with_x11:
                 self.requires("xorg/system")
             self.requires("libdrm/[>=2.4 <3]")
+        elif self.settings.os == "Windows":
+            self.requires("directx-headers/1.619.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
