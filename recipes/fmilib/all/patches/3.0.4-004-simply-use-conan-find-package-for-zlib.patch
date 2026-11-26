@@ -1,0 +1,40 @@
+From 20a8a003ca0f80360b5e0a4e50fb91dc063b50ea Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Fri, 31 Oct 2025 13:09:20 +0100
+Subject: [PATCH 4/5] Simply use conan find package for zlib
+
+---
+ Config.cmake/fmizlib.cmake | 17 +----------------
+ 1 file changed, 1 insertion(+), 16 deletions(-)
+
+diff --git a/Config.cmake/fmizlib.cmake b/Config.cmake/fmizlib.cmake
+index ba8b7e0..74f4a46 100644
+--- a/Config.cmake/fmizlib.cmake
++++ b/Config.cmake/fmizlib.cmake
+@@ -12,22 +12,7 @@
+ #    along with this program. If not, contact Modelon AB <http://www.modelon.com>.
+ 
+ if(FMILIB_SYSTEM_ZLIB)
+-
+-    include(FindZLIB)
+-
+-    find_package(ZLIB)
+-    if(NOT ZLIB_FOUND)
+-        message(FATAL_ERROR "Could not locate ZLIB using find_package.")
+-    endif()
+-
+-    add_library(zlib STATIC IMPORTED ZLIB::ZLIB)
+-    ## ZLIB_INCLUDE_DIRS set by FindZLIB
+-    set_target_properties(
+-        zlib PROPERTIES
+-        IMPORTED_LOCATION "${ZLIB_LIBRARIES}"
+-        INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIRS}"
+-    )
+-
++    find_package(ZLIB REQUIRED)
+ else() # build zlib from ThirdParty/zlib
+ 
+     set(ZLIB_PREFIX "${FMILIB_THIRDPARTYLIBS}/Zlib/zlib-1.3.1")
+-- 
+2.39.5
+
