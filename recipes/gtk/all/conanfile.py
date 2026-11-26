@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
@@ -36,6 +36,9 @@ class Gtk4Conan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_wayland
             del self.options.with_x11
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -79,6 +82,7 @@ class Gtk4Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)

@@ -2,3 +2,6 @@ sources:
   "4.25.1":
     url: "https://download.gnome.org/sources/gtk/4.25/gtk-4.25.1.tar.xz"
     sha256: "223e0aaa0b483e65660bbddea2b2ffb278868d954b7558cc794cd7a847b3a158"
+patches:
+  "4.25.1":
+    - patch_file: "patches/4.25.1-0001-no-update-mime-database.patch"

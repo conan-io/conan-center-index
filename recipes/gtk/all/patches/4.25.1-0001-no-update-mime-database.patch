@@ -1,0 +1,15 @@
+Custom: Do not require update-mime-database at configure time.
+
+Updating the MIME database is a system-install step that has no purpose when packaging into the Conan cache
+
+--- a/meson.build
++++ b/meson.build
+@@ -1036,7 +1036,7 @@
+   gnome.post_install(
+     glib_compile_schemas: true,
+     gtk_update_icon_cache: get_option('build-demos'),
+-    update_mime_database: os_linux,
++    update_mime_database: false,
+   )
+ else
+   message('Not executing post-install steps automatically when cross compiling')
