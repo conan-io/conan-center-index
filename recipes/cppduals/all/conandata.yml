@@ -1,0 +1,4 @@
+sources:
+  "0.9.6":
+    url: "https://gitlab.com/tesch1/cppduals/-/archive/v0.9.6/cppduals-v0.9.6.tar.gz"
+    sha256: "5db3375a8c54dd50fce12040401ae8ae2412a13ee92467f11c04ecc14c7538a7"
