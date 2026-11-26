@@ -1,15 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import XCRun
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 
 import os
-import platform
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class MetalcppConan(ConanFile):
@@ -39,29 +36,10 @@ class MetalcppConan(ConanFile):
 
     def validate(self):
         os_name = str(self.settings.os)
-        if not os_name in ["Macos", "iOS", "tvOS"]:
-            raise ConanInvalidConfiguration("Metal can only be used on an Macos, iOS or tvOS platform.")
+        if not os_name in ["Macos", "iOS", "tvOS", "visionOS"]:
+            raise ConanInvalidConfiguration("Metal can only be used on macOS, iOS, tvOS or visionOS.")
 
-        if self.settings.compiler.get_safe("cppstd"):
-            min_cppstd = "17"
-            check_min_cppstd(self, min_cppstd)
-
-        minimum_os_version = self.conan_data["minimum_os_version"][self.version][os_name]
-
-        xcrun = XCRun(self)
-        os_version = self.settings.get_safe("os.version")
-        sdk_version = self.settings.get_safe("os.sdk_version")
-        visible_sdk_version = xcrun.sdk_version if platform.system() == "Darwin" else None
-
-        sdk_version = sdk_version or os_version or visible_sdk_version
-
-        if sdk_version is None:
-            # Will raise when `os.version` or `os.sdk_version` are not defined
-            # and we are *NOT* running this on macOS
-            raise ConanInvalidConfiguration(f"metal-cpp {self.version} requires the os.version or sdk.version settings, but the are not defined")
-
-        if sdk_version < Version(minimum_os_version):
-            raise ConanInvalidConfiguration(f"metal-cpp {self.version} requires {os_name} SDK version {minimum_os_version} but {sdk_version} is the target.")
+        check_min_cppstd(self, 17)
 
     def package(self):
         copy(
@@ -87,6 +65,4 @@ class MetalcppConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
 
-        self.cpp_info.frameworks = ["Foundation", "Metal", "MetalKit", "QuartzCore"]
-        if self.version >= Version('14'):
-            self.cpp_info.frameworks.append("MetalFX")
+        self.cpp_info.frameworks = ["Foundation", "Metal", "MetalKit", "QuartzCore", "MetalFX"]
