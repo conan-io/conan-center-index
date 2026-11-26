@@ -39,11 +39,9 @@ class QrupdateConan(ConanFile):
 
     @property
     def _fortran_compiler(self):
-        # The Fortran compiler comes from the configuration: CMakeToolchain forwards it
-        # to CMAKE_Fortran_COMPILER, so nothing has to be passed by hand
-        comp_exe = self.conf.get("tools.build:compiler_executables")
-        if comp_exe and "fortran" in comp_exe:
-            return comp_exe["fortran"]
+        return self.conf.get(
+            "tools.build:compiler_executables", default={}, check_type=dict
+        ).get("fortran")
 
     def export_sources(self):
         export_conandata_patches(self)
