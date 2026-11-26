@@ -4,6 +4,7 @@ from conan.tools.env import Environment
 from conan.tools.files import chdir, copy, get, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+import glob
 import json
 import os
 
@@ -29,7 +30,11 @@ class EmSDKConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nodejs/16.3.0")
+        if Version(self.version) >= "4.0.0":
+            # The compiler needs Node.js 18.3 since Emscripten 4.0.1 (20 in 4.0.0); emsdk itself ships 22
+            self.requires("nodejs/22.20.0")
+        else:
+            self.requires("nodejs/16.3.0")
         # self.requires("python")  # FIXME: Not available as Conan package
         # self.requires("wasm")  # FIXME: Not available as Conan package
 
@@ -72,6 +77,8 @@ class EmSDKConan(ConanFile):
         env.define_path("EMSCRIPTEN", self._emscripten)
         env.define_path("EM_CONFIG", self._em_config)
         env.define_path("EM_CACHE", self._em_cache)
+        # The bundled python is only installed by build(); until then, never another emsdk's
+        env.unset("EMSDK_PYTHON")
         env.vars(self, scope="emsdk").save_script("emsdk_env_file")
 
     @staticmethod
@@ -90,7 +97,15 @@ class EmSDKConan(ConanFile):
             data = json.load(f)
             tools = data["tools"]
             if self.settings.os == "Windows":
-                python = next((it for it in tools if (it["id"] == "python" and not it.get("is_old", False))), None)
+                # The newest python for this machine: Emscripten 5.x needs python 3.10 or newer, and
+                # the manifest lists the old 3.9.2 first
+                arch = "arm64" if str(self._settings_build.arch).startswith("armv8") else "x86_64"
+                pythons = [it for it in tools if it["id"] == "python" and it.get("arch") == arch
+                           and "windows_url" in it and not it.get("is_old", False)]
+                if pythons:
+                    python = max(pythons, key=lambda it: Version(it["version"].split("-")[0]))
+                else:
+                    python = next((it for it in tools if (it["id"] == "python" and not it.get("is_old", False))), None)
                 ret["python"] = f"python-{python['version']}-64bit"
             node = next((it for it in tools if (it["id"] == "node" and not it.get("is_old", False))), None)
             ret["nodejs"] = f"node-{node['version']}-64bit"
@@ -98,8 +113,12 @@ class EmSDKConan(ConanFile):
 
     def build(self):
         with chdir(self, self.source_folder):
-            emsdk = "emsdk.bat" if self._settings_build.os == "Windows" else "./emsdk"
-            self._chmod_plus_x("emsdk")
+            # The full path: a bare "emsdk.bat" can resolve to another emsdk on PATH (cmd.exe skips the
+            # current directory when NoDefaultCurrentDirectoryInExePath is set), which would then
+            # install and activate this version in that checkout instead of in the package.
+            script = "emsdk.bat" if self._settings_build.os == "Windows" else "emsdk"
+            emsdk = f'"{os.path.join(self.source_folder, script)}"'
+            self._chmod_plus_x(os.path.join(self.source_folder, "emsdk"))
 
             # Install required tools
             required_tools = self._tools_for_version()
@@ -158,6 +177,12 @@ class EmSDKConan(ConanFile):
         self.buildenv_info.define_path("EMSCRIPTEN", self._emscripten)
         self.buildenv_info.define_path("EM_CONFIG", self._em_config)
         self.buildenv_info.define_path("EM_CACHE",  self._em_cache)
+        # emcc.bat runs %EMSDK_PYTHON%, which an emsdk installed on the machine may set user-wide
+        pythons = glob.glob(os.path.join(self.package_folder, "bin", "python", "*", "python.exe"))
+        if pythons:
+            self.buildenv_info.define_path("EMSDK_PYTHON", pythons[0])
+        else:
+            self.buildenv_info.unset("EMSDK_PYTHON")
 
         compiler_executables = {
             "c": self._define_tool_var("emcc"),
