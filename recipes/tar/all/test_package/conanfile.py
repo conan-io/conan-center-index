@@ -29,6 +29,7 @@ class TestPackageConan(ConanFile):
         self.run("zstd --version")
 
         tar_bin = load(self, os.path.join(self.build_folder, "tar_bin"))
+        self.run(f'test "$TAR" = "{tar_bin}"')
         with chdir(self, self.source_folder):
             test_tar = os.path.join(self.build_folder, "test.tar.zstd")
             self.run(f"{tar_bin} --zstd -cf {test_tar} conanfile.py")
