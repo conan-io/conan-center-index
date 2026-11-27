@@ -214,13 +214,16 @@ class Gtk4Conan(ConanFile):
                                                                     "wayland::wayland", "xkbcommon::xkbcommon"]
         if self.settings.os == "Macos":
             self.cpp_info.components["gdk-3"].frameworks = ["Cocoa", "Carbon", "CoreGraphics", "CoreVideo", "IOSurface", "QuartzCore"]
+            if Version(self.version) >= "3.24.52":
+                self.cpp_info.components["gdk-3"].frameworks.append("UniformTypeIdentifiers")
 
             self.cpp_info.components["gdk-quartz-3.0"].set_property("pkg_config_name", "gdk-quartz-3.0.pc")
             self.cpp_info.components["gdk-quartz-3.0"].set_property("pkg_config_custom_content", pkgconfig_vars)
             self.cpp_info.components["gdk-quartz-3.0"].libs = ["gdk-3"]
             self.cpp_info.components["gdk-quartz-3.0"].includedirs.append(os.path.join("include", "gtk-3.0"))
-            self.cpp_info.components["gdk-quartz-3.0"].frameworks = ["Cocoa", "Carbon", "CoreGraphics", "CoreVideo",
-                                                                     "IOSurface", "QuartzCore"]
+            self.cpp_info.components["gdk-quartz-3.0"].frameworks = ["Cocoa", "Carbon", "CoreGraphics", "CoreVideo", "IOSurface", "QuartzCore"]
+            if Version(self.version) >= "3.24.52":
+                self.cpp_info.components["gdk-quartz-3.0"].frameworks.append("UniformTypeIdentifiers")
             self.cpp_info.components["gdk-quartz-3.0"].requires = ["pango::pango", "gdk-pixbuf::gdk-pixbuf", "cairo::cairo",
                                                                    "fribidi::fribidi", "libepoxy::libepoxy", "glib::glib"]
 
