@@ -1,31 +1,31 @@
 sources:
   "0.3.2":
-    url: "https://github.com/kuba--/zip/archive/v0.3.2.tar.gz"
-    sha256: "0c33740aec7a3913bca07df360420c19cac5e794e0f602f14f798cb2e6f710e5"
+    url: "https://github.com/kuba--/zip/archive/9a2b1d875be5d3822b85822fbcedde49473eba34.tar.gz"
+    sha256: "009329c769b62bbd9324992436a8a6cce29b03c9fdc7b5046ee813b8e79df3c0"
   "0.3.1":
-    url: "https://github.com/kuba--/zip/archive/v0.3.1.tar.gz"
-    sha256: "775b8a44b53e72a55c13839bf507219c2cf30b26f62e70f1a20bb727db54438f"
+    url: "https://github.com/kuba--/zip/archive/e51882025b9a8b6b1699271363526c78a37b7459.tar.gz"
+    sha256: "1df1233710bfa23063d12c1d37b72d1479c408fbb37bd46f56f5a537eb6c98df"
   "0.3.0":
-    url: "https://github.com/kuba--/zip/archive/v0.3.0.tar.gz"
-    sha256: "feb70ae0fe5948b805635b3cc2f3b7f074662c481981857bc6b5896a4343fe5e"
+    url: "https://github.com/kuba--/zip/archive/617413eb3d0385b34e8bf29c711d25497bfc9be9.tar.gz"
+    sha256: "f27d09924f43991c68f86150908da8a5d8c0e1b816d971d04ca8954ca27c5231"
   "0.2.6":
-    url: "https://github.com/kuba--/zip/archive/v0.2.6.tar.gz"
-    sha256: "6a00e10dc5242f614f76f1bd1d814726a41ee6e3856ef3caf7c73de0b63acf0b"
+    url: "https://github.com/kuba--/zip/archive/3292c5812d88c108bda14d5fe819c9205842748f.tar.gz"
+    sha256: "0d0b9478f7d28c0927a668046c5732dc8b5493ede30050b0d9b1c68222afb1a5"
   "0.2.5":
-    url: "https://github.com/kuba--/zip/archive/v0.2.5.tar.gz"
-    sha256: "e052f6cbe6713f69f8caec61214fda4e5ae5150d1fcba02c9e79f1a05d939305"
+    url: "https://github.com/kuba--/zip/archive/8fbfb94c1c83c617502ac3755b8d5981d7a15945.tar.gz"
+    sha256: "61510fc2a9f13308dc4fc4038984fdd210fd52b18f94b2e7ce2036e51e69ffb3"
   "0.2.4":
-    url: "https://github.com/kuba--/zip/archive/v0.2.4.tar.gz"
-    sha256: "a3dd762129d58c7ca7a6462f509d29388dbdb25bec559cb4dc03f75523d69cf2"
+    url: "https://github.com/kuba--/zip/archive/f31bf957a3359b2704b97a7fc42b87ca06dcc849.tar.gz"
+    sha256: "19a7c9fc99cee0b7459c5a13f8e8fbb10b2c993bb528098ac4cfe3d1ec3274b8"
   "0.2.3":
-    url: "https://github.com/kuba--/zip/archive/v0.2.3.tar.gz"
-    sha256: "800e9dc2d2834d92ad333dac29b438dfb495c765bc4e97c7b10101f4f22d53d4"
+    url: "https://github.com/kuba--/zip/archive/95e382360aaa051f8ed37563d709eb1e477fe23c.tar.gz"
+    sha256: "2777bbbf2e36fac63eb6c1a43fdd4d8cd3d310c72b2bb49029285b5734b200ea"
   "0.2.2":
-    url: "https://github.com/kuba--/zip/archive/refs/tags/v0.2.2.tar.gz"
-    sha256: "f278b1da5e5382c7a1a1db1502cfa1f6df6b1e05e36253d661344d30277f9895"
+    url: "https://github.com/kuba--/zip/archive/38fc9f9d36139d1c5c92600cbb4eb30b3e2126f0.tar.gz"
+    sha256: "8c4b1a49766c60b0051a2e6bfc029b8e3dddcb39325492b1ca20965da98c298a"
   "0.2.0":
-    url: "https://github.com/kuba--/zip/archive/refs/tags/v0.2.0.tar.gz"
-    sha256: "59ee52b717933b90ea1fff53d5381b612bab8ffbcb3b5f65d2cdfd0814b3068a"
+    url: "https://github.com/kuba--/zip/archive/b6c7147cde5f686f6b841cf88304f854e2d251f6.tar.gz"
+    sha256: "72f6bfed988f1fe52e2a4788daec1c87a20e93edc5d4a19590075098b99b3fe3"
   "0.1.31":
-    url: "https://github.com/kuba--/zip/archive/refs/tags/v0.1.31.tar.gz"
-    sha256: "65ad5e63497e48ee773fdec86a4c36752a92e53da9cd8da4f1f77b5d743794f1"
+    url: "https://github.com/kuba--/zip/archive/c66484cc550c9cecaa6a47247ce07c255c999ae8.tar.gz"
+    sha256: "895fb0eada89c8b220d3c5a431699be759ce715593d7622761fd5b2261a654af"
