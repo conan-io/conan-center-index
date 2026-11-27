@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanException
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import build_jobs
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, replace_in_file, rename, rm, rmdir
@@ -56,6 +56,10 @@ class OpenSSLConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
+    def validate(self):
+        if self.settings.arch == "arm64ec" and not is_msvc(self):
+            raise ConanInvalidConfiguration("arm64ec is only supported with the msvc compiler")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -98,6 +102,9 @@ class OpenSSLConan(ConanFile):
                 else "VC-CLANG-WIN64-CLANGASM-ARM" if self.settings.compiler == "clang" and self._msvc_abi
                 else "VC-WIN64-CLANGASM-ARM"
             ),
+            # No upstream ARM64EC target (openssl/openssl#16482): build the armv8 target with
+            # no-asm and /arm64EC. Not VC-WIN64-ARM: it is a OneCore target (onecore.lib, no kernel32).
+            ("Windows", "arm64ec"): "VC-WIN64-CLANGASM-ARM",
         }
         key = (str(self.settings.os), str(self.settings.arch))
         if key not in targets:
@@ -114,7 +121,17 @@ class OpenSSLConan(ConanFile):
             tc.extra_cflags.append("-nologo")
         if is_apple_os(self) and self.options.shared:
             tc.extra_ldflags.append("-headerpad_max_install_names")
-        tc.generate()
+        if self.settings.arch == "arm64ec":
+            # Conan selects the ARM64 cross tools via vcvars but does not add the ARM64EC switches
+            tc.extra_cflags.append("/arm64EC")
+            tc.extra_cxxflags.append("/arm64EC")
+            # LDFLAGS from the environment replaces OpenSSL's default "/nologo /debug"; keep /debug,
+            # otherwise no .pdb files are produced and "install_programs" fails copying them
+            tc.extra_ldflags.extend(["/nologo", "/debug", "/machine:ARM64EC"])
+        env = tc.environment()
+        if self.settings.arch == "arm64ec":
+            env.define("ARFLAGS", "/nologo /machine:ARM64EC")
+        tc.generate(env)
 
     @property
     def _configure_args(self):
@@ -131,6 +148,10 @@ class OpenSSLConan(ConanFile):
             "no-unit-test",
             "no-tests",
         ]
+
+        if self.settings.arch == "arm64ec":
+            # OpenSSL's AArch64 assembly uses registers reserved by the ARM64EC ABI
+            args.append("no-asm")
 
         if self.settings.os != "Windows":
             args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
