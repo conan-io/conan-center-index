@@ -1,0 +1,4 @@
+sources:
+  "0.43.2":
+    url: "https://github.com/rerun-io/rerun/releases/download/0.43.2/rerun_cpp_sdk.zip"
+    sha256: "e2d5090469f6724eacb2030c1e45191373418bedbaa5fe8e93fd83bae1d4fe91"
