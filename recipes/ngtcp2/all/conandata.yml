@@ -1,0 +1,4 @@
+sources:
+  "1.26.0":
+    url: "https://github.com/ngtcp2/ngtcp2/releases/download/v1.26.0/ngtcp2-1.26.0.tar.gz"
+    sha256: "85174d674e7f8fd911a827c6e483fd417b21b1f54d7853dac464cee446c8d35f"
