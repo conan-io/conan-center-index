@@ -7,3 +7,7 @@ patches:
     - patch_file: "patches/0001-cmake-updates.patch"
       patch_description: "CMake 3.0+ compatibility"
       patch_type: "conan"
+    - patch_file: "patches/0002-coff-initialize-def-sym.patch"
+      patch_description: "Initialize def_sym in the COFF object format, which the .scl, .type and .endef directives read"
+      patch_type: "backport"
+      patch_source: "https://github.com/yasm/yasm/commit/74184586228af6c362f970c84fce58da3fcbdec8"
