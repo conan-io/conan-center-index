@@ -39,6 +39,20 @@ class FTXUIConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Let Conan control POSITION_INDEPENDENT_CODE via the fPIC option
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "cmake", "ftxui_set_options.cmake"),
+            "set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)",
+            "# set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)",
+        )
+        # Always install into flat lib/ and bin/ directories even with multi-config generators
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "cmake", "ftxui_install.cmake"),
+            "get_property(_ftxui_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)",
+            "set(_ftxui_isMultiConfig FALSE)",
+        )
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
@@ -52,9 +66,6 @@ class FTXUIConan(ConanFile):
         tc.generate()
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ftxui_set_options.cmake"),
-                        "set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)",
-                        "# set_property(TARGET ${library} PROPERTY POSITION_INDEPENDENT_CODE ON)")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
