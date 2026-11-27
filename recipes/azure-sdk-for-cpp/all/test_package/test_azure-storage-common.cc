@@ -1,10 +1,15 @@
-#include <azure/storage/common/storage_common.hpp>
+#include <azure/core/http/raw_response.hpp>
+#include <azure/storage/common/storage_exception.hpp>
 
+#include <memory>
+
+using namespace Azure::Core::Http;
 using namespace Azure::Storage;
 
 int main()
 {
-  ContentHash contentHash{};
+  auto response = std::make_unique<RawResponse>(1, 1, HttpStatusCode::BadRequest, "Bad Request");
+  auto exception = StorageException::CreateFromResponse(std::move(response));
 
-  return 0;
+  return exception.StatusCode == HttpStatusCode::BadRequest ? 0 : 1;
 }
