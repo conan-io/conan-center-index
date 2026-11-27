@@ -1,9 +1,10 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 import os
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.4"
 
 
 class TinygltfConan(ConanFile):
@@ -20,12 +21,10 @@ class TinygltfConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_filesystem": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_filesystem": True,
     }
 
     def export_sources(self):
@@ -38,9 +37,12 @@ class TinygltfConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
+    def validate(self):
+        check_min_cstd(self, 11)
+
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TINYGLTF3_ENABLE_FS"] = self.options.with_filesystem
+        tc.variables["TINYGLTF3_ENABLE_FS"] = True
         tc.variables["TINYGLTF3_BUILD_TESTS"] = False
         tc.generate()
 
