@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.64.0 <2 || >=2.2.0"
+required_conan_version = ">=2.2.0"
 
 
 class DbusConan(ConanFile):
@@ -213,12 +213,3 @@ class DbusConan(ConanFile):
             self.cpp_info.requires.append("libsystemd::libsystemd")
         if self.options.get_safe("with_selinux"):
             self.cpp_info.requires.append("libselinux::selinux")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "DBus1"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "DBus1"
-        self.cpp_info.names["cmake_find_package"] = "dbus-1"
-        self.cpp_info.names["cmake_find_package_multi"] = "dbus-1"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "dbus-1"

@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.system import package_manager
 from conan.tools.gnu import PkgConfig
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0"
 
 
 class SysConfigOpenGLConan(ConanFile):
@@ -52,10 +52,6 @@ class SysConfigOpenGLConan(ConanFile):
         alpine.install(["mesa-dev"], update=True, check=True)
 
     def package_info(self):
-        # TODO: Workaround for #2311 until a better solution can be found
-        self.cpp_info.filenames["cmake_find_package"] = "opengl_system"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "opengl_system"
-
         self.cpp_info.set_property("cmake_file_name", "opengl_system")
 
         self.cpp_info.bindirs = []
