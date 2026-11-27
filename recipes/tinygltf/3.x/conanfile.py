@@ -43,8 +43,8 @@ class TinygltfConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TINYGLTF3_ENABLE_FS"] = True
-        tc.variables["TINYGLTF3_BUILD_TESTS"] = False
+        tc.cache_variables["TINYGLTF3_ENABLE_FS"] = True
+        tc.cache_variables["TINYGLTF3_BUILD_TESTS"] = False
         tc.generate()
 
     def build(self):
