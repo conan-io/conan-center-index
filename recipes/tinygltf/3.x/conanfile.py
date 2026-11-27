@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=2.4"
@@ -40,10 +42,12 @@ class TinygltfConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cstd"):
             check_min_cstd(self, 11)
+        if is_msvc(self) and self.options.shared:
+            # It'd need to use the WINDOWS_EXPORT_ALL_SYMBOLS; Avoiding it for now
+            raise ConanInvalidConfiguration("MSVC and shared is not supported")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["TINYGLTF3_ENABLE_FS"] = True
         tc.cache_variables["TINYGLTF3_BUILD_TESTS"] = False
         tc.generate()
 
@@ -59,5 +63,4 @@ class TinygltfConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "TinyGLTF")
-        self.cpp_info.set_property("cmake_target_name", "TinyGLTF::TinyGLTF")
         self.cpp_info.libs = ["tinygltf"]
