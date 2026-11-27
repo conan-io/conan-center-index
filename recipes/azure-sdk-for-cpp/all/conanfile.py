@@ -120,6 +120,8 @@ class AzureSDKForCppConan(ConanFile):
         copy(self, "LICENSE.txt",
              dst=os.path.join(self.package_folder, "licenses"),
              src=self.source_folder)
+        copy(self, "NOTICE.txt", os.path.join(self.source_folder, "sdk", "core", "azure-core"),
+              os.path.join(self.package_folder, "licenses"))
 
         cmake = CMake(self)
         cmake.install()
