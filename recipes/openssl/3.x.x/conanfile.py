@@ -452,6 +452,15 @@ class OpenSSLConan(ConanFile):
             # See https://github.com/conan-io/conan-center-index/issues/27424
             tc.extra_ldflags.append("-headerpad_max_install_names")
 
+        if self.settings.os == "Emscripten":
+            # Conan adds no optimization flags for emcc, so OpenSSL would be built at -O0
+            tc.extra_cflags.extend({
+                "Release": ["-O3"],
+                "RelWithDebInfo": ["-O2", "-g"],
+                "MinSizeRel": ["-Os"],
+                "Debug": ["-g"],
+            }.get(str(self.settings.build_type), []))
+
         self._create_targets(tc.cflags, tc.cxxflags, tc.defines, tc.ldflags)
         tc.generate(env)
 
@@ -468,6 +477,7 @@ class OpenSSLConan(ConanFile):
                     {shared_cflag}
                     {shared_extension}
                     {perlasm_scheme}
+                    {bn_ops}
                 }},
             );
         """)
@@ -475,6 +485,11 @@ class OpenSSLConan(ConanFile):
         perlasm_scheme = ""
         if self._perlasm_scheme:
             perlasm_scheme = f'perlasm_scheme => "{self._perlasm_scheme}",'
+
+        bn_ops = ""
+        if self.settings.os == "Emscripten":
+            # Use 64-bit multiplication for bignums, which WebAssembly supports natively
+            bn_ops = 'bn_ops => "BN_LLONG",'
 
         defines = '", "'.join(defines)
         defines = 'defines => add("%s"),' % defines if defines else ""
@@ -506,6 +521,7 @@ class OpenSSLConan(ConanFile):
             cxxflags=" ".join(cxxflags),
             defines=defines,
             perlasm_scheme=perlasm_scheme,
+            bn_ops=bn_ops,
             shared_target=shared_target,
             shared_extension=shared_extension,
             shared_cflag=shared_cflag,
