@@ -90,8 +90,6 @@ class CppRestSDKConan(ConanFile):
             tc.variables["CPPREST_HTTP_CLIENT_IMPL"] = self.options.http_client_impl
         if self.options.get_safe("http_listener_impl"):
             tc.variables["CPPREST_HTTP_LISTENER_IMPL"] = self.options.http_listener_impl
-        if Version(self.version) <= "2.10.15":
-            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
