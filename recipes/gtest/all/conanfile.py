@@ -35,9 +35,6 @@ class GTestConan(ConanFile):
         "hide_symbols": False,
         "disable_pthreads": False,
     }
-    # disallow cppstd compatibility, as it affects the ABI in this library
-    # see https://github.com/conan-io/conan-center-index/issues/23854
-    extension_properties = {"compatibility_cppstd": False}
     implements = ["auto_shared_fpic"]
 
     def layout(self):
@@ -45,6 +42,12 @@ class GTestConan(ConanFile):
 
     def package_id(self):
         del self.info.options.no_main # Only used to expose more targets
+
+    def compatibility(self):
+        if Version(self.version) < "1.18":
+            # disallow cppstd compatibility, as it affects the ABI in this library
+            # see https://github.com/conan-io/conan-center-index/issues/23854
+            self.extension_properties = {"compatibility_cppstd": False}
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
