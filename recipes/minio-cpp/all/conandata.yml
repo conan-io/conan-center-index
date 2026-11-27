@@ -1,7 +1,7 @@
 sources:
-  "0.7.0":
-    url: "https://github.com/minio/minio-cpp/archive/refs/tags/v0.7.0.tar.gz"
-    sha256: "87564e15846642af64c45d28eb81cf2841a44949883ef81db5cf79e80d4730b5"
+  "1.0.1":
+    url: "https://github.com/minio/minio-cpp/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "f402f143580b5d2298512ce818c54e40a5561de617ccecfd6f4c0d4849ff2bad"
 patches:
-  "0.7.0":
-    - patch_file: "patches/0.7.0-0001-fix-fpic-cmake.patch"
+  "1.0.1":
+    - patch_file: "patches/1.0.1-0001-fix-fpic-cmake.patch"
