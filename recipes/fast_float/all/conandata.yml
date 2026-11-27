@@ -1,4 +1,7 @@
 sources:
+  "8.4.0":
+    url: "https://github.com/fastfloat/fast_float/archive/refs/tags/v8.4.0.tar.gz"
+    sha256: "0bf4277827259720028bbef6c11d400f07482608bea5952b289baaef6af141a4"
   "8.2.10":
     url: "https://github.com/fastfloat/fast_float/archive/refs/tags/v8.2.10.tar.gz"
     sha256: "76f958dd97b1cf4d8862d1f0986a47d4bdfa8845252bae15ef0f40de3b95961f"

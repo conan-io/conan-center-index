@@ -27,15 +27,16 @@ class YojimboConan(ConanFile):
         self.tool_requires("cmake/[>=3.19]")
 
     def requirements(self):
-        self.requires("libsodium/[~1.0.20]")
+        self.requires("mas-bandwidth-serialize/2.1.6", transitive_headers=True)
+        self.requires("reliable/1.4.6")
+        self.requires("netcode/1.5.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["YOJIMBO_SYSTEM_SODIUM"] = True
-        tc.cache_variables["YOJIMBO_SYSTEM_DEPS"] = False
+        tc.cache_variables["YOJIMBO_SYSTEM_DEPS"] = True
         tc.cache_variables["YOJIMBO_BUILD_TESTS"] = False
         tc.cache_variables["YOJIMBO_INSTALL"] = True
         tc.generate()

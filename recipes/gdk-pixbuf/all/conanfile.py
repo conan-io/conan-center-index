@@ -31,7 +31,6 @@ class GdkPixbufConan(ConanFile):
         "with_libpng": [True, False],
         "with_libtiff": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg", False],
-        "with_introspection": [True, False],
     }
     default_options = {
         "shared": False,
@@ -39,7 +38,6 @@ class GdkPixbufConan(ConanFile):
         "with_libpng": True,
         "with_libtiff": True,
         "with_libjpeg": "libjpeg",
-        "with_introspection": False,
     }
 
     def config_options(self):
@@ -86,8 +84,6 @@ class GdkPixbufConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
-        if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.72.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -110,7 +106,7 @@ class GdkPixbufConan(ConanFile):
         tc.project_options.update({
             "builtin_loaders": "all",
             "gio_sniffing": "false",
-            "introspection": enabled_disabled(self.options.with_introspection),
+            "introspection": "disabled",
             "documentation": "false",
             "tests": "false",
             "man": "false",

@@ -1,0 +1,49 @@
+Custom: Let Conan configure C++ standard and fPIC
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e99361b..f64d088 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -13,10 +13,6 @@ list(GET VERSION_LIST 0 PROJECT_VERSION_MAJOR)
+ list(GET VERSION_LIST 1 PROJECT_VERSION_MINOR)
+ list(GET VERSION_LIST 2 PROJECT_VERSION_MICRO)
+ 
+-# HSMCPP requires at least C++11 support
+-set(CMAKE_CXX_STANDARD 11)
+-set(CMAKE_CXX_STANDARD_REQUIRED True)
+-set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+ set(HSMBUILD_TARGET "library" CACHE STRING "Desired build output. Possible values: library, platformio, arduinoide")
+ 
+@@ -218,9 +214,6 @@ elseif (HSMBUILD_TARGET STREQUAL "library")
+     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+     target_include_directories(${HSM_LIBRARY_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+                                                            ${CMAKE_CURRENT_SOURCE_DIR}/include/hsmcpp/os)
+-    if (NOT WIN32)
+-        target_compile_options(${HSM_LIBRARY_NAME} PUBLIC "-fPIC")
+-    endif()
+ 
+     # =============================================
+     # Platform Environment
+@@ -235,7 +228,7 @@ elseif (HSMBUILD_TARGET STREQUAL "library")
+     # Export variables
+     set(HSMCPP_DEFINITIONS ${HSM_DEFINITIONS_BASE} CACHE STRING "" FORCE)
+     if (NOT WIN32)
+-        set(HSMCPP_CXX_FLAGS "-fPIC" CACHE STRING "" FORCE)
++        set(HSMCPP_CXX_FLAGS "" CACHE STRING "" FORCE)
+     else()
+         set(HSMCPP_CXX_FLAGS "" CACHE STRING "" FORCE)
+     endif()
+diff --git a/cmake/dispatchers/std.cmake b/cmake/dispatchers/std.cmake
+index b91520e..1e54a71 100644
+--- a/cmake/dispatchers/std.cmake
++++ b/cmake/dispatchers/std.cmake
+@@ -4,7 +4,7 @@ if (HSMBUILD_DISPATCHER_STD)
+     add_library(${HSM_LIBRARY_NAME}_std STATIC ${CMAKE_CURRENT_SOURCE_DIR}/src/HsmEventDispatcherSTD.cpp)
+ 
+     if (NOT WIN32)
+-        target_compile_options(${HSM_LIBRARY_NAME}_std PUBLIC "-fPIC")
++        target_compile_options(${HSM_LIBRARY_NAME}_std PUBLIC "")
+     endif()
+ 
+     # Export variables
