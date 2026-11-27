@@ -33,7 +33,9 @@ class SysConfigOpenGLConan(ConanFile):
         yum.install(["mesa-libGL-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
-        apt.install_substitutes(["libgl-dev"], ["libgl1-mesa-dev"], update=True, check=True)
+        # libglvnd's libOpenGL.so (libopengl-dev) too, as the dnf branch gets it with libglvnd-devel:
+        # CMake's FindOpenGL prefers GLVND, so a consumer such as Qt links libOpenGL, not libGL.
+        apt.install_substitutes(["libgl-dev", "libopengl-dev"], ["libgl1-mesa-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
         pacman.install(["libglvnd"], update=True, check=True)
