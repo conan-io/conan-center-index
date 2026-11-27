@@ -11,29 +11,3 @@ index ec78441d2..de4513baf 100644
      add_subdirectory (src/iv)
  endif ()
  
-diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index 425404cfd..31bc0ddff 100644
---- src/cmake/externalpackages.cmake
-+++ src/cmake/externalpackages.cmake
-@@ -240,7 +240,7 @@ checked_find_package (fmt REQUIRED
-                       VERSION_MIN 7.0
-                       BUILD_LOCAL missing
-                      )
--get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
-+#get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
- 
- 
- ###########################################################################
-diff --git src/libutil/CMakeLists.txt src/libutil/CMakeLists.txt
-index 2a159e449..64b3ee17e 100644
---- src/libutil/CMakeLists.txt
-+++ src/libutil/CMakeLists.txt
-@@ -88,7 +88,7 @@ function (setup_oiio_util_library targetname)
-         add_dependencies(${targetname} fmt_internal_target)
-     else ()
-         target_link_libraries (${targetname}
--                               PUBLIC fmt::fmt-header-only)
-+                               PUBLIC fmt::fmt)
-     endif ()
- 
-     if (WIN32)

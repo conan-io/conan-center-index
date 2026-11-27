@@ -258,6 +258,8 @@ class OpenImageIOConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("fmt", "cmake_additional_variables_prefixes", ["FMT"])
+        # upstream expects the fmt::fmt-header-only target, even if fmt is not built as header-only
+        deps.set_property("fmt", "cmake_target_name", "fmt::fmt-header-only")
         deps.set_property("ffmpeg", "cmake_additional_variables_prefixes", ["FFMPEG"])
         deps.set_property("ffmpeg", "cmake_file_name", "FFmpeg")
         deps.set_property("libheif", "cmake_additional_variables_prefixes", ["LIBHEIF"])
