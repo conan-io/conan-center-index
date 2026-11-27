@@ -1,0 +1,9 @@
+sources:
+  "3.1.0":
+    url: "https://github.com/syoyo/tinygltf/archive/v3.1.0.tar.gz"
+    sha256: "6e3043d1353d31daa4a06b17606bc9f4c46bf8f047bddffe1a63a6a79446182e"
+patches:
+  "3.1.0":
+    - patch_file: "patches/0001-build-library-instead-of-installing-source.patch"
+      patch_description: "Build a tinygltf library and install it instead of installing the .c source file"
+      patch_type: "conan"

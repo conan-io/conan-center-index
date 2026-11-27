@@ -1,0 +1,34 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,13 +4,10 @@
+ 
+ include(GNUInstallDirs)
+ 
+-set(CMAKE_C_STANDARD 11)
+-set(CMAKE_C_STANDARD_REQUIRED On)
+-set(CMAKE_C_EXTENSIONS Off)
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ 
+ option(TINYGLTF3_BUILD_TESTS "Build and run tinygltf v3 C unit tests" ON)
+ option(TINYGLTF3_INSTALL "Install tinygltf v3 files during install step" ON)
+ 
+ set(TINYGLTF3_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+@@ -45,10 +42,16 @@
+   endif()
+ endif ()
+ 
++add_library(tinygltf tiny_gltf_v3.c)
++
+ if (TINYGLTF3_INSTALL)
++  install(TARGETS tinygltf
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  )
+   install(FILES
+     tiny_gltf_v3.h
+-    tiny_gltf_v3.c
+     tinygltf_json_c.h
+     DESTINATION
+     ${TINYGLTF3_INSTALL_DIR}
