@@ -38,7 +38,8 @@ class TinygltfConan(ConanFile):
         apply_conandata_patches(self)
 
     def validate(self):
-        check_min_cstd(self, 11)
+        if self.settings.get_safe("compiler.cstd"):
+            check_min_cstd(self, 11)
 
     def generate(self):
         tc = CMakeToolchain(self)
