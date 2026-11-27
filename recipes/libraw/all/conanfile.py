@@ -24,6 +24,7 @@ class LibRawConan(ConanFile):
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_lcms": [True, False],
         "with_jasper": [True, False],
+        "versioned_names": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,6 +33,11 @@ class LibRawConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_lcms": True,
         "with_jasper": True,
+        "versioned_names": False,
+    }
+    options_description = {
+        "versioned_names": "Name the shared libraries as upstream's own builds do: libraw.so.25 / "
+                           "libraw.25.dylib (from LIBRAW_SHLIB_*), and libraw.dll / libraw.lib on Windows",
     }
     exports_sources = ["CMakeLists.txt"]
 
@@ -81,6 +87,7 @@ class LibRawConan(ConanFile):
         tc.variables["LIBRAW_WITH_JPEG"] = bool(self.options.with_jpeg)
         tc.variables["LIBRAW_WITH_LCMS"] = self.options.with_lcms
         tc.variables["LIBRAW_WITH_JASPER"] = self.options.with_jasper
+        tc.variables["LIBRAW_VERSIONED_NAMES"] = self.options.versioned_names
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -99,7 +106,7 @@ class LibRawConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["libraw_"].set_property("pkg_config_name", "libraw")
-        self.cpp_info.components["libraw_"].libs = ["raw"]
+        self.cpp_info.components["libraw_"].libs = ["libraw" if self.options.versioned_names and self.settings.os == "Windows" else "raw"]
         self.cpp_info.components["libraw_"].includedirs.append(os.path.join("include", "libraw"))
 
         if self.settings.os == "Windows":
