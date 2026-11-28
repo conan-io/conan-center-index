@@ -1,4 +1,4 @@
 sources:
-  "0.9.8":
-    url: "https://github.com/Reddimus/kalshi-cpp/archive/refs/tags/v0.9.8.tar.gz"
-    sha256: "7925c511d6b9eefbf6c87c977d3ff012fae76758bff645c023e3f6caa417aefc"
+  "0.9.9":
+    url: "https://github.com/Reddimus/kalshi-cpp/archive/refs/tags/v0.9.9.tar.gz"
+    sha256: "ce6594e35636efdd4eccc561e638281db7ed404b25ec359c6598f871288482d7"
