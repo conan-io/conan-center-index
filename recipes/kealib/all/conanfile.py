@@ -65,6 +65,7 @@ class KealibConan(ConanFile):
         tc.variables["HDF5_USE_STATIC_LIBRARIES"] = not self.dependencies["hdf5"].options.shared
         tc.variables["HDF5_PREFER_PARALLEL"] = self.dependencies["hdf5"].options.parallel
         tc.variables["HDF5_THREADSAFE"] = self.dependencies["hdf5"].options.get_safe("threadsafe", False)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_GDAL"] = True
         tc.variables["LIBKEA_WITH_GDAL"] = False
         # INFO: kealib uses C++11 but does not configure in cmake: https://github.com/ubarsc/kealib/pull/48
         if not valid_min_cppstd(self, self._min_cppstd):
