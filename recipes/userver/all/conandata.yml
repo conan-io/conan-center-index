@@ -1,0 +1,4 @@
+sources:
+  "3.0":
+    url: "https://github.com/userver-framework/userver/archive/refs/tags/v3.0.tar.gz"
+    sha256: "79e6263ce6070c20b265e0b81d9b120a65d7017a8d380ec6cf7be6bd3aa0b686"
