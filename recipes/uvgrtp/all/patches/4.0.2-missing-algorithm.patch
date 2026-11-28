@@ -1,0 +1,5 @@
+--- a/src/session.cc
++++ b/src/session.cc
+@@ -1 +1,2 @@
+ #include "uvgrtp/session.hh"
++#include <algorithm>

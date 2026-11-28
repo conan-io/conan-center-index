@@ -1,0 +1,16 @@
+sources:
+  "4.0.2":
+    url: "https://github.com/ultravideo/uvgRTP/archive/refs/tags/v4.0.2.tar.gz"
+    sha256: "5d80f39441b196e29d0b2d007fa417798b6da27f034b6b2878d7e63d862f033d"
+
+patches:
+  "4.0.2":
+    - patch_file: "patches/4.0.2-find-cryptopp.patch"
+      patch_description: "Link Crypto++ using its CMake imported target"
+      patch_type: "portability"
+    - patch_file: "patches/4.0.2-fix-windows-shared.patch"
+      patch_description: "Fix version API exports in Windows shared builds"
+      patch_type: "portability"
+    - patch_file: "patches/4.0.2-missing-algorithm.patch"
+      patch_description: "Include algorithm for std::find_if when crypto is disabled"
+      patch_type: "portability"
