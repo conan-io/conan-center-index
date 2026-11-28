@@ -62,7 +62,7 @@ class EudevConan(ConanFile):
         if self.options.with_kmod:
             self.requires("kmod/30")
         if self.options.with_libblkid:
-            self.requires("libmount/2.39.2")
+            self.requires("libmount/[>=2.39.2 <3]")
         if self.options.with_selinux:
             self.requires("libselinux/3.6")
 
