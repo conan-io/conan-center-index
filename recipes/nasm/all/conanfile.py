@@ -54,7 +54,7 @@ class NASMConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
-            self.tool_requires("strawberryperl/5.32.1.1")
+            self.tool_requires("strawberryperl/[>=5.32 <6]")
             if not is_msvc(self):
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
